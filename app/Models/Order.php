@@ -11,8 +11,9 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
-        'customer_name', // Optional, keep if you use it elsewhere
-        'total_price',   // FIX: Matches Database
+        'customer_name',  // 🟢 THIS MUST BE HERE
+        'customer_email', // 🟢 THIS MUST BE HERE
+        'total_price',
         'status',
         'payment_method',
         'points_earned',
@@ -21,13 +22,13 @@ class Order extends Model
         'notes',
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

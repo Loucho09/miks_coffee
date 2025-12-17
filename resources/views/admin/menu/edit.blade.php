@@ -27,18 +27,20 @@
 
                 <form method="POST" action="{{ route('admin.menu.update', $product->id) }}" enctype="multipart/form-data">
                     @csrf 
-                    @method('PUT') <div class="mb-6">
+                    @method('PUT') 
+
+                    <div class="mb-6">
                         <label class="block font-bold text-sm text-gray-700 dark:text-gray-300 mb-2">Product Image</label>
                         
                         @if($product->image)
                             <div class="mb-4">
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Current Image:</p>
-                                <img src="{{ asset('storage/' . $product->image) }}" alt="Current" class="w-32 h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600">
+                                <img src="{{ asset('storage/' . $product->image) }}" alt="Current" class="w-32 h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm">
                             </div>
                         @endif
 
-                        <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 dark:file:bg-gray-700 dark:file:text-gray-300">
-                        <p class="text-xs text-gray-500 mt-2">Upload new to replace current image.</p>
+                        <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 dark:file:bg-gray-700 dark:file:text-gray-300 cursor-pointer">
+                        <p class="text-xs text-gray-500 mt-2">Upload a new file to replace the current image.</p>
                     </div>
 
                     <div class="mb-6">

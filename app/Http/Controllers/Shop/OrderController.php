@@ -29,7 +29,6 @@ class OrderController extends Controller
         ];
         
         session()->put('claimed_reward', $reward);
-        
         return redirect()->route('cart.index')
             ->with('success', $request->name . ' applied! Place order to claim.');
     }
@@ -52,7 +51,6 @@ class OrderController extends Controller
         $discount = 0;
         $pointsRedeemed = 0;
         $rewardType = null;
-
         $claimed = session()->get('claimed_reward');
 
         if ($claimed) {
@@ -61,8 +59,7 @@ class OrderController extends Controller
                 $rewardType = $claimed['name'];
                 $discount = $claimed['value']; 
             }
-        } 
-        elseif ($request->has('redeem_points') && $user->points >= 50) {
+        } elseif ($request->has('redeem_points') && $user->points >= 50) {
             $discount = 50;
             $pointsRedeemed = 50;
             $rewardType = 'Standard Discount';
@@ -78,6 +75,8 @@ class OrderController extends Controller
         try {
             $order = Order::create([
                 'user_id' => $user->id,
+                'customer_name' => $request->customer_name,
+                'customer_email' => $request->customer_email,
                 'total_price' => $finalTotal,
                 'status' => 'pending',
                 'payment_method' => 'cash',
@@ -87,15 +86,15 @@ class OrderController extends Controller
                 'notes' => $rewardType ? "Reward: $rewardType" : null,
             ]);
 
-            // 🟢 FIXED LOOP: Use the correct integer ID
             foreach ($cart as $key => $details) {
-                // If key is "46_16oz", intval() converts it to 46 (which works!)
-                // Or we prefer using details['product_id'] if available.
+                // Determine ID (Handles "46_16oz" keys)
                 $realProductId = isset($details['product_id']) ? $details['product_id'] : intval($key);
 
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $realProductId, // 🟢 NOW SAVES 46, NOT "46_16oz"
+                    'product_id' => $realProductId,
+                    'product_name' => $details['name'],
+                    'size' => $details['size'] ?? null, // 🟢 SAVING SIZE TO DB
                     'quantity' => $details['quantity'],
                     'price' => $details['price'],
                 ]);
@@ -114,9 +113,7 @@ class OrderController extends Controller
 
             try {
                 Mail::to($user->email)->send(new OrderReceipt($order));
-            } catch (\Exception $e) {
-                // Email failed, but continue
-            }
+            } catch (\Exception $e) {}
 
             return redirect()->route('orders.index')->with('success', 'Order placed! You earned 10 points.');
 

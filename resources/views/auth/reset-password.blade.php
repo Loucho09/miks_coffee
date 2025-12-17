@@ -1,70 +1,59 @@
 <x-guest-layout>
-    <div class="min-h-screen flex flex-col justify-center items-center bg-gray-50 dark:bg-gray-900 px-4 transition-colors duration-300">
+    <div class="min-h-screen flex flex-col justify-center items-center bg-stone-50 dark:bg-stone-900 px-4 transition-colors duration-300">
         
-        <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
-            <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-8 text-center">
-                <div class="bg-white dark:bg-gray-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
-                    <span class="text-3xl">🔑</span>
+        <div class="w-full max-w-md bg-white dark:bg-stone-800 rounded-2xl shadow-xl overflow-hidden border border-stone-100 dark:border-stone-700">
+            <div class="bg-gradient-to-r from-amber-500 to-orange-600 p-8 text-center">
+                <div class="bg-white/20 backdrop-blur-md w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
                 </div>
                 <h2 class="text-2xl font-bold text-white">Create New Password</h2>
-                <p class="text-amber-100 text-sm mt-2">Make it strong and secure.</p>
             </div>
 
-            <div class="p-8">
+            <div class="p-8" x-data="{ showPass: false, showConfirm: false }">
                 <form method="POST" action="{{ route('password.store') }}">
                     @csrf
                     <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
                     <div class="mb-5">
-                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
-                        <input id="email" class="block w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-amber-500 focus:ring-amber-500 outline-none" 
-                            type="email" name="email" :value="old('email', $request->email)" required autofocus />
+                        <label for="email" class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-1.5">Email Address</label>
+                        <input id="email" class="block w-full px-4 py-3 rounded-lg border border-stone-300 dark:border-stone-600 bg-stone-100 dark:bg-stone-700 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-amber-500 outline-none" 
+                            type="email" name="email" :value="old('email', $request->email)" required autofocus readonly />
                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
 
                     <div class="mb-5">
-                        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+                        <label for="password" class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-1.5">New Password</label>
                         <div class="relative">
-                            <input id="password" class="block w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-amber-500 focus:ring-amber-500 outline-none" 
-                                type="password" name="password" required autocomplete="new-password" placeholder="••••••••" />
-                            <button type="button" onclick="togglePass('password', 'eye1')" class="absolute inset-y-0 right-0 px-4 text-gray-500 dark:text-gray-400">
-                                <span id="eye1">👁️</span>
+                            <input :type="showPass ? 'text' : 'password'" id="password" class="block w-full px-4 py-3 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-amber-500 outline-none pr-12" 
+                                name="password" required autocomplete="new-password" placeholder="••••••••" />
+                            <button type="button" @click="showPass = !showPass" class="absolute inset-y-0 right-0 px-4 text-stone-400 hover:text-stone-600">
+                                <svg x-show="!showPass" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                <svg x-show="showPass" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.05 10.05 0 01-1.563 3.029m5.858.908l3.59 3.59" /></svg>
                             </button>
                         </div>
                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
                     </div>
 
-                    <div class="mb-6">
-                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
+                    <div class="mb-8">
+                        <label for="password_confirmation" class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-1.5">Confirm New Password</label>
                         <div class="relative">
-                            <input id="password_confirmation" class="block w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-amber-500 focus:ring-amber-500 outline-none" 
-                                type="password" name="password_confirmation" required autocomplete="new-password" placeholder="••••••••" />
-                            <button type="button" onclick="togglePass('password_confirmation', 'eye2')" class="absolute inset-y-0 right-0 px-4 text-gray-500 dark:text-gray-400">
-                                <span id="eye2">👁️</span>
+                            <input :type="showConfirm ? 'text' : 'password'" id="password_confirmation" class="block w-full px-4 py-3 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-amber-500 outline-none pr-12" 
+                                name="password_confirmation" required autocomplete="new-password" placeholder="••••••••" />
+                            <button type="button" @click="showConfirm = !showConfirm" class="absolute inset-y-0 right-0 px-4 text-stone-400 hover:text-stone-600">
+                                <svg x-show="!showConfirm" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                <svg x-show="showConfirm" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.05 10.05 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.05 10.05 0 01-1.563 3.029m5.858.908l3.59 3.59" /></svg>
                             </button>
                         </div>
                         <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                     </div>
 
-                    <button type="submit" class="w-full bg-gray-900 dark:bg-amber-600 hover:bg-gray-800 dark:hover:bg-amber-700 text-white font-bold py-3 rounded-lg shadow-md transition duration-200">
-                        {{ __('Reset Password') }}
+                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition transform hover:-translate-y-0.5">
+                        Reset Password
                     </button>
                 </form>
             </div>
         </div>
     </div>
-
-    <script>
-        function togglePass(inputId, iconId) {
-            var input = document.getElementById(inputId);
-            var icon = document.getElementById(iconId);
-            if (input.type === "password") {
-                input.type = "text";
-                icon.textContent = "🙈";
-            } else {
-                input.type = "password";
-                icon.textContent = "👁️";
-            }
-        }
-    </script>
 </x-guest-layout>

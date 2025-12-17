@@ -11,48 +11,50 @@ class CartController extends Controller
 {
     public function index()
     {
-        return view('cafe.cart'); 
+        $cart = session()->get('cart', []);
+        return view('shop.cart', compact('cart'));
     }
 
-    // 🟢 UPDATED ADD FUNCTION TO HANDLE SIZES
     public function add(Request $request)
     {
-        $productId = $request->product_id;
-        $sizeId = $request->size_id; // This might be null for food items
+        $product = Product::find($request->product_id);
 
-        $product = Product::findOrFail($productId);
-        $cart = session()->get('cart', []);
-
-        // Determine Price and Unique Cart ID
-        $price = $product->price;
-        $sizeName = 'Regular';
-        $cartKey = $productId; // Default key for items without sizes
-
-        // If a size was selected
-        if ($sizeId) {
-            $sizeOption = ProductSize::findOrFail($sizeId);
-            $price = $sizeOption->price;
-            $sizeName = $sizeOption->size;
-            // Create a unique key like "1_12oz" so we can have both sizes in cart
-            $cartKey = $productId . '_' . $sizeName; 
+        if(!$product) {
+            return redirect()->back()->with('error', 'Product not found!');
         }
 
-        // Logic to add or increment
+        // Get Size Logic
+        $sizeName = null;
+        $price = $product->price;
+        $cartKey = $product->id; // Default key
+
+        // If a size was selected (e.g., from the modal)
+        if ($request->has('size_id') && $request->size_id) {
+            $size = ProductSize::find($request->size_id);
+            if ($size) {
+                $sizeName = $size->size;   // "16oz"
+                $price = $size->price;     // 49.00
+                $cartKey = $product->id . '_' . $size->size; // Unique Key: "46_16oz"
+            }
+        }
+
+        $cart = session()->get('cart', []);
+
         if(isset($cart[$cartKey])) {
             $cart[$cartKey]['quantity']++;
         } else {
             $cart[$cartKey] = [
-                "product_id" => $product->id,
+                "product_id" => $product->id, // Store the real ID separate from the key
                 "name" => $product->name,
                 "quantity" => 1,
                 "price" => $price,
-                "size" => $sizeName, // Save the size name
-                "image" => $product->image
+                "image" => $product->image,
+                "size" => $sizeName // 🟢 SAVING SIZE TO SESSION
             ];
         }
 
         session()->put('cart', $cart);
-        return redirect()->back()->with('success', 'Added to cart!');
+        return redirect()->back()->with('success', 'Product added to cart successfully!');
     }
 
     public function remove(Request $request)
@@ -63,7 +65,7 @@ class CartController extends Controller
                 unset($cart[$request->id]);
                 session()->put('cart', $cart);
             }
-            return redirect()->back()->with('success', 'Removed successfully!');
+            return redirect()->back()->with('success', 'Item removed successfully');
         }
     }
 }

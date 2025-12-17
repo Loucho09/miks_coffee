@@ -11,12 +11,12 @@
         .info { margin-bottom: 20px; line-height: 1.6; }
         .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         .table th { text-align: left; background: #eee; padding: 10px; }
-        .table td { padding: 10px; border-bottom: 1px solid #eee; }
+        .table td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: top; }
         
-        /* POINTS HIGHLIGHTS */
         .points-box { background: #d1fae5; color: #065f46; padding: 15px; text-align: center; font-weight: bold; border-radius: 5px; margin-top: 20px; }
         .redeemed-text { color: #dc2626; font-weight: bold; }
         .total-text { font-size: 18px; font-weight: bold; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; text-align: right; }
+        .size-tag { font-size: 11px; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; color: #555; font-weight: bold; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -29,6 +29,7 @@
         <div class="info">
             <strong>Order ID:</strong> #{{ $order->id }}<br>
             <strong>Date:</strong> {{ $order->created_at->format('F d, Y h:i A') }}<br>
+            <strong>Customer:</strong> {{ $order->customer_name ?? 'Guest' }}
         </div>
 
         <table class="table">
@@ -42,7 +43,13 @@
             <tbody>
                 @foreach($order->items as $item)
                 <tr>
-                    <td>{{ $item->product_name ?? $item->product->name }}</td>
+                    <td>
+                        {{ $item->product_name ?? $item->product->name }}
+                        
+                        @if(!empty($item->size) && $item->size !== 'Regular')
+                            <span class="size-tag">{{ $item->size }}</span>
+                        @endif
+                    </td>
                     <td>{{ $item->quantity }}</td>
                     <td>₱{{ number_format($item->price, 2) }}</td>
                 </tr>

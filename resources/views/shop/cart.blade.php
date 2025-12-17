@@ -1,133 +1,173 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            🛒 {{ __('Your Shopping Cart') }}
+        <h2 class="font-bold text-3xl text-stone-800 dark:text-white leading-tight">
+            Shopping Cart
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 transition-colors">
+            
+            <div class="flex flex-col lg:flex-row gap-8">
                 
-                @if(session('error'))
-                    <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-                        <strong class="font-bold">Error:</strong>
-                        <span class="block sm:inline">{{ session('error') }}</span>
-                    </div>
-                @endif
-
-                @if(session('cart') && count(session('cart')) > 0)
-                    <div class="overflow-x-auto">
+                <div class="flex-1 bg-white dark:bg-[#1C1C1E] overflow-hidden shadow-sm sm:rounded-3xl p-6">
+                    @if(session('cart') && count(session('cart')) > 0)
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 uppercase text-sm leading-normal">
-                                    <th class="py-3 px-6">Product</th>
-                                    <th class="py-3 px-6 text-center">Price</th>
-                                    <th class="py-3 px-6 text-center">Qty</th>
-                                    <th class="py-3 px-6 text-center">Total</th>
-                                    <th class="py-3 px-6 text-center">Action</th>
+                                <tr class="text-stone-500 dark:text-stone-400 border-b border-stone-200 dark:border-stone-800 text-sm uppercase tracking-wider">
+                                    <th class="py-4 font-medium">Product</th>
+                                    <th class="py-4 font-medium hidden md:table-cell">Price</th>
+                                    <th class="py-4 font-medium">Qty</th>
+                                    <th class="py-4 font-medium">Total</th>
+                                    <th class="py-4 font-medium"></th>
                                 </tr>
                             </thead>
-                            <tbody class="text-gray-600 dark:text-gray-300 text-sm font-light">
-                                @php $total = 0; @endphp
+                            <tbody>
                                 @foreach(session('cart') as $id => $details)
-                                    @php $total += $details['price'] * $details['quantity']; @endphp
-                                    <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        <td class="py-3 px-6 font-bold">{{ $details['name'] }}</td>
-                                        <td class="py-3 px-6 text-center">₱{{ number_format($details['price'], 2) }}</td>
-                                        <td class="py-3 px-6 text-center">{{ $details['quantity'] }}</td>
-                                        <td class="py-3 px-6 text-center font-bold">₱{{ number_format($details['price'] * $details['quantity'], 2) }}</td>
-                                        <td class="py-3 px-6 text-center">
+                                    <tr class="border-b border-stone-100 dark:border-stone-800 last:border-0 group">
+                                        <td class="py-4">
+                                            <div class="flex items-center gap-4">
+                                                @if($details['image'])
+                                                    <img src="{{ asset('storage/' . $details['image']) }}" class="w-16 h-16 object-cover rounded-xl shadow-sm">
+                                                @else
+                                                    <div class="w-16 h-16 bg-stone-100 dark:bg-stone-800 rounded-xl flex items-center justify-center text-xs text-stone-400">No Img</div>
+                                                @endif
+                                                
+                                                <div>
+                                                    <div class="font-bold text-lg text-stone-900 dark:text-white leading-tight">{{ $details['name'] }}</div>
+                                                    @if(isset($details['size']) && $details['size'])
+                                                        <div class="text-[10px] uppercase font-bold text-stone-500 bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded inline-block mt-1">
+                                                            {{ $details['size'] }}
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 font-medium text-stone-600 dark:text-stone-400 hidden md:table-cell">
+                                            ₱{{ number_format($details['price'], 2) }}
+                                        </td>
+                                        <td class="py-4">
+                                            <span class="font-bold text-stone-900 dark:text-white bg-stone-100 dark:bg-stone-800 px-3 py-1 rounded-lg">
+                                                {{ $details['quantity'] }}
+                                            </span>
+                                        </td>
+                                        <td class="py-4 font-bold text-amber-600">
+                                            ₱{{ number_format($details['price'] * $details['quantity'], 2) }}
+                                        </td>
+                                        <td class="py-4 text-right">
                                             <form action="{{ route('cart.remove') }}" method="POST">
-                                                @csrf @method('DELETE')
+                                                @csrf
+                                                @method('DELETE')
                                                 <input type="hidden" name="id" value="{{ $id }}">
-                                                <button class="text-red-500 font-bold hover:underline text-xs uppercase">Remove</button>
+                                                <button type="submit" class="text-red-400 hover:text-red-600 transition p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
                                             </form>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
-                    </div>
+                    @else
+                        <div class="text-center py-20">
+                            <div class="text-6xl mb-4 opacity-30">🛒</div>
+                            <h3 class="text-xl font-bold text-stone-400 mb-4">Your cart is empty</h3>
+                            <a href="{{ route('home') }}" class="px-6 py-3 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition shadow-lg shadow-amber-500/20">
+                                Browse Menu
+                            </a>
+                        </div>
+                    @endif
+                </div>
 
-                    <div class="mt-8 flex justify-end">
-                        <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg w-full md:w-1/3">
-                            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Summary</h3>
+                @if(session('cart') && count(session('cart')) > 0)
+                    <div class="w-full lg:w-96">
+                        <form action="{{ route('checkout.store') }}" method="POST">
+                            @csrf
                             
-                            <div class="flex justify-between mb-2 text-gray-600 dark:text-gray-300">
-                                <span>Subtotal</span>
-                                <span>₱{{ number_format($total, 2) }}</span>
-                            </div>
-                            <div id="discount-row" class="flex justify-between mb-2 text-green-600 font-bold hidden">
-                                <span>Discount</span>
-                                <span>-₱50.00</span>
-                            </div>
+                            <div class="bg-white dark:bg-[#1C1C1E] p-6 rounded-3xl shadow-sm h-fit sticky top-6">
+                                <h3 class="font-bold text-xl text-stone-900 dark:text-white mb-6">Order Summary</h3>
 
-                            <div class="border-t border-gray-300 dark:border-gray-600 my-2"></div>
-
-                            <form action="{{ route('checkout.store') }}" method="POST">
-                                @csrf
-                                
-                                @php 
-                                    $userPoints = Auth::user()->points; 
-                                    $canRedeem = $userPoints >= 50; 
-                                @endphp
-
-                                <div class="mb-4 bg-amber-100 dark:bg-amber-900/30 p-3 rounded-lg border border-amber-200 dark:border-amber-800">
-                                    <div class="flex justify-between font-bold text-amber-800 dark:text-amber-500 mb-2">
-                                        <span>Points: {{ $userPoints }}</span>
-                                    </div>
-                                    @if($canRedeem)
-                                        <label class="flex items-center gap-2 cursor-pointer select-none">
-                                            <input type="checkbox" id="redeem-checkbox" name="redeem_points" value="1" class="rounded text-amber-600 focus:ring-amber-500">
-                                            <span class="text-sm text-gray-700 dark:text-gray-300">Use 50 pts for ₱50 OFF</span>
+                                <div class="mb-6">
+                                    @if(session('claimed_reward'))
+                                        <div class="bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 p-4 rounded-xl flex justify-between items-center">
+                                            <div>
+                                                <span class="block font-bold text-green-700 dark:text-green-400 text-sm">Reward Applied!</span>
+                                                <span class="text-xs text-green-600 dark:text-green-500">{{ session('claimed_reward')['name'] }}</span>
+                                            </div>
+                                            <span class="font-bold text-green-700 dark:text-green-400">-₱{{ session('claimed_reward')['value'] }}</span>
+                                        </div>
+                                    @elseif(Auth::user()->points >= 50)
+                                        <label class="flex items-start gap-3 p-4 border border-stone-200 dark:border-stone-700 rounded-xl cursor-pointer hover:bg-stone-50 dark:hover:bg-stone-800 transition">
+                                            <input type="checkbox" name="redeem_points" value="1" class="mt-1 w-5 h-5 text-amber-500 rounded focus:ring-amber-500 border-gray-300">
+                                            <div>
+                                                <span class="block font-bold text-stone-900 dark:text-white text-sm">Redeem 50 Points</span>
+                                                <span class="text-xs text-stone-500">Use 50 pts for a ₱50.00 discount</span>
+                                            </div>
                                         </label>
                                     @else
-                                        <span class="text-xs text-gray-500 dark:text-gray-400 italic">Need 50 points to redeem.</span>
+                                        <div class="p-4 bg-stone-50 dark:bg-stone-800 rounded-xl text-center">
+                                            <span class="text-xs font-bold text-stone-400 uppercase tracking-wide">Your Points</span>
+                                            <div class="text-xl font-extrabold text-amber-500">{{ Auth::user()->points }} pts</div>
+                                            <div class="text-xs text-stone-400 mt-1">Need 50 pts to redeem</div>
+                                        </div>
                                     @endif
                                 </div>
 
-                                <div class="flex justify-between mb-6 text-lg font-bold text-gray-900 dark:text-white">
-                                    <span>Total</span>
-                                    <span id="final-total" data-original="{{ $total }}">₱{{ number_format($total, 2) }}</span>
+                                @php
+                                    $total = 0;
+                                    foreach(session('cart') as $details) {
+                                        $total += $details['price'] * $details['quantity'];
+                                    }
+                                    
+                                    $discount = 0;
+                                    if(session('claimed_reward')) {
+                                        $discount = session('claimed_reward')['value'];
+                                    }
+                                @endphp
+
+                                <div class="space-y-3 mb-6 pb-6 border-b border-stone-100 dark:border-stone-800">
+                                    <div class="flex justify-between text-stone-500 dark:text-stone-400">
+                                        <span>Subtotal</span>
+                                        <span>₱{{ number_format($total, 2) }}</span>
+                                    </div>
+                                    @if($discount > 0)
+                                        <div class="flex justify-between text-green-600 font-bold">
+                                            <span>Discount</span>
+                                            <span>-₱{{ number_format($discount, 2) }}</span>
+                                        </div>
+                                    @endif
+                                    <div class="flex justify-between text-xl font-extrabold text-stone-900 dark:text-white pt-2">
+                                        <span>Total</span>
+                                        <span>₱{{ number_format(max(0, $total - $discount), 2) }}</span>
+                                    </div>
                                 </div>
-                                
-                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg">
-                                    Checkout
+
+                                <div class="space-y-4 mb-6">
+                                    <div>
+                                        <label class="text-xs font-bold text-stone-500 uppercase">Customer Name</label>
+                                        <input type="text" name="customer_name" required 
+                                               value="{{ Auth::user()->name }}"
+                                               class="w-full mt-1 px-4 py-2 rounded-xl border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 dark:text-white focus:ring-2 focus:ring-amber-500 transition">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-stone-500 uppercase">Email Receipt</label>
+                                        <input type="email" name="customer_email" required 
+                                               value="{{ Auth::user()->email }}"
+                                               class="w-full mt-1 px-4 py-2 rounded-xl border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 dark:text-white focus:ring-2 focus:ring-amber-500 transition">
+                                    </div>
+                                    <input type="hidden" name="payment_method" value="cash">
+                                </div>
+
+                                <button type="submit" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold text-lg rounded-2xl shadow-lg shadow-amber-500/30 transition transform hover:scale-[1.02] active:scale-95">
+                                    Confirm Order
                                 </button>
-                            </form>
+                                
                             </div>
-                    </div>
-                @else
-                    <div class="text-center py-12">
-                        <p class="text-gray-500 dark:text-gray-400 mb-4">Cart is empty.</p>
-                        <a href="{{ route('home') }}" class="text-blue-500 underline">Browse Menu</a>
+                        </form>
                     </div>
                 @endif
             </div>
+
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkbox = document.getElementById('redeem-checkbox');
-            const totalElement = document.getElementById('final-total');
-            const discountRow = document.getElementById('discount-row');
-            
-            if (checkbox && totalElement) {
-                const originalTotal = parseFloat(totalElement.getAttribute('data-original'));
-                
-                checkbox.addEventListener('change', function() {
-                    if (this.checked) {
-                        let newTotal = Math.max(0, originalTotal - 50);
-                        totalElement.innerText = '₱' + newTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                        if(discountRow) discountRow.classList.remove('hidden');
-                    } else {
-                        totalElement.innerText = '₱' + originalTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                        if(discountRow) discountRow.classList.add('hidden');
-                    }
-                });
-            }
-        });
-    </script>
 </x-app-layout>
