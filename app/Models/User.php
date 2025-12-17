@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'usertype', // <--- CHANGED FROM 'is_admin' TO 'usertype'
     ];
 
     /**
@@ -44,5 +45,12 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // 🚨 THIS WAS MISSING! 🚨
+    // This tells Laravel: "A User has many Orders"
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }
