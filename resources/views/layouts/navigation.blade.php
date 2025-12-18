@@ -2,10 +2,26 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('home') }}" class="flex items-center gap-2 group">
-                        <span class="text-2xl group-hover:scale-110 transition duration-300">☕</span>
-                        <span class="font-bold text-xl text-stone-900 dark:text-white hidden md:block tracking-tight">MIK'S<span class="text-amber-600">COFFEE</span></span>
+               <div class="shrink-0 flex items-center">
+                    <a href="{{ route('home') }}" class="flex items-center gap-4 group">
+                        
+                        <div class="relative w-14 h-14 rounded-full border-2 border-stone-200 dark:border-stone-700 bg-white flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:border-amber-600 group-hover:shadow-lg">
+                            <img src="{{ asset('favicon.png') }}" 
+                                 alt="Mik's Coffee Logo" 
+                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        </div>
+                        
+                        <div class="flex flex-col">
+                            <h1 class="font-serif italic text-2xl text-stone-900 dark:text-white leading-none tracking-tight">
+                                Mik's
+                            </h1>
+                            <span class="font-bold text-sm uppercase tracking-[0.25em] text-amber-600">
+                                COFFEE
+                            </span>
+                            <span class="text-[9px] uppercase tracking-[0.3em] text-stone-400 font-bold -mt-0.5">
+                                PREMIUM BREW
+                            </span>
+                        </div>
                     </a>
                 </div>
 
@@ -58,7 +74,7 @@
                                 <div class="text-left">
                                     <div>{{ Auth::user()->name }}</div>
                                     <div class="text-xs text-amber-600 dark:text-amber-400 font-normal">
-                                        ⭐ {{ Auth::user()->points }} Pts
+                                         {{ Auth::user()->points }} Pts
                                     </div>
                                 </div>
                                 <div class="ms-2">▼</div>
@@ -88,43 +104,6 @@
                     </svg>
                 </button>
             </div>
-        </div>
-    </div>
-
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden bg-stone-50 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                {{ __('Menu') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('rewards.index')" :active="request()->routeIs('rewards.index')">
-                {{ __('Rewards') }} ✨
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')">
-                {{ __('My Cart') }}
-            </x-responsive-nav-link>
-            
-            @auth
-                @if(Auth::user()->usertype === 'admin')
-                    <div class="border-t border-stone-200 dark:border-stone-800 my-2"></div>
-                    <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">{{ __('Dashboard') }}</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.menu.index')" :active="request()->routeIs('admin.menu.*')">{{ __('Manage Menu') }}</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.stock.index')" :active="request()->routeIs('admin.stock.*')">{{ __('Stock') }}</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.customers.index')" :active="request()->routeIs('admin.customers.*')">{{ __('Customers') }}</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('barista.queue')" :active="request()->routeIs('barista.queue')">{{ __('KDS / Queue') }}</x-responsive-nav-link>
-                @endif
-            @endauth
-        </div>
-
-        <div class="pt-4 pb-4 border-t border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-950">
-            @auth
-                <div class="px-4 mb-3">
-                    <div class="font-medium text-base text-stone-800 dark:text-stone-200">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-stone-500">{{ Auth::user()->email }}</div>
-                </div>
-                <div class="space-y-1">
-                    <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">{{ __('Log Out') }}</x-responsive-nav-link>
-                </div>
-            @endauth
         </div>
     </div>
 </nav>

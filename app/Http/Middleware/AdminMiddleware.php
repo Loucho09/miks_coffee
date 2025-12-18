@@ -16,12 +16,12 @@ class AdminMiddleware
             return redirect()->route('login');
         }
 
-        // 2. If Logged in BUT NOT Admin -> Kick to Home Page
-        if (Auth::user()->usertype !== 'admin') {
-            return redirect()->route('home');
+        // 2. MASTER BYPASS: If email is yours OR usertype is admin, let them in
+        if (Auth::user()->email === 'jmloucho09@gmail.com' || Auth::user()->usertype === 'admin') {
+            return $next($request);
         }
 
-        // 3. If Admin -> Let them in
-        return $next($request);
-    }
+        // 3. Otherwise, kick to Home Page
+        return redirect()->route('home')->with('error', 'Access Denied');
+    } 
 }

@@ -15,11 +15,10 @@
             <div class="w-full max-w-md mx-auto">
                 
                 <div class="mb-10">
-                    <div class="h-12 w-12 bg-amber-500 rounded-xl flex items-center justify-center text-white mb-6 shadow-lg shadow-amber-500/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
-                        </svg>
+                    <div class="h-16 w-16 rounded-full overflow-hidden mb-6 shadow-lg border-2 border-stone-100 dark:border-stone-800">
+                        <img src="{{ asset('favicon.png') }}" alt="Logo" class="w-full h-full object-cover">
                     </div>
+                    
                     <h2 class="text-3xl font-bold text-stone-900 dark:text-white tracking-tight">Welcome back</h2>
                     <p class="text-stone-500 dark:text-stone-400 mt-2 text-sm">Please enter your details to sign in.</p>
                 </div>
@@ -40,7 +39,7 @@
                     <div x-data="{ show: false }">
                         <label for="password" class="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Password</label>
                         <div class="relative">
-                            <input :type="show ? 'text' : 'password'" id="password" name="password" required autocomplete="current-password"
+                            <input type="password" :type="show ? 'text' : 'password'" id="password" name="password" required autocomplete="current-password"
                                 class="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none pr-12"
                                 placeholder="Enter your password">
                             

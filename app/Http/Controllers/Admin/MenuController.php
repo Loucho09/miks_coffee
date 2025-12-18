@@ -7,7 +7,7 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage; // 🟢 Needed for image handling
+use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
@@ -40,10 +40,11 @@ class MenuController extends Controller
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB Max
+            // 🟢 UPDATED: Changed max:5120 to max:10240 (Allows up to 50MB)
+          'image' => 'required|image|mimes:jpeg,png,jpg|max:51200', 
         ]);
 
-        // 🌟 SMART SLUG GENERATOR
+        // Smart Slug Generator
         $slug = Str::slug($request->name);
         $originalSlug = $slug;
         $count = 1;
@@ -63,7 +64,7 @@ class MenuController extends Controller
             'is_active' => true,
         ];
 
-        // 🟢 HANDLE IMAGE UPLOAD
+        // Handle Image Upload
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
         }
@@ -91,15 +92,16 @@ class MenuController extends Controller
         $product = Product::findOrFail($id);
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:51200',
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            // 🟢 UPDATED: Changed max:5120 to max:10240 (Allows up to 50MB)
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:51200',
         ]);
 
-        // 🌟 SMART SLUG UPDATE
+        // Smart Slug Update
         $slug = Str::slug($request->name);
         if ($slug !== $product->slug) {
             $originalSlug = $slug;
@@ -121,13 +123,12 @@ class MenuController extends Controller
             'description' => $request->description,
         ];
 
-        // 🟢 HANDLE IMAGE UPDATE
+        // Handle Image Update
         if ($request->hasFile('image')) {
-            // Delete old image to save space
+            // Delete old image
             if ($product->image) {
                 Storage::disk('public')->delete($product->image);
             }
-            // Store new image
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
@@ -143,7 +144,6 @@ class MenuController extends Controller
     {
         $product = Product::findOrFail($id);
         
-        // 🟢 DELETE IMAGE ON DESTROY
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }

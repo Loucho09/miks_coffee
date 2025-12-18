@@ -3,8 +3,6 @@
         
         <div class="w-full max-w-md bg-white dark:bg-stone-800 rounded-2xl shadow-xl overflow-hidden border border-stone-100 dark:border-stone-700">
             <div class="bg-gradient-to-br from-amber-500 to-orange-600 p-8 text-center relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-10" style="background-image: url('data:image/svg+xml,...');"></div>
-                
                 <div class="bg-white/20 backdrop-blur-sm w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

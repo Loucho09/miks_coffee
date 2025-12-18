@@ -22,7 +22,7 @@
                     <div class="mb-6 relative">
                         <label for="password" class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-1.5">Password</label>
                         <div class="relative">
-                            <input :type="show ? 'text' : 'password'" id="password" name="password" required autocomplete="current-password"
+                            <input type="password" :type="show ? 'text' : 'password'" id="password" name="password" required autocomplete="current-password"
                                 class="w-full px-4 py-3 rounded-lg border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-700 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-amber-500 transition outline-none pr-12">
                             
                             <button type="button" @click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200">

@@ -46,7 +46,7 @@
                     <div>
                         <label for="password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Password</label>
                         <div class="relative">
-                            <input :type="showPass ? 'text' : 'password'" id="password" name="password" required autocomplete="new-password"
+                            <input type="password" :type="showPass ? 'text' : 'password'" id="password" name="password" required autocomplete="new-password"
                                 class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none pr-12"
                                 placeholder="Min. 8 characters">
                             
@@ -61,7 +61,7 @@
                     <div>
                         <label for="password_confirmation" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Confirm Password</label>
                         <div class="relative">
-                            <input :type="showConfirm ? 'text' : 'password'" id="password_confirmation" name="password_confirmation" required
+                            <input type="password" :type="showConfirm ? 'text' : 'password'" id="password_confirmation" name="password_confirmation" required
                                 class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none pr-12"
                                 placeholder="Repeat password">
                             

@@ -8,16 +8,16 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminUserSeeder extends Seeder
 {
-    public function run(): void
-    {
-        // Check if the user exists first. If yes, update it. If no, create it.
-        User::updateOrCreate(
-            ['email' => 'jmloucho09@gmail.com'], // Look for this email
-            [
-                'name' => 'Admin User',
-                'password' => Hash::make('password'),
-                'is_admin' => true,
-            ]
-        );
-    }
+public function run(): void
+{
+    \App\Models\User::updateOrCreate(
+        ['email' => 'jmloucho09@gmail.com'], 
+        [
+            'name' => 'Admin User',
+            'password' => \Illuminate\Support\Facades\Hash::make('password0909'),
+            'usertype' => 'admin', 
+            'points' => 1000,
+        ]
+    );
+}
 }

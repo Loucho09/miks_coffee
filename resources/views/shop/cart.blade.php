@@ -70,7 +70,7 @@
                         </table>
                     @else
                         <div class="text-center py-20">
-                            <div class="text-6xl mb-4 opacity-30">🛒</div>
+                            <div class="text-6xl mb-4 opacity-30"></div>
                             <h3 class="text-xl font-bold text-stone-400 mb-4">Your cart is empty</h3>
                             <a href="{{ route('home') }}" class="px-6 py-3 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition shadow-lg shadow-amber-500/20">
                                 Browse Menu

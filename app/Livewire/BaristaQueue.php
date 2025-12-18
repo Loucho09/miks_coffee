@@ -12,13 +12,16 @@ class BaristaQueue extends Component
         $order = Order::find($orderId);
         if ($order) {
             $order->update(['status' => $status]);
-            session()->flash('success', 'Order #' . $order->id . ' marked as ' . strtoupper($status));
+            
+            // This flash message will show up on the page without a refresh
+            session()->flash('success', 'Order #' . $order->id . ' is now ' . strtoupper($status));
         }
     }
 
     public function render()
     {
-        // Matches your original QueueController logic perfectly
+        // We fetch the orders here so that every time a button is clicked, 
+        // Livewire re-runs this query and sees the new status.
         $orders = Order::whereIn('status', ['pending', 'preparing'])
                         ->with(['items.product', 'user']) 
                         ->orderBy('id', 'asc')

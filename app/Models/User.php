@@ -17,12 +17,14 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'usertype', // <--- CHANGED FROM 'is_admin' TO 'usertype'
-    ];
+   protected $fillable = [
+    'name',
+    'email',
+    'password',
+    'usertype', // For AdminMiddleware
+    'is_admin', // For IsAdmin Middleware
+    'points',   // For your rewards system
+];
 
     /**
      * The attributes that should be hidden for serialization.

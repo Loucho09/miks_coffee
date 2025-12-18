@@ -53,13 +53,28 @@
              class="fixed w-full top-0 z-40 transition-all duration-500 ease-in-out">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-20 items-center">
-                    <div class="flex items-center gap-2 group cursor-pointer">
-                        <span class="text-3xl filter drop-shadow-md group-hover:rotate-12 transition-transform duration-300">☕</span>
-                        <span class="font-extrabold text-2xl tracking-tight text-white transition-colors duration-300" 
-                              :class="{'text-stone-900 dark:text-white': scrolled}">
-                            MIK'S<span class="text-amber-500">COFFEE</span>
-                        </span>
-                    </div>
+                    <div class="shrink-0 flex items-center">
+                    <a href="{{ route('home') }}" class="flex items-center gap-4 group">
+                        
+                        <div class="relative w-14 h-14 rounded-full border-2 border-stone-200 dark:border-stone-700 bg-white flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:border-amber-600 group-hover:shadow-lg">
+                            <img src="{{ asset('favicon.png') }}" 
+                                 alt="Mik's Coffee Logo" 
+                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        </div>
+                        
+                        <div class="flex flex-col">
+                            <h1 class="font-serif italic text-2xl text-stone-900 dark:text-white leading-none tracking-tight">
+                                Mik's
+                            </h1>
+                            <span class="font-bold text-sm uppercase tracking-[0.25em] text-amber-600">
+                                COFFEE
+                            </span>
+                            <span class="text-[9px] uppercase tracking-[0.3em] text-stone-400 font-bold -mt-0.5">
+                                PREMIUM BREW
+                            </span>
+                        </div>
+                    </a>
+                </div>
 
                     <div class="hidden md:flex space-x-8 font-bold text-sm uppercase tracking-widest" 
                          :class="{'text-stone-600 dark:text-stone-300': scrolled, 'text-stone-200': !scrolled}">
