@@ -3,7 +3,11 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}?v={{ time() }}">
+<link rel="shortcut icon" type="image/png" href="{{ asset('favicon.png') }}?v={{ time() }}">
+<link rel="apple-touch-icon" href="{{ asset('favicon.png') }}?v={{ time() }}">
         <title>Miks Coffee Shop - Trece Martires</title>
+
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=outfit:300,400,500,600,700,800&display=swap" rel="stylesheet" />
         <script src="https://cdn.tailwindcss.com"></script>
@@ -168,32 +172,63 @@
             </div>
         </section>
 
-        <section class="py-24 bg-stone-50 dark:bg-stone-950 relative">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <h2 class="text-3xl md:text-4xl font-bold text-stone-900 dark:text-white">Why Miks Coffee?</h2>
-                    <div class="w-20 h-1 bg-amber-500 mx-auto mt-4 rounded-full"></div>
-                </div>
+      <section class="py-32 bg-stone-50 dark:bg-stone-950 relative overflow-hidden">
+    <div class="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-[120px]"></div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="bg-white dark:bg-stone-900 p-8 rounded-[2rem] shadow-xl shadow-stone-200/50 dark:shadow-none border border-stone-100 dark:border-stone-800 hover:border-amber-500/50 transition duration-500 group hover:-translate-y-2">
-                        <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition duration-500 group-hover:bg-amber-500 group-hover:text-white">☕</div>
-                        <h3 class="text-xl font-bold text-stone-900 dark:text-white mb-3">Premium Beans</h3>
-                        <p class="text-stone-500 dark:text-stone-400 leading-relaxed">Sourced from the finest growers, roasted to perfection to give you that rich, bold flavor every single time.</p>
-                    </div>
-                    <div class="bg-white dark:bg-stone-900 p-8 rounded-[2rem] shadow-xl shadow-stone-200/50 dark:shadow-none border border-stone-100 dark:border-stone-800 hover:border-amber-500/50 transition duration-500 group hover:-translate-y-2">
-                        <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition duration-500 group-hover:bg-amber-500 group-hover:text-white">🥐</div>
-                        <h3 class="text-xl font-bold text-stone-900 dark:text-white mb-3">Fresh Pastries</h3>
-                        <p class="text-stone-500 dark:text-stone-400 leading-relaxed">Baked daily in-house. Our waffles, donuts, and sandwiches are the perfect companion to your cup.</p>
-                    </div>
-                    <div class="bg-white dark:bg-stone-900 p-8 rounded-[2rem] shadow-xl shadow-stone-200/50 dark:shadow-none border border-stone-100 dark:border-stone-800 hover:border-amber-500/50 transition duration-500 group hover:-translate-y-2">
-                        <div class="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition duration-500 group-hover:bg-amber-500 group-hover:text-white">⚡</div>
-                        <h3 class="text-xl font-bold text-stone-900 dark:text-white mb-3">Fast WiFi</h3>
-                        <p class="text-stone-500 dark:text-stone-400 leading-relaxed">Stay productive or just chill. High-speed internet is always on the house for all our customers.</p>
-                    </div>
-                </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center mb-24">
+            <span class="text-amber-500 font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">The Craftsmanship</span>
+            <h2 class="text-4xl md:text-6xl font-black text-stone-900 dark:text-white tracking-tight">Why Mik's Coffee?</h2>
+            <div class="mt-8 flex justify-center gap-1.5">
+                <div class="w-16 h-1 bg-amber-500 rounded-full"></div>
+                <div class="w-2 h-1 bg-amber-500/20 rounded-full"></div>
+                <div class="w-2 h-1 bg-amber-500/10 rounded-full"></div>
             </div>
-        </section>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div class="group relative p-10 rounded-[3rem] bg-white dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.15)]">
+                <div class="relative z-10">
+                    <div class="w-20 h-20 rounded-3xl bg-amber-500/10 flex items-center justify-center mb-8 border border-amber-500/20 group-hover:bg-amber-500 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                        <svg class="w-10 h-10 text-amber-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l9-5-9-5-9 5 9 5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-stone-900 dark:text-white mb-4 tracking-tight">Premium Beans</h3>
+                    <p class="text-stone-500 dark:text-stone-400 leading-relaxed font-light">Sourced from the world’s most renowned high-altitude estates, roasted in micro-batches for an unparalleled flavor profile.</p>
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/[0.03] rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </div>
+
+            <div class="group relative p-10 rounded-[3rem] bg-white dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.15)]">
+                <div class="relative z-10">
+                    <div class="w-20 h-20 rounded-3xl bg-amber-500/10 flex items-center justify-center mb-8 border border-amber-500/20 group-hover:bg-amber-500 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500 shadow-inner">
+                        <svg class="w-10 h-10 text-amber-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.703 2.703 0 00-3 0 2.704 2.704 0 01-3 0 2.703 2.703 0 00-3 0 2.704 2.704 0 01-1.5-.454M3 20h18M4 11a4 4 0 118 0v1H4v-1z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-stone-900 dark:text-white mb-4 tracking-tight">Handcrafted Eats</h3>
+                    <p class="text-stone-500 dark:text-stone-400 leading-relaxed font-light">Every pastry is rolled, proofed, and baked at sunrise in our kitchen to ensure a crisp, golden exterior and airy crumb.</p>
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/[0.03] rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </div>
+
+            <div class="group relative p-10 rounded-[3rem] bg-white dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.15)]">
+                <div class="relative z-10">
+                    <div class="w-20 h-20 rounded-3xl bg-amber-500/10 flex items-center justify-center mb-8 border border-amber-500/20 group-hover:bg-amber-500 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                        <svg class="w-10 h-10 text-amber-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-stone-900 dark:text-white mb-4 tracking-tight">Ultra-Fast Fiber</h3>
+                    <p class="text-stone-500 dark:text-stone-400 leading-relaxed font-light">A sanctuary for productivity. Enjoy seamless gigabit connectivity while you sip, perfect for the modern nomad.</p>
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/[0.03] rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </div>
+        </div>
+    </div>
+</section>
 
         <section id="featured" class="py-24 bg-white dark:bg-[#121212] relative overflow-hidden">
             <div class="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl"></div>
@@ -222,7 +257,14 @@
                                     <p class="text-stone-300 line-clamp-2 mb-6 text-sm opacity-0 group-hover:opacity-100 transition duration-500 delay-100">{{ $product->description }}</p>
                                     
                                     <div class="flex items-center justify-between">
-                                        <span class="text-2xl font-extrabold text-amber-400">₱{{ number_format($product->price, 0) }}</span>
+                                      <div class="flex flex-col">
+    @if($product->sizes->count() > 0)
+        <span class="text-[10px] text-amber-500 uppercase font-black tracking-widest mb-0.5">Starts at</span>
+        <span class="text-2xl font-extrabold text-amber-400 leading-none">₱{{ number_format($product->sizes->min('price'), 0) }}</span>
+    @else
+        <span class="text-2xl font-extrabold text-amber-400">₱{{ number_format($product->price, 0) }}</span>
+    @endif
+</div>
                                         <a href="{{ route('cart.add', $product->id) }}" class="bg-white text-stone-900 p-3 rounded-full hover:bg-amber-500 hover:text-white transition shadow-lg hover:rotate-90 duration-300">
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                         </a>
@@ -243,33 +285,49 @@
 
         <section id="location" class="bg-stone-900 text-white py-24 relative overflow-hidden">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row gap-16 items-center">
-                <div class="w-full md:w-1/2">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-800 border border-stone-700 text-xs font-bold uppercase tracking-wider text-stone-400 mb-6">
-                        <span>📍</span> Visit Us
-                    </div>
-                    <h2 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">Come for the Coffee,<br>Stay for the <span class="text-amber-500">Vibe.</span></h2>
-                    <p class="text-lg text-stone-400 mb-10 font-light leading-relaxed">
-                        We are more than just a coffee shop. We are a place to connect, relax, and enjoy the little moments.
-                    </p>
-                    
-                    <div class="space-y-8">
-                        <div class="flex gap-5">
-                            <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-stone-800 flex items-center justify-center text-amber-500 text-2xl border border-stone-700">📍</div>
-                            <div>
-                                <h4 class="text-xl font-bold text-white mb-1">Address</h4>
-                                <p class="text-stone-400">Unit 2B Blk 6 Lot 15 Cavite Avenue<br>Brgy. Osorio, Trece Martires City</p>
-                                <p class="text-amber-500 text-sm mt-2 font-medium">Landmark: Tapat ng High School</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-5">
-                            <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-stone-800 flex items-center justify-center text-amber-500 text-2xl border border-stone-700">⏰</div>
-                            <div>
-                                <h4 class="text-xl font-bold text-white mb-1">Opening Hours</h4>
-                                <p class="text-stone-400">Daily: 9:00 AM - 10:00 PM</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+
+
+                <div class="space-y-6">
+    <div class="group flex items-start gap-6 p-6 rounded-[2rem] bg-stone-900/40 backdrop-blur-md border border-stone-800 hover:border-amber-500/50 transition-all duration-500 hover:shadow-[0_0_40px_-15px_rgba(245,158,11,0.2)]">
+        <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-stone-800 to-stone-900 flex items-center justify-center border border-stone-700 group-hover:border-amber-500/50 transition-colors duration-500">
+            <svg class="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+        </div>
+        
+        <div class="flex-1">
+            <h4 class="text-xs font-black uppercase tracking-[0.2em] text-amber-500 mb-2">Our Main Coffee Shop</h4>
+            <h3 class="text-xl font-bold text-white mb-1">Physical Address</h3>
+            <p class="text-stone-400 font-light leading-relaxed mb-3">
+                Unit 2B Blk 6 Lot 15 Cavite Avenue<br>
+                Brgy. Osorio, Trece Martires City
+            </p>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest text-amber-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                Landmark: Tapat ng High School
+            </div>
+        </div>
+    </div>
+
+    <div class="group flex items-start gap-6 p-6 rounded-[2rem] bg-stone-900/40 backdrop-blur-md border border-stone-800 hover:border-amber-500/50 transition-all duration-500 hover:shadow-[0_0_40px_-15px_rgba(245,158,11,0.2)]">
+        <div class="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-stone-800 to-stone-900 flex items-center justify-center border border-stone-700 group-hover:border-amber-500/50 transition-colors duration-500">
+            <svg class="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+        
+        <div class="flex-1">
+            <h4 class="text-xs font-black uppercase tracking-[0.2em] text-amber-500 mb-2">Service Hours</h4>
+            <h3 class="text-xl font-bold text-white mb-1">We are Open</h3>
+            <div class="flex items-baseline gap-2">
+                <span class="text-stone-400 font-light">Monday — Sunday:</span>
+                <span class="text-white font-bold tracking-tight">9:00 AM — 10:00 PM</span>
+            </div>
+        </div>
+    </div>
+</div>
                 
                 <div class="w-full md:w-1/2 h-96 bg-stone-800 rounded-[2.5rem] overflow-hidden border-4 border-stone-800 shadow-2xl relative group">
                     <iframe 
@@ -282,48 +340,86 @@
             </div>
         </section>
 
-        <footer class="bg-white dark:bg-stone-950 border-t border-stone-200 dark:border-stone-900 py-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 mb-12 text-center sm:text-left">
-                    
-                    <div>
-                        <h3 class="text-xs font-black text-stone-900 dark:text-white tracking-[0.2em] uppercase mb-6">About Us</h3>
-                        <ul class="space-y-3">
-                            <li><a href="#" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-500 transition font-medium text-sm">Our Story</a></li>
-                            <li><a href="#" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-500 transition font-medium text-sm">Locations</a></li>
-                        </ul>
+      <footer class="bg-white dark:bg-stone-950 border-t border-stone-200 dark:border-stone-900 pt-24 pb-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-16 mb-20">
+            
+            <div class="md:col-span-4 flex flex-col items-center md:items-start">
+                <a href="{{ route('home') }}" class="flex items-center gap-4 group mb-6">
+                    <div class="relative w-12 h-12 rounded-2xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:border-amber-500 group-hover:shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)]">
+                        <img src="{{ asset('favicon.png') }}" alt="Logo" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
                     </div>
-
-                    <div>
-                        <h3 class="text-xs font-black text-stone-900 dark:text-white tracking-[0.2em] uppercase mb-6">Order</h3>
-                        <ul class="space-y-3">
-                            <li><a href="{{ route('menu.index') }}" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-500 transition font-medium text-sm">Full Menu</a></li>
-                            <li><a href="#" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-500 transition font-medium text-sm">Delivery</a></li>
-                        </ul>
+                    <div class="flex flex-col">
+                        <span class="font-serif italic text-xl text-stone-900 dark:text-white leading-none">Mik's</span>
+                        <span class="font-black text-[10px] uppercase tracking-[0.3em] text-amber-600">Premium Brew</span>
                     </div>
+                </a>
+                <p class="text-stone-500 dark:text-stone-400 text-sm leading-relaxed max-w-xs text-center md:text-left font-light">
+                    Crafting extraordinary coffee experiences in the heart of Trece Martires. Every bean tells a story of quality and passion.
+                </p>
+            </div>
 
-                    <div>
-                        <h3 class="text-xs font-black text-stone-900 dark:text-white tracking-[0.2em] uppercase mb-6">Connect</h3>
-                        <ul class="space-y-3">
-                            <li><a href="#" class="text-stone-500 dark:text-stone-400 hover:text-blue-600 transition font-medium text-sm">Facebook</a></li>
-                            <li><a href="#" class="text-stone-500 dark:text-stone-400 hover:text-pink-600 transition font-medium text-sm">Instagram</a></li>
-                        </ul>
-                    </div>
+            <div class="md:col-span-2 text-center md:text-left">
+                <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-500 tracking-[0.4em] uppercase mb-8">Discover</h3>
+                <ul class="space-y-4">
+                    <li><a href="#" class="group flex items-center justify-center md:justify-start gap-2 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all duration-300">
+                        <span class="w-0 group-hover:w-4 h-px bg-amber-500 transition-all duration-300"></span>
+                        <span class="text-sm font-medium group-hover:translate-x-1 transition-transform">Our Story</span>
+                    </a></li>
+                    <li><a href="#location" class="group flex items-center justify-center md:justify-start gap-2 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all duration-300">
+                        <span class="w-0 group-hover:w-4 h-px bg-amber-500 transition-all duration-300"></span>
+                        <span class="text-sm font-medium group-hover:translate-x-1 transition-transform">Locations</span>
+                    </a></li>
+                </ul>
+            </div>
 
-                    <div>
-                        <h3 class="text-xs font-black text-stone-900 dark:text-white tracking-[0.2em] uppercase mb-6">Newsletter</h3>
-                        <form class="flex gap-2">
-                            <input type="email" placeholder="Email" class="w-full px-4 py-2.5 border border-stone-200 dark:border-stone-800 rounded-lg bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-white text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                            <button class="bg-amber-600 text-white px-5 py-2.5 rounded-lg hover:bg-amber-700 text-sm font-bold shadow-lg shadow-amber-600/20">Go</button>
-                        </form>
-                    </div>
-                </div>
+            <div class="md:col-span-2 text-center md:text-left">
+                <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-500 tracking-[0.4em] uppercase mb-8">Experience</h3>
+                <ul class="space-y-4">
+                    <li><a href="{{ route('menu.index') }}" class="group flex items-center justify-center md:justify-start gap-2 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all duration-300">
+                        <span class="w-0 group-hover:w-4 h-px bg-amber-500 transition-all duration-300"></span>
+                        <span class="text-sm font-medium group-hover:translate-x-1 transition-transform">Full Menu</span>
+                    </a></li>
+                    <li><a href="#" class="group flex items-center justify-center md:justify-start gap-2 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all duration-300">
+                        <span class="w-0 group-hover:w-4 h-px bg-amber-500 transition-all duration-300"></span>
+                        <span class="text-sm font-medium group-hover:translate-x-1 transition-transform">Delivery</span>
+                    </a></li>
+                </ul>
+            </div>
 
-                <div class="border-t border-stone-200 dark:border-stone-900 pt-8 text-center">
-                    <p class="text-stone-400 text-sm font-medium">© 2025 Mik's Coffee Shop. All rights reserved.</p>
+            <div class="md:col-span-4 flex flex-col items-center md:items-start">
+                <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-500 tracking-[0.4em] uppercase mb-8 text-center md:text-left">Join the Culture</h3>
+                <form class="flex w-full p-1.5 rounded-2xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 focus-within:border-amber-500/50 transition-all duration-500 mb-8">
+                    <input type="email" placeholder="Your email address" class="w-full px-4 bg-transparent border-none text-stone-900 dark:text-white text-sm focus:ring-0 placeholder-stone-500 font-light">
+                    <button class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition shadow-lg shadow-amber-600/20">Join</button>
+                </form>
+
+
+                <!-- FACEBOOK -->
+                <div class="flex gap-4">
+                    <a href="https://www.facebook.com/share/17aDwarKPW/" class="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-blue-600 hover:border-blue-600/30 transition-all duration-300 group">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    </a>
+
+                    <!-- INSATAGRAM -->
+                    <a href="https://www.instagram.com/mikscoffee?igsh=c3kwb2IxOG80MHg4" class="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-pink-600 hover:border-pink-600/30 transition-all duration-300 group">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    </a>
                 </div>
             </div>
-        </footer>
+        </div>
+
+        <div class="border-t border-stone-200 dark:border-stone-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-stone-500 dark:text-stone-500 text-[10px] font-black uppercase tracking-[0.2em]">
+                &copy; 2025 Mik's Coffee Shop. Artfully Designed.
+            </p>
+            <div class="flex gap-8">
+                <a href="#" class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 hover:text-amber-500 transition-colors">Privacy</a>
+                <a href="#" class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 hover:text-amber-500 transition-colors">Terms</a>
+            </div>
+        </div>
+    </div>
+</footer>
 
         <script>
             var themeToggleBtn = document.getElementById('theme-toggle');

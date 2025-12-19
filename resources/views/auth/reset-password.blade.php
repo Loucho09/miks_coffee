@@ -16,12 +16,20 @@
                     @csrf
                     <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-                    <div>
-                        <label for="email" class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-1.5">Email Address</label>
-                        <input id="email" class="block w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white transition outline-none opacity-75 cursor-not-allowed" 
-                            type="email" name="email" :value="old('email', $request->email)" required readonly />
-                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                    </div>
+                   <div>
+    <label for="email" class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-1.5">
+        Email Address
+    </label>
+    
+    <input id="email" 
+        class="block w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white transition outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" 
+        type="email" 
+        name="email" 
+        value="{{ old('email', $request->email ?? '') }}" 
+        required readonly />
+        
+    <x-input-error :messages="$errors->get('email')" class="mt-2" />
+</div>
 
                     <div>
                         <label for="password" class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-1.5">New Password</label>

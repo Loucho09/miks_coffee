@@ -29,8 +29,14 @@ Route::get('/', function () {
     if (Auth::check()) {
         return redirect()->route('dashboard');
     }
-    // Fetch 3 random active products with sizes for the "Signature Series" section
-    $featured = Product::where('is_active', true)->with('sizes')->inRandomOrder()->take(3)->get();
+    
+    // 🟢 MUST load sizes so the landing page can see them
+    $featured = Product::where('is_active', true)
+                        ->with('sizes')
+                        ->inRandomOrder()
+                        ->take(3)
+                        ->get();
+                        
     return view('welcome', compact('featured'));
 })->name('welcome');
 
@@ -127,6 +133,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::view('/privacy', 'legal.privacy')->name('privacy');
+Route::view('/terms', 'legal.terms')->name('terms');
         });
     });
 

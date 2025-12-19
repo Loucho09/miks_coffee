@@ -8,21 +8,34 @@ export default {
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
     ],
-theme: {
+    theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Outfit', ...defaultTheme.fontFamily.sans],
             },
-            // ADD THIS SECTION:
             colors: {
+                // 🟢 UPDATED: Sophisticated Beige Palette
+                stone: {
+                    50: '#FDFBF7',  // Main Background (Cream)
+                    100: '#F7F3F0', // Secondary background (Linen)
+                    200: '#E9E2DB', // Borders
+                    300: '#D6C9BE',
+                    400: '#A39284',
+                    500: '#7B6F63',
+                    600: '#5F554C',
+                    700: '#4A423B',
+                    800: '#38322D',
+                    900: '#26221F',
+                    950: '#0C0A09'
+                },
                 'coffee': {
-                    100: '#F5E6E0', // Light Latte
-                    600: '#8D5F46', // Milk Coffee
-                    800: '#4B2C20', // Espresso (Dark Brown)
-                    900: '#2C1810', // Dark Roast
+                    100: '#F5E6E0',
+                    600: '#8D5F46',
+                    800: '#4B2C20',
+                    900: '#2C1810',
                 },
                 'brand': {
-                    orange: '#F59E0B', // Warm Amber (Matches your menu)
+                    orange: '#F59E0B',
                 }
             }
         },

@@ -17,7 +17,7 @@ class AdminUserSeeder extends Seeder
             ['email' => 'jmloucho09@gmail.com'], 
             [
                 'name' => 'Admin User',
-                'password' => Hash::make('password0909'),
+                'password' => Hash::make('password123'),
                 'usertype' => 'admin', // Matches your web.php check
                 'points' => 1000,
             ]
