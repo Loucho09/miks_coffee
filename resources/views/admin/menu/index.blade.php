@@ -53,7 +53,15 @@
                                         </span>
                                     </td>
                                     <td class="py-4 px-6 text-stone-700 dark:text-stone-300">
-                                        ₱{{ number_format($product->price, 2) }}
+                                        {{-- 🟢 FIXED: Check if product has sizes --}}
+                                        @if($product->sizes->count() > 0)
+                                            <span class="text-amber-600 font-bold">
+                                                ₱{{ number_format($product->sizes->min('price'), 2) }} - ₱{{ number_format($product->sizes->max('price'), 2) }}
+                                            </span>
+                                            <div class="text-[10px] text-gray-500 uppercase font-black tracking-tighter">Sizes Active</div>
+                                        @else
+                                            ₱{{ number_format($product->price, 2) }}
+                                        @endif
                                     </td>
                                     <td class="py-4 px-6 text-center">
                                         <span class="{{ $product->stock_quantity < 10 ? 'text-red-500 font-bold' : 'text-stone-600 dark:text-stone-400' }}">

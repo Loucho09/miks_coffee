@@ -23,7 +23,8 @@ class User extends Authenticatable
     'password',
     'usertype', // For AdminMiddleware
     'is_admin', // For IsAdmin Middleware
-    'points',   // For your rewards system
+    'points',
+    'role',   // For your rewards system
 ];
 
     /**

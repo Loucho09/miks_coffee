@@ -19,10 +19,10 @@ class DatabaseSeeder extends Seeder
         // 2. Setup Test Customer
         User::updateOrCreate(
             ['email' => 'customer@example.com'],
-            ['name' => 'Test Customer', 'password' => Hash::make('password'), 'usertype' => 'user', 'points' => 50]
+            ['name' => 'Test Customer', 'password' => Hash::make('password'), 'role' => 'user', 'points' => 50]
         );
 
-        // 3. Menu Data (Top 3 per category)
+        // 3. Menu Data (Organized by Categories)
         $menu = [
             'Rice Meals' => [
                 ['name' => 'Chicken Teriyaki', 'price' => 119, 'desc' => 'Savory chicken glazed in teriyaki sauce.'],
@@ -54,17 +54,20 @@ class DatabaseSeeder extends Seeder
                 ['name' => 'Overload Fries', 'price' => 79, 'desc' => 'Fries, cheese sauce and beef.'],
                 ['name' => 'Penne Carbonara', 'price' => 149, 'desc' => 'Pasta served with garlic bread.'],
             ],
+            // 🟢 ADDED: Fruit Tea's Category
+            'Fruit Tea\'s' => [
+                ['name' => 'Blueberry Fruit Tea', 'price' => 89, 'desc' => 'Refreshing tea infused with sweet blueberry flavor.'],
+                ['name' => 'Green Apple Fruit Tea', 'price' => 89, 'desc' => 'Crisp and tart green apple flavored tea.'],
+                ['name' => 'Lychee Fruit Tea', 'price' => 89, 'desc' => 'Exotic and sweet lychee infused refreshing tea.'],
+            ],
         ];
 
         // 4. Sync to DB
-        foreach ($menu as $categoryName => $products) {
-            $category = Category::updateOrCreate(
-                ['name' => $categoryName],
-                ['slug' => Str::slug($categoryName)]
-            );
+      foreach ($menu as $categoryName => $products) {
+            $category = Category::updateOrCreate(['name' => $categoryName], ['slug' => Str::slug($categoryName)]);
 
             foreach ($products as $item) {
-                Product::updateOrCreate(
+                $product = Product::updateOrCreate(
                     ['name' => $item['name']],
                     [
                         'category_id' => $category->id,
@@ -75,7 +78,14 @@ class DatabaseSeeder extends Seeder
                         'is_active' => true,
                     ]
                 );
+
+                // 🟢 ONLY add sizes to Coffee and Fruit Tea categories
+                if ($categoryName === 'Coffee Based' || $categoryName === 'Fruit Tea\'s') {
+                    $product->sizes()->updateOrCreate(['size' => '12oz'], ['price' => 39.00]);
+                    $product->sizes()->updateOrCreate(['size' => '16oz'], ['price' => 49.00]);
             }
+        }
+            
         }
     }
 }

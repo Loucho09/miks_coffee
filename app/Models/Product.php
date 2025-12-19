@@ -14,7 +14,7 @@ class Product extends Model
         'name',
         'slug',
         'description',
-        'price', // This becomes the "Base Price" or 12oz price default
+        'price',
         'stock_quantity',
         'image',
         'is_active',
@@ -25,7 +25,7 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    // 🟢 ADD THIS RELATIONSHIP
+    // 🟢 ADD THIS: Links products to their sizes (16oz, 22oz, etc.)
     public function sizes()
     {
         return $this->hasMany(ProductSize::class);

@@ -22,9 +22,10 @@
     <div class="py-8" x-data="{ 
         showModal: false, 
         selectedProduct: null, 
+        selectedSize: null,
         openModal(product) {
-            console.log(product); // Debug: Check console to see if sizes exist
             this.selectedProduct = product;
+            this.selectedSize = null; 
             this.showModal = true;
         }
     }">
@@ -64,9 +65,10 @@
                                 </div>
                             @endif
 
+                            {{-- 🟢 DYNAMIC BUTTON LOGIC --}}
                             @if($product->sizes->count() > 0)
                                 <button type="button" 
-                                        @click='openModal(@json($product))'
+                                        @click='openModal(@json($product->load("sizes")))'
                                         class="absolute bottom-2 right-3 text-amber-500 hover:text-amber-400 text-4xl leading-none transition-transform hover:scale-110 active:scale-95">
                                     +
                                 </button>
@@ -90,28 +92,23 @@
                                 {{ $product->description }}
                             </p>
                             
+                            {{-- 🟢 FIXED PRICE DISPLAY --}}
                             <div class="font-extrabold text-xl text-stone-900 dark:text-white">
-                                ₱{{ number_format($product->price, 2) }}
+                                @if($product->sizes->count() > 0)
+                                    ₱{{ number_format($product->sizes->min('price'), 2) }}
+                                    <span class="text-[10px] text-amber-600 uppercase tracking-widest font-black ml-1">Starts at</span>
+                                @else
+                                    ₱{{ number_format($product->price, 2) }}
+                                @endif
                             </div>
                         </div>
                     </div>
                 @endforeach
             </div>
-
-            @if($products->isEmpty())
-                <div class="flex flex-col items-center justify-center py-20 text-center">
-                    <div class="text-6xl mb-4 opacity-50">🔍</div>
-                    <h3 class="text-xl font-bold text-stone-900 dark:text-white mb-2">No items found</h3>
-                    <p class="text-stone-500 dark:text-stone-400 mb-6">Try searching for something else.</p>
-                    <a href="{{ route('home') }}" class="px-6 py-2 bg-stone-200 dark:bg-stone-800 rounded-full font-bold text-stone-700 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-700 transition">
-                        Clear Filters
-                    </a>
-                </div>
-            @endif
         </div>
 
+        {{-- Selection Modal --}}
         <div x-show="showModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak>
-            
             <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showModal = false"></div>
 
             <div class="relative bg-white dark:bg-[#1C1C1E] w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-stone-800">
@@ -121,31 +118,28 @@
 
                     <form method="POST" action="{{ route('cart.add') }}">
                         @csrf
-                        <input type="hidden" name="product_id" x-model="selectedProduct?.id">
+                        <input type="hidden" name="product_id" :value="selectedProduct?.id">
+                        <input type="hidden" name="size" :value="selectedSize?.size">
+                        <input type="hidden" name="price" :value="selectedSize?.price">
 
                         <div class="space-y-3 mb-8">
-                            <p class="text-xs font-bold text-stone-400 uppercase tracking-wide">Select Size</p>
+                            <p class="text-xs font-bold text-stone-400 uppercase tracking-wide">Select Choice</p>
                             
                             <template x-if="selectedProduct?.sizes && selectedProduct.sizes.length > 0">
-                                <template x-for="size in selectedProduct.sizes" :key="size.id">
-                                    <label class="flex items-center justify-between p-4 rounded-xl border border-stone-200 dark:border-stone-700 cursor-pointer hover:border-amber-500 hover:bg-stone-50 dark:hover:bg-stone-800 transition">
-                                        <div class="flex items-center gap-3">
-                                            <input type="radio" name="size_id" :value="size.id" required class="text-amber-600 focus:ring-amber-500 border-gray-300">
-                                            <span class="font-bold text-stone-800 dark:text-white" x-text="size.size"></span>
-                                        </div>
-                                        <span class="font-bold text-amber-600" x-text="'₱' + parseFloat(size.price).toFixed(2)"></span>
-                                    </label>
-                                </template>
-                            </template>
-
-                            <template x-if="!selectedProduct?.sizes || selectedProduct.sizes.length === 0">
-                                <label class="flex items-center justify-between p-4 rounded-xl border border-amber-500 bg-amber-50 dark:bg-amber-900/10 cursor-pointer">
-                                    <div class="flex items-center gap-3">
-                                        <input type="radio" name="size_id" value="" checked class="text-amber-600 focus:ring-amber-500 border-gray-300">
-                                        <span class="font-bold text-stone-800 dark:text-white">Regular</span>
-                                    </div>
-                                    <span class="font-bold text-amber-600" x-text="'₱' + parseFloat(selectedProduct?.price).toFixed(2)"></span>
-                                </label>
+                                <div class="space-y-2">
+                                    <template x-for="sizeObj in selectedProduct.sizes" :key="sizeObj.id">
+                                        <label class="flex items-center justify-between p-4 rounded-xl border cursor-pointer transition"
+                                               :class="selectedSize?.id === sizeObj.id ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/10' : 'border-stone-200 dark:border-stone-700 hover:border-amber-500'">
+                                            <div class="flex items-center gap-3">
+                                                <input type="radio" name="size_id" :value="sizeObj.id" required 
+                                                       @change="selectedSize = sizeObj"
+                                                       class="text-amber-600 focus:ring-amber-500 border-gray-300">
+                                                <span class="font-bold text-stone-800 dark:text-white" x-text="sizeObj.size"></span>
+                                            </div>
+                                            <span class="font-bold text-amber-600" x-text="'₱' + parseFloat(sizeObj.price).toFixed(2)"></span>
+                                        </label>
+                                    </template>
+                                </div>
                             </template>
                         </div>
 
@@ -153,7 +147,7 @@
                             <button type="button" @click="showModal = false" class="flex-1 py-3 rounded-xl font-bold text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition">
                                 Cancel
                             </button>
-                            <button type="submit" class="flex-1 py-3 rounded-xl font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-600/20 transition">
+                            <button type="submit" :disabled="!selectedSize" class="flex-1 py-3 rounded-xl font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-600/20 transition disabled:opacity-50 disabled:cursor-not-allowed">
                                 Add to Order
                             </button>
                         </div>
@@ -161,6 +155,5 @@
                 </div>
             </div>
         </div>
-
     </div>
 </x-app-layout>

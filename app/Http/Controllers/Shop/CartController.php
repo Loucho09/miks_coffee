@@ -23,18 +23,19 @@ class CartController extends Controller
             return redirect()->back()->with('error', 'Product not found!');
         }
 
-        // Get Size Logic
+        // Default values
         $sizeName = null;
         $price = $product->price;
-        $cartKey = $product->id; // Default key
+        $cartKey = $product->id; 
 
-        // If a size was selected (e.g., from the modal)
+        // 🟢 Size Selection Logic
         if ($request->has('size_id') && $request->size_id) {
             $size = ProductSize::find($request->size_id);
             if ($size) {
-                $sizeName = $size->size;   // "16oz"
-                $price = $size->price;     // 49.00
-                $cartKey = $product->id . '_' . $size->size; // Unique Key: "46_16oz"
+                $sizeName = $size->size;   // e.g., "16oz"
+                $price = $size->price;     // e.g., 140.00
+                // Unique Key ensures different sizes stay separate in the cart
+                $cartKey = $product->id . '_' . $size->size; 
             }
         }
 
@@ -44,17 +45,17 @@ class CartController extends Controller
             $cart[$cartKey]['quantity']++;
         } else {
             $cart[$cartKey] = [
-                "product_id" => $product->id, // Store the real ID separate from the key
+                "product_id" => $product->id,
                 "name" => $product->name,
                 "quantity" => 1,
                 "price" => $price,
                 "image" => $product->image,
-                "size" => $sizeName // 🟢 SAVING SIZE TO SESSION
+                "size" => $sizeName // 🟢 Size stored in session
             ];
         }
 
         session()->put('cart', $cart);
-        return redirect()->back()->with('success', 'Product added to cart successfully!');
+        return redirect()->back()->with('success', 'Added to cart successfully!');
     }
 
     public function remove(Request $request)
@@ -65,7 +66,7 @@ class CartController extends Controller
                 unset($cart[$request->id]);
                 session()->put('cart', $cart);
             }
-            return redirect()->back()->with('success', 'Item removed successfully');
+            return redirect()->back()->with('success', 'Item removed');
         }
     }
 }
