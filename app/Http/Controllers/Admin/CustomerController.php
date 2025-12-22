@@ -9,13 +9,23 @@ use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends Controller
 {
-    // 1. List all customers
-    public function index()
+    // 1. List all customers (Enhanced with Search & Pagination)
+    public function index(Request $request)
     {
-        $customers = User::where('usertype', 'user')
-                        ->withCount('orders')
-                        ->latest()
-                        ->get();
+        $query = User::where('usertype', 'user')
+                    ->withCount('orders')
+                    ->latest();
+
+        // 🟢 NEW FEATURE: Admin Customer Search
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // 🟢 Optimized for performance with Pagination
+        $customers = $query->paginate(15)->withQueryString();
 
         return view('admin.customers.index', compact('customers'));
     }

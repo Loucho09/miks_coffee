@@ -16,7 +16,6 @@
             @endif
 
             @if(session('cart') && count(session('cart')) > 0)
-                
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
                     <div class="lg:col-span-2 space-y-4">
@@ -56,6 +55,8 @@
                                 }
                                 $userPoints = Auth::user()->points;
                                 $canRedeem = $userPoints >= 50; 
+                                // 🟢 NEW FEATURE: Calculate points to be earned (1 point per ₱100)
+                                $pointsToEarn = floor($total / 100);
                             @endphp
 
                             <div class="space-y-2 mb-6 text-stone-600 dark:text-stone-300">
@@ -63,9 +64,13 @@
                                     <span>Subtotal</span>
                                     <span>₱{{ number_format($total, 2) }}</span>
                                 </div>
-                                <div id="discount-row" class="flex justify-between text-green-600 font-bold hidden">
+                                <div id="discount-row" class="justify-between text-green-600 font-bold" style="display: none;">
                                     <span>Loyalty Discount</span>
                                     <span>-₱50.00</span>
+                                </div>
+                                <div class="flex justify-between text-amber-600 text-xs font-bold pt-2 border-t border-stone-50 dark:border-stone-800">
+                                    <span>Points to earn:</span>
+                                    <span>+{{ $pointsToEarn }} PTS</span>
                                 </div>
                             </div>
 
@@ -114,12 +119,9 @@
                         </div>
                     </div>
                 </div>
-
             @else
-                
                 <div class="max-w-xl mx-auto">
                     <div class="bg-white dark:bg-stone-900 rounded-3xl shadow-sm border border-stone-100 dark:border-stone-800 p-12 text-center">
-                        <div class="text-6xl mb-6"></div>
                         <h3 class="text-2xl font-bold text-stone-900 dark:text-white mb-2">Your cart is empty.</h3>
                         <p class="text-stone-500 dark:text-stone-400 mb-8">Looks like you haven't added any coffee yet!</p>
                         <a href="{{ route('home') }}" class="inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:scale-105 transition transform">
@@ -127,7 +129,6 @@
                         </a>
                     </div>
                 </div>
-
             @endif
 
         </div>
@@ -147,11 +148,12 @@
                         let newTotal = Math.max(0, originalTotal - 50);
                         totalElement.innerText = '₱' + newTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                         totalElement.classList.add('text-green-600');
-                        if(discountRow) discountRow.classList.remove('hidden');
+                        // 🟢 FIXED JS: Correctly managing display property
+                        if(discountRow) discountRow.style.display = 'flex';
                     } else {
                         totalElement.innerText = '₱' + originalTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                         totalElement.classList.remove('text-green-600');
-                        if(discountRow) discountRow.classList.add('hidden');
+                        if(discountRow) discountRow.style.display = 'none';
                     }
                 });
             }

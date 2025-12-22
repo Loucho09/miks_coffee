@@ -4,8 +4,8 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}?v={{ time() }}">
-<link rel="shortcut icon" type="image/png" href="{{ asset('favicon.png') }}?v={{ time() }}">
-<link rel="apple-touch-icon" href="{{ asset('favicon.png') }}?v={{ time() }}">
+        <link rel="shortcut icon" type="image/png" href="{{ asset('favicon.png') }}?v={{ time() }}">
+        <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}?v={{ time() }}">
         <title>Miks Coffee Shop - Trece Martires</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -36,7 +36,6 @@
             }
         </script>
         <script>
-            // Dark Mode Logic
             if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
             } else {
@@ -59,7 +58,6 @@
                 <div class="flex justify-between h-20 items-center">
                     <div class="shrink-0 flex items-center">
                     <a href="{{ route('home') }}" class="flex items-center gap-4 group">
-                        
                         <div class="relative w-14 h-14 rounded-full border-2 border-stone-200 dark:border-stone-700 bg-white flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:border-amber-600 group-hover:shadow-lg">
                             <img src="{{ asset('favicon.png') }}" 
                                  alt="Mik's Coffee Logo" 
@@ -86,6 +84,7 @@
                         <a href="#featured" class="hover:text-amber-500 transition duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-amber-500 after:left-0 after:-bottom-1 after:transition-all hover:after:w-full">Favorites</a>
                         <a href="{{ route('menu.index') }}" class="hover:text-amber-500 transition duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-amber-500 after:left-0 after:-bottom-1 after:transition-all hover:after:w-full">Menu</a>
                         <a href="#location" class="hover:text-amber-500 transition duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-amber-500 after:left-0 after:-bottom-1 after:transition-all hover:after:w-full">Visit</a>
+                        <a href="{{ route('support.index') }}" class="hover:text-amber-500 transition duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:bg-amber-500 after:left-0 after:-bottom-1 after:transition-all hover:after:w-full">Support</a>
                     </div>
 
                     <div class="hidden md:flex items-center gap-4">
@@ -119,6 +118,7 @@
                     <a href="#hero" class="block px-4 py-3 rounded-lg text-stone-300 font-medium hover:text-white hover:bg-stone-800 transition">Home</a>
                     <a href="{{ route('menu.index') }}" class="block px-4 py-3 rounded-lg text-stone-300 font-medium hover:text-white hover:bg-stone-800 transition">Full Menu</a>
                     <a href="#location" class="block px-4 py-3 rounded-lg text-stone-300 font-medium hover:text-white hover:bg-stone-800 transition">Location</a>
+                    <a href="{{ route('support.index') }}" class="block px-4 py-3 rounded-lg text-stone-300 font-medium hover:text-white hover:bg-stone-800 transition">Support</a>
                 </div>
                 <div class="py-6 border-t border-stone-800 px-4 space-y-3">
                     @auth
@@ -214,7 +214,7 @@
                 <div class="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/[0.03] rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
 
-            <div class="group relative p-10 rounded-[3rem] bg-white dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.15)]">
+            <div class="group relative p-10 rounded-[3rem] bg-white dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60_15px_rgba(245,158,11,0.15)]">
                 <div class="relative z-10">
                     <div class="w-20 h-20 rounded-3xl bg-amber-500/10 flex items-center justify-center mb-8 border border-amber-500/20 group-hover:bg-amber-500 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner">
                         <svg class="w-10 h-10 text-amber-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,62 +231,63 @@
 </section>
 
         <section id="featured" class="py-24 bg-white dark:bg-[#121212] relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 w-96 h-96 bg-stone-800/10 rounded-full blur-3xl"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center mb-16">
+            <span class="text-amber-600 font-bold tracking-[0.2em] uppercase text-sm">Our Best Sellers</span>
+            <h2 class="text-4xl md:text-5xl font-black text-stone-900 dark:text-white mt-3 mb-6">Taste the Magic</h2>
+        </div>
 
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div class="text-center mb-16">
-                    <span class="text-amber-600 font-bold tracking-[0.2em] uppercase text-sm">Our Best Sellers</span>
-                    <h2 class="text-4xl md:text-5xl font-black text-stone-900 dark:text-white mt-3 mb-6">Taste the Magic</h2>
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+            @foreach($featured as $product)
+                <div class="group relative">
+                    <div class="aspect-[4/5] rounded-[2rem] overflow-hidden bg-stone-100 dark:bg-stone-800 relative shadow-2xl transition-all duration-500 hover:shadow-amber-500/20 hover:-translate-y-2">
+                        @if($product->image)
+                            <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center bg-stone-200 dark:bg-stone-900">
+                                <span class="font-serif italic text-[14rem] text-stone-800 dark:text-stone-200 opacity-[0.03] uppercase tracking-tighter select-none leading-none">
+                                    {{ strtoupper(substr($product->name, 0, 1)) }}
+                                </span>
+                            </div>
+                        @endif
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    @foreach($featured as $product)
-                        <div class="group relative">
-                            <div class="aspect-[4/5] rounded-[2rem] overflow-hidden bg-stone-100 dark:bg-stone-800 relative shadow-2xl transition-all duration-500 group-hover:shadow-amber-500/20 group-hover:-translate-y-2">
-                                @if($product->image)
-                                    <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-6xl text-stone-300">☕</div>
-                                @endif
-                                
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition"></div>
-                                
-                                <div class="absolute bottom-0 left-0 p-8 w-full translate-y-2 group-hover:translate-y-0 transition duration-500">
-                                    <h3 class="text-2xl font-bold text-white mb-2">{{ $product->name }}</h3>
-                                    <p class="text-stone-300 line-clamp-2 mb-6 text-sm opacity-0 group-hover:opacity-100 transition duration-500 delay-100">{{ $product->description }}</p>
-                                    
-                                    <div class="flex items-center justify-between">
-                                      <div class="flex flex-col">
-    @if($product->sizes->count() > 0)
-        <span class="text-[10px] text-amber-500 uppercase font-black tracking-widest mb-0.5">Starts at</span>
-        <span class="text-2xl font-extrabold text-amber-400 leading-none">₱{{ number_format($product->sizes->min('price'), 0) }}</span>
-    @else
-        <span class="text-2xl font-extrabold text-amber-400">₱{{ number_format($product->price, 0) }}</span>
-    @endif
-</div>
-                                        <a href="{{ route('cart.add', $product->id) }}" class="bg-white text-stone-900 p-3 rounded-full hover:bg-amber-500 hover:text-white transition shadow-lg hover:rotate-90 duration-300">
-                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                        </a>
-                                    </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition"></div>
+                        
+                        <div class="absolute bottom-0 left-0 p-8 w-full translate-y-2 group-hover:translate-y-0 transition duration-500">
+                            <h3 class="text-2xl font-bold text-white mb-2">{{ $product->name }}</h3>
+                            
+                            <p class="text-stone-300 line-clamp-2 mb-6 text-sm opacity-0 group-hover:opacity-100 transition duration-500 delay-100">
+                                {{ $product->description }}
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <div class="flex flex-col">
+                                    @if($product->sizes->count() > 0)
+                                        <span class="text-[10px] text-amber-500 uppercase font-black tracking-widest mb-0.5">Starts at</span>
+                                        <span class="text-2xl font-extrabold text-amber-400 leading-none">₱{{ number_format($product->sizes->min('price'), 0) }}</span>
+                                    @else
+                                        <span class="text-2xl font-extrabold text-amber-400">₱{{ number_format($product->price, 0) }}</span>
+                                    @endif
                                 </div>
+                                <a href="{{ route('cart.add', $product->id) }}" class="bg-white text-stone-900 p-3 rounded-full hover:bg-amber-500 hover:text-white transition shadow-lg hover:rotate-90 duration-300">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                </a>
                             </div>
                         </div>
-                    @endforeach
+                    </div>
                 </div>
+            @endforeach
+        </div>
 
-                <div class="mt-20 text-center">
-                    <a href="{{ route('menu.index') }}" class="inline-block px-8 py-3 rounded-full border-2 border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-bold hover:bg-stone-900 hover:border-stone-900 hover:text-white dark:hover:bg-white dark:hover:text-stone-900 transition-all">
-                        View Complete Menu
-                    </a>
-                </div>
-            </div>
-        </section>
+        <div class="mt-20 text-center">
+            <a href="{{ route('menu.index') }}" class="inline-block px-8 py-3 rounded-full border-2 border-stone-200 dark:border-stone-800 text-stone-900 dark:text-white font-bold hover:bg-stone-900 hover:text-white transition-all">
+                View Complete Menu
+            </a>
+        </div>
+    </div>
+</section>
 
         <section id="location" class="bg-stone-900 text-white py-24 relative overflow-hidden">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row gap-16 items-center">
-
-
 
                 <div class="space-y-6">
     <div class="group flex items-start gap-6 p-6 rounded-[2rem] bg-stone-900/40 backdrop-blur-md border border-stone-800 hover:border-amber-500/50 transition-all duration-500 hover:shadow-[0_0_40px_-15px_rgba(245,158,11,0.2)]">
@@ -331,7 +332,7 @@
                 
                 <div class="w-full md:w-1/2 h-96 bg-stone-800 rounded-[2.5rem] overflow-hidden border-4 border-stone-800 shadow-2xl relative group">
                     <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3866.4583365512226!2d120.8656874748664!3d14.284781586165046!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd81001f3e2407%3A0x7548c28cd57121cc!2sMik%E2%80%99s%20coffee%20shop!5e0!3m2!1sen!2sph!4v1765471789970!5m2!1sen!2sph" 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15444.60462479261!2d120.8647000!3d14.2821000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd70b800000000%3A0x0!2zMTTCsDE2JzU1LjYiTiAxMjDCsDUxJzUyLjkiRQ!5e0!3m2!1sen!2sph!4v1700000000000!5m2!1sen!2sph" 
                         class="absolute inset-0 w-full h-full border-0 grayscale group-hover:grayscale-0 transition duration-700"
                         allowfullscreen="" 
                         loading="lazy">
@@ -394,14 +395,11 @@
                     <button class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition shadow-lg shadow-amber-600/20">Join</button>
                 </form>
 
-
-                <!-- FACEBOOK -->
                 <div class="flex gap-4">
                     <a href="https://www.facebook.com/share/17aDwarKPW/" class="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-blue-600 hover:border-blue-600/30 transition-all duration-300 group">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                     </a>
 
-                    <!-- INSATAGRAM -->
                     <a href="https://www.instagram.com/mikscoffee?igsh=c3kwb2IxOG80MHg4" class="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-pink-600 hover:border-pink-600/30 transition-all duration-300 group">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
                     </a>
@@ -411,7 +409,7 @@
 
         <div class="border-t border-stone-200 dark:border-stone-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p class="text-stone-500 dark:text-stone-500 text-[10px] font-black uppercase tracking-[0.2em]">
-                &copy; 2025 Mik's Coffee Shop. Artfully Designed.
+                © 2025 Mik's Coffee Shop. Artfully Designed.
             </p>
             <div class="flex gap-8">
                 <a href="#" class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 hover:text-amber-500 transition-colors">Privacy</a>
@@ -432,4 +430,4 @@
             });
         </script>
     </body>
-</html>
+</html> 

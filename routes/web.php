@@ -13,6 +13,8 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Shop\OrderController;
 use App\Http\Controllers\Barista\QueueController;
 use App\Http\Controllers\Shop\CartController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SupportController; 
 
 // Models
 use App\Models\Product;
@@ -30,7 +32,6 @@ Route::get('/', function () {
         return redirect()->route('dashboard');
     }
     
-    // 🟢 MUST load sizes so the landing page can see them
     $featured = Product::where('is_active', true)
                         ->with('sizes')
                         ->inRandomOrder()
@@ -40,7 +41,6 @@ Route::get('/', function () {
     return view('welcome', compact('featured'));
 })->name('welcome');
 
-// Public Menu (Visible to Guests)
 Route::get('/menu', function (Request $request) {
     $query = Product::with(['category', 'sizes'])->where('is_active', true);
     
@@ -60,72 +60,93 @@ Route::get('/menu', function (Request $request) {
 
 /*
 |--------------------------------------------------------------------------
-| 2. AUTHENTICATED ROUTES (Customers, Baristas, Admins)
+| 2. AUTHENTICATED ROUTES
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified'])->group(function () {
 
+    // Dashboard
     Route::get('/dashboard', function () {
         $user = Auth::user();
-        $recentOrders = Order::where('user_id', $user->id)->latest()->take(5)->get();
+        $recentOrders = Order::where('user_id', $user->id)
+                            ->with(['items.product', 'items.review'])
+                            ->latest()
+                            ->take(5)
+                            ->get();
         return view('dashboard', compact('recentOrders'));
     })->name('dashboard');
 
-    /**
-     * SHOPPING HOME: The internal catalog for ordering
-     */
+    // Home / Menu
     Route::get('/home', function (Request $request) {
-        // 🟢 CRITICAL FIX: We MUST include 'sizes' in the with() method
         $query = Product::with(['category', 'sizes'])->where('is_active', true);
-        
         if ($request->filled('search')) $query->where('name', 'like', '%' . $request->search . '%');
         if ($request->filled('category')) $query->where('category_id', $request->category);
         
         $products = $query->get();
         $categories = Category::all();
-
         return view('cafe.index', compact('products', 'categories'));
     })->name('home');
 
-    // Rewards System
+    // Rewards
     Route::get('/rewards', function () {
         return view('cafe.rewards');
     })->name('rewards.index');
 
     Route::post('/claim-reward', [OrderController::class, 'claimReward'])->name('rewards.claim');
 
-    // Cart Management
+    // Review System
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+
+    // Customer Support Routes (Sending)
+    Route::get('/support', [SupportController::class, 'index'])->name('support.index');
+    Route::post('/support/send', [SupportController::class, 'send'])->name('support.send');
+
+    // Cart
     Route::controller(CartController::class)->group(function () {
         Route::get('/cart', 'index')->name('cart.index');
         Route::post('/add-to-cart', 'add')->name('cart.add'); 
         Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
     });
 
-    // Checkout & Order Tracking
+    // Orders
     Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{id}/receipt', [OrderController::class, 'downloadReceipt'])->name('orders.receipt');
 
-    // Profile Management
+    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Barista Queue
     Route::prefix('barista')->name('barista.')->group(function () {
         Route::get('/queue', [QueueController::class, 'index'])->name('queue');
         Route::post('/update-status/{id}', [QueueController::class, 'updateStatus'])->name('update_status');
     });
 
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN ONLY ROUTES
+    |--------------------------------------------------------------------------
+    */
     Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
         
+        // Admin: Customer Management
         Route::controller(CustomerController::class)->prefix('customers')->name('customers.')->group(function () {
             Route::get('/', 'index')->name('index');           
             Route::get('/{id}', 'show')->name('show');         
             Route::put('/{id}/password', 'resetPassword')->name('reset_password');
         });
 
+        // 🟢 ADMIN: SUPPORT TICKET MANAGEMENT
+        Route::controller(SupportController::class)->prefix('support-requests')->name('support.')->group(function () {
+            Route::get('/', 'adminIndex')->name('admin_index');
+            Route::post('/{id}/resolve', 'resolve')->name('resolve');
+        });
+
+        // Admin: Menu Management
         Route::controller(MenuController::class)->prefix('menu')->name('menu.')->group(function () {
             Route::get('/', 'index')->name('index'); 
             Route::get('/create', 'create')->name('create');
@@ -133,11 +154,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
-            Route::view('/privacy', 'legal.privacy')->name('privacy');
-Route::view('/terms', 'legal.terms')->name('terms');
         });
-    });
 
+        Route::view('/privacy', 'legal.privacy')->name('privacy');
+        Route::view('/terms', 'legal.terms')->name('terms');
+    });
 });
 
 require __DIR__.'/auth.php';

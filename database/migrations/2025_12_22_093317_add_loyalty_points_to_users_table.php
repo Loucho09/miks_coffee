@@ -6,21 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Adds the role column. Default is 'customer'
-            if (!Schema::hasColumn('users', 'role')) {
-                $table->string('role')->default('customer')->after('password');
-            }
+            // Adds the column. We use 'after' to keep the database organized.
+            $table->integer('loyalty_points')->default(0)->after('email');
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role');
+            $table->dropColumn('loyalty_points');
         });
     }
 };

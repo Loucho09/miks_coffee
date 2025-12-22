@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Auth\Notifications\ResetPassword; // <--- Import this
-use Illuminate\Notifications\Messages\MailMessage; // <--- Import this
+use Illuminate\Support\Facades\View; // 🟢 ADDED THIS
+use App\Models\SupportTicket; // 🟢 ADDED THIS
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Notifications\Messages\MailMessage;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,9 +24,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // 🟢 SHARE OPEN SUPPORT TICKETS COUNT WITH NAVIGATION
+        View::composer('layouts.navigation', function ($view) {
+            $view->with('openTicketsCount', SupportTicket::where('status', 'open')->count());
+        });
+
         // Keep your existing Gate logic
         Gate::define('isBarista', function ($user) {
-            return $user->usertype === 'admin'; // Fixed: Changed 'is_admin' to 'usertype' based on your previous files
+            return $user->usertype === 'admin'; 
         });
 
         // ☕ CUSTOM EMAIL FOR PASSWORD RESET ☕

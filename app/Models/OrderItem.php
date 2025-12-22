@@ -14,11 +14,23 @@ class OrderItem extends Model
         'product_id',
         'quantity',
         'price',
-        'size', // 🟢 ADD THIS LINE
+        'size', 
     ];
 
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    // 🟢 NEW FEATURE: Link item to its review
+    public function review()
+    {
+        return $this->hasOne(Review::class, 'product_id', 'product_id')
+                    ->where('user_id', $this->order->user_id);
     }
 }

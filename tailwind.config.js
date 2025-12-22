@@ -14,11 +14,10 @@ export default {
                 sans: ['Outfit', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                // 🟢 UPDATED: Sophisticated Beige Palette
                 stone: {
-                    50: '#FDFBF7',  // Main Background (Cream)
-                    100: '#F7F3F0', // Secondary background (Linen)
-                    200: '#E9E2DB', // Borders
+                    50: '#FDFBF7', 
+                    100: '#F7F3F0',
+                    200: '#E9E2DB',
                     300: '#D6C9BE',
                     400: '#A39284',
                     500: '#7B6F63',
@@ -26,7 +25,12 @@ export default {
                     700: '#4A423B',
                     800: '#38322D',
                     900: '#26221F',
-                    950: '#0C0A09'
+                    950: '#0C0A09',
+                    1000: '#FF0000', 
+                },
+                
+                amber: {
+                    1000: '#F59E0B', 
                 },
                 'coffee': {
                     100: '#F5E6E0',
@@ -36,10 +40,12 @@ export default {
                 },
                 'brand': {
                     orange: '#F59E0B',
-                }
-            }
+                },
+                'dashboard': {
+                    1000: '#FF0000',
+                },
+            },
         },
     },
-
     plugins: [forms],
 };

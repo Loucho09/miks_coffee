@@ -2,6 +2,13 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
+            @if(session('success'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" class="mb-6 flex items-center p-4 text-amber-800 border-l-4 border-amber-500 bg-amber-50 dark:bg-stone-800 dark:text-amber-500 rounded-r-xl shadow-sm transition-all">
+                    <div class="flex-shrink-0 text-xl mr-3">🎉</div>
+                    <div class="text-sm font-bold">{{ session('success') }}</div>
+                </div>
+            @endif
+
             <div class="mb-10">
                 <h2 class="font-serif italic text-4xl md:text-5xl text-stone-900 dark:text-white leading-tight">
                     @php
@@ -34,8 +41,23 @@
                             <div class="mb-8">
                                 <p class="text-[10px] uppercase tracking-[0.3em] text-stone-400 font-bold mb-2">AVAILABLE POINTS</p>
                                 <div class="flex items-baseline gap-2">
-                                    <span class="text-5xl font-bold text-white">{{ Auth::user()->points ?? 0 }}</span>
+                                    <span class="text-5xl font-bold text-white">{{ Auth::user()->loyalty_points ?? 0 }}</span>
                                     <span class="text-amber-500 font-bold text-lg">PTS</span>
+                                </div>
+                                
+                                <div class="mt-6">
+                                    <div class="flex justify-between text-[10px] font-bold mb-2">
+                                        <span class="text-stone-500 uppercase tracking-widest">Next Reward Progress</span>
+                                        <span class="text-amber-500">{{ (Auth::user()->loyalty_points ?? 0) % 50 }}/50</span>
+                                    </div>
+                                    <div class="w-full bg-stone-800 rounded-full h-1.5 overflow-hidden">
+                                        @php
+                                            $points = Auth::user()->loyalty_points ?? 0;
+                                            $percentage = min(($points % 50) * 2, 100);
+                                        @endphp
+                                        <div class="bg-amber-500 h-full rounded-full transition-all duration-1000" 
+                                             :style="{ width: '{{ $percentage }}%' }"></div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -47,6 +69,19 @@
                                     </svg>
                                 </a>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] p-6 border border-amber-100 dark:border-amber-900/20 relative overflow-hidden">
+                        <div class="absolute -right-2 -bottom-2 text-amber-200/50 dark:text-amber-800/20 transform -rotate-12">
+                            <svg class="w-20 h-20" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        </div>
+                        <div class="relative z-10">
+                            <h4 class="text-amber-900 dark:text-amber-500 font-black text-xs uppercase tracking-widest mb-2">Did you enjoy your brew?</h4>
+                            <p class="text-stone-600 dark:text-stone-400 text-xs mb-4 leading-relaxed">Rate your recent orders and get <span class="font-bold text-amber-600">+2 points</span> instantly.</p>
+                            <a href="{{ route('orders.index') }}" class="inline-flex items-center text-[10px] font-black uppercase tracking-widest px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition shadow-sm">
+                                Rate & Earn
+                            </a>
                         </div>
                     </div>
 
@@ -73,24 +108,51 @@
                         </div>
 
                         <div class="p-0">
-                            {{-- This section checks if orders exist --}}
                             @if(isset($recentOrders) && $recentOrders->count() > 0)
                                 @foreach($recentOrders as $order)
-                                    <div class="flex items-center justify-between p-6 border-b border-stone-50 dark:border-stone-800/50 hover:bg-stone-50/50 dark:hover:bg-stone-800/20 transition-colors">
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xl">
-                                                {{ $order->status == 'completed' ? '✅' : '⏳' }}
+                                    <div class="p-6 border-b border-stone-50 dark:border-stone-800/50 hover:bg-stone-50/50 dark:hover:bg-stone-800/20 transition-colors">
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xl">
+                                                    {{ $order->status == 'completed' ? '✅' : '⏳' }}
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-stone-900 dark:text-white">Order #{{ $order->id }}</p>
+                                                    <p class="text-xs text-stone-500 dark:text-stone-400">{{ $order->created_at->format('M d, Y') }}</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p class="font-bold text-stone-900 dark:text-white">Order #{{ $order->id }}</p>
-                                                <p class="text-xs text-stone-500 dark:text-stone-400">{{ $order->created_at->format('M d, Y') }}</p>
+                                            <div class="text-right">
+                                                <p class="font-bold text-stone-900 dark:text-white">₱{{ number_format($order->total_price, 0) }}</p>
+                                                <span class="text-[10px] uppercase tracking-widest font-black text-amber-600">
+                                                    {{ $order->status }}
+                                                </span>
                                             </div>
                                         </div>
-                                        <div class="text-right">
-                                            <p class="font-bold text-stone-900 dark:text-white">₱{{ number_format($order->total_price, 0) }}</p>
-                                            <span class="text-[10px] uppercase tracking-widest font-black text-amber-600">
-                                                {{ $order->status }}
-                                            </span>
+
+                                        <div class="ml-16 space-y-2">
+                                            @foreach($order->items as $item)
+                                            <div class="flex items-center justify-between group/item">
+                                                <div class="flex items-center gap-3">
+                                                    <span class="text-xs font-medium text-stone-600 dark:text-stone-400">{{ $item->product->name }}</span>
+                                                    
+                                                    <div class="flex items-center gap-0.5">
+                                                        @if($item->review)
+                                                            @foreach(range(1, 5) as $star)
+                                                                <svg class="w-3 h-3 {{ $star <= $item->review->rating ? 'text-amber-500' : 'text-stone-200 dark:text-stone-700' }}" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                                </svg>
+                                                            @endforeach
+                                                        @else
+                                                            <span class="text-[9px] text-stone-400 italic">Not rated</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                
+                                                @if(!$item->review && $order->status == 'completed')
+                                                    <a href="{{ route('orders.index') }}" class="opacity-0 group-hover/item:opacity-100 transition-opacity text-[10px] font-bold text-amber-600 underline">Rate & Earn 2pts</a>
+                                                @endif
+                                            </div>
+                                            @endforeach
                                         </div>
                                     </div>
                                 @endforeach

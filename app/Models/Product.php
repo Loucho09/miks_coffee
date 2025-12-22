@@ -20,12 +20,22 @@ class Product extends Model
         'is_active',
     ];
 
+    // 🟢 NEW FEATURE: Stock Status Helper
+    public function getStockStatusAttribute()
+    {
+        if ($this->stock_quantity <= 0) {
+            return 'out_of_stock';
+        } elseif ($this->stock_quantity <= 10) {
+            return 'low_stock';
+        }
+        return 'in_stock';
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    // 🟢 ADD THIS: Links products to their sizes (16oz, 22oz, etc.)
     public function sizes()
     {
         return $this->hasMany(ProductSize::class);
