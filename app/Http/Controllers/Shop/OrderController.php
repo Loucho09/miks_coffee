@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product; // 🟢 Required for stock deduction
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -73,6 +74,16 @@ class OrderController extends Controller
 
         DB::beginTransaction();
         try {
+            // 🟢 NEW FEATURE: Pre-order Stock Check
+            // Prevents checkout if any item in the cart exceeds available stock
+            foreach ($cart as $key => $details) {
+                $productId = isset($details['product_id']) ? $details['product_id'] : intval($key);
+                $product = Product::find($productId);
+                if ($product && $product->stock_quantity < $details['quantity']) {
+                    return redirect()->back()->with('error', "Sorry, {$product->name} is low on stock.");
+                }
+            }
+
             $order = Order::create([
                 'user_id' => $user->id,
                 'customer_name' => $request->customer_name,
@@ -87,17 +98,22 @@ class OrderController extends Controller
             ]);
 
             foreach ($cart as $key => $details) {
-                // Determine ID (Handles "46_16oz" keys)
                 $realProductId = isset($details['product_id']) ? $details['product_id'] : intval($key);
 
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $realProductId,
                     'product_name' => $details['name'],
-                    'size' => $details['size'] ?? null, // 🟢 SAVING SIZE TO DB
+                    'size' => $details['size'] ?? null,
                     'quantity' => $details['quantity'],
                     'price' => $details['price'],
                 ]);
+
+                // 🟢 FIXED: Deduct stock from the Product table
+                $product = Product::find($realProductId);
+                if ($product) {
+                    $product->decrement('stock_quantity', $details['quantity']);
+                }
             }
 
             if ($pointsRedeemed > 0) {
@@ -119,7 +135,7 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            dd('ORDER FAILED:', $e->getMessage()); 
+            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
 }

@@ -30,7 +30,7 @@
 
                     <div>
                         <label for="email" class="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Email</label>
-                        <input id="email" type="email" name="email" :value="old('email')" required autofocus 
+                        <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus 
                             class="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none"
                             placeholder="name@example.com">
                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
@@ -39,7 +39,7 @@
                     <div x-data="{ show: false }">
                         <label for="password" class="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Password</label>
                         <div class="relative">
-                            <input type="password" :type="show ? 'text' : 'password'" id="password" name="password" required autocomplete="current-password"
+                            <input :type="show ? 'text' : 'password'" id="password" name="password" required autocomplete="current-password"
                                 class="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none pr-12"
                                 placeholder="Enter your password">
                             
@@ -86,4 +86,10 @@
             </div>
         </div>
     </div>
+
+    <script>
+        setInterval(function() {
+            fetch('/refresh-csrf').catch(error => console.log('Ping successful'));
+        }, 300000); // 300,000ms = 5 minutes
+    </script>
 </x-guest-layout>

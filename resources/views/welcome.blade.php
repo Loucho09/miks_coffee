@@ -18,10 +18,37 @@
                 theme: {
                     extend: {
                         fontFamily: { sans: ['Outfit', 'sans-serif'] },
-                        colors: {
-                            stone: { 50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4', 300: '#d6d3d1', 400: '#a8a29e', 500: '#78716c', 600: '#57534e', 700: '#44403c', 800: '#292524', 900: '#1c1917', 950: '#0c0a09' },
-                            amber: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 700: '#b45309' }
-                        },
+                         colors: {
+                // 🟢 UPDATED: Sophisticated Beige Theme (60-30-10 Rule)
+                stone: {
+                    // LIGHT MODE: The 60% and 30% Beige connection
+                    50: '#F5F2EA',  // 60% - Main Beige Background (Soft & Warm)
+                    100: '#EBE6D9', // 30% - Secondary/Card Background
+                    200: '#DED7C5', // 10% - Subtle Beige Borders
+                    
+                    // DARK MODE: The "Connected" Charcoal-Beige
+                    950: '#0C0B0A', // 60% - Primary Dark BG (Deep Espresso)
+                    900: '#1A1816', // 30% - Secondary Dark BG (Warm Charcoal)
+                    
+                    // Neutral Steps for Typography and Accents
+                    300: '#D1C8B1',
+                    400: '#B8AD91',
+                    500: '#8F8366',
+                    600: '#736852',
+                    700: '#574F3E',
+                    800: '#3B352A',
+                    1000: '#FF0000', // 🔴 Custom Red Preserved
+                },
+                
+               
+                amber: {
+                    400: '#FBBF24',
+                    500: '#F59E0B', // 🟠 Primary 10% Accent
+                    600: '#D97706',
+                    700: '#B45309',
+                    1000: '#F59E0B',
+                }
+            },
                         animation: {
                             'float': 'float 6s ease-in-out infinite',
                         },
@@ -36,6 +63,7 @@
             }
         </script>
         <script>
+            // Dark Mode Logic
             if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
             } else {
@@ -58,6 +86,7 @@
                 <div class="flex justify-between h-20 items-center">
                     <div class="shrink-0 flex items-center">
                     <a href="{{ route('home') }}" class="flex items-center gap-4 group">
+                        
                         <div class="relative w-14 h-14 rounded-full border-2 border-stone-200 dark:border-stone-700 bg-white flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:border-amber-600 group-hover:shadow-lg">
                             <img src="{{ asset('favicon.png') }}" 
                                  alt="Mik's Coffee Logo" 
@@ -95,7 +124,7 @@
                                 </a>
                             @else
                                 <a href="{{ route('login') }}" class="font-bold hover:text-amber-500 transition" :class="{'text-stone-800 dark:text-white': scrolled, 'text-white': !scrolled}">Log in</a>
-                                <a href="{{ route('register') }}" class="bg-white text-stone-900 px-6 py-2.5 rounded-full font-bold hover:bg-stone-100 hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                                <a href="{{ route('register') }}" class="bg-white text-stone-900 px-6 py-2.5 rounded-full font-bold hover:bg-amber-500 hover:text100 hover:shadow-lg transition-all transform hover:-translate-y-0.5">
                                     Sign Up
                                 </a>
                             @endauth
@@ -214,7 +243,7 @@
                 <div class="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/[0.03] rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
 
-            <div class="group relative p-10 rounded-[3rem] bg-white dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60_15px_rgba(245,158,11,0.15)]">
+            <div class="group relative p-10 rounded-[3rem] bg-white dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.15)]">
                 <div class="relative z-10">
                     <div class="w-20 h-20 rounded-3xl bg-amber-500/10 flex items-center justify-center mb-8 border border-amber-500/20 group-hover:bg-amber-500 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner">
                         <svg class="w-10 h-10 text-amber-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -332,7 +361,7 @@
                 
                 <div class="w-full md:w-1/2 h-96 bg-stone-800 rounded-[2.5rem] overflow-hidden border-4 border-stone-800 shadow-2xl relative group">
                     <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15444.60462479261!2d120.8647000!3d14.2821000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd70b800000000%3A0x0!2zMTTCsDE2JzU1LjYiTiAxMjDCsDUxJzUyLjkiRQ!5e0!3m2!1sen!2sph!4v1700000000000!5m2!1sen!2sph" 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15444.606!2d120.9161!3d14.2811!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd7f0000000000%3A0x0!2zMTTCsDE2JzUyLjAiTiAxMjDCsDU0JzU4LjAiRQ!5e0!3m2!1sen!2sph!4v1700000000000" 
                         class="absolute inset-0 w-full h-full border-0 grayscale group-hover:grayscale-0 transition duration-700"
                         allowfullscreen="" 
                         loading="lazy">
@@ -430,4 +459,4 @@
             });
         </script>
     </body>
-</html> 
+</html>

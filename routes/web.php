@@ -58,6 +58,10 @@ Route::get('/menu', function (Request $request) {
     return view('public_menu', compact('products', 'categories'));
 })->name('menu.index');
 
+// 🟢 MOVED TO PUBLIC: Customer Support Routes
+Route::get('/support', [SupportController::class, 'index'])->name('support.index');
+Route::post('/support/send', [SupportController::class, 'send'])->name('support.send');
+
 /*
 |--------------------------------------------------------------------------
 | 2. AUTHENTICATED ROUTES
@@ -96,10 +100,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Review System
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
-
-    // Customer Support Routes (Sending)
-    Route::get('/support', [SupportController::class, 'index'])->name('support.index');
-    Route::post('/support/send', [SupportController::class, 'send'])->name('support.send');
 
     // Cart
     Route::controller(CartController::class)->group(function () {
@@ -140,7 +140,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('/{id}/password', 'resetPassword')->name('reset_password');
         });
 
-        // 🟢 ADMIN: SUPPORT TICKET MANAGEMENT
+        // ADMIN: SUPPORT TICKET MANAGEMENT
         Route::controller(SupportController::class)->prefix('support-requests')->name('support.')->group(function () {
             Route::get('/', 'adminIndex')->name('admin_index');
             Route::post('/{id}/resolve', 'resolve')->name('resolve');

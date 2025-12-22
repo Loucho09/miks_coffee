@@ -80,10 +80,13 @@
                                     </td>
                                     <td class="py-6 px-6 text-center">
                                         <div class="inline-flex flex-col items-center">
-                                            <span class="text-base font-black {{ $product->stock_quantity < 10 ? 'text-rose-600' : 'text-stone-900 dark:text-white' }}">
+                                            <span class="text-base font-black 
+                                                @if($product->stock_quantity <= 0) text-rose-600 animate-pulse @elseif($product->stock_quantity < 5) text-amber-600 @else text-stone-900 dark:text-white @endif">
                                                 {{ $product->stock_quantity }}
                                             </span>
-                                            <span class="text-[8px] uppercase font-black tracking-widest text-stone-400">In Stock</span>
+                                            <span class="text-[8px] uppercase font-black tracking-widest text-stone-400">
+                                                {{ $product->stock_quantity <= 0 ? 'Out of Stock' : 'In Stock' }}
+                                            </span>
                                         </div>
                                     </td>
                                     <td class="py-6 px-6 text-center">
