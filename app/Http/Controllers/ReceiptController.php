@@ -1,26 +1,35 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Shop;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReceiptController extends Controller
 {
-    public function download($id)
+    /**
+     * Handle the receipt generation.
+     * 🟢 FIXED: Added __invoke to make the class a valid "Invokable" route action.
+     */
+    public function __invoke($id)
     {
-        // 1. Find the order safely
-        $order = Order::with('items.product')
-            ->where('id', $id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+        /** @var User $user */
+        $user = Auth::user();
 
-        // 2. Generate PDF
-        $pdf = Pdf::loadView('pdf.receipt', compact('order'));
+        // Load order with items and products
+        $order = Order::with(['items.product', 'user'])->findOrFail($id);
 
-        // 3. Download
-        return $pdf->download('Miks-Receipt-#' . $order->id . '.pdf');
+        // Security: Ensure user owns the order OR is an admin
+        if ($order->user_id !== $user->id && !$user->isAdmin()) {
+            abort(403, 'Unauthorized access to this receipt.');
+        }
+
+        // Feature: Logic for the "Loyalty Tier" badge
+        $pts = $order->user->loyalty_points ?? 0;
+        $tier = $pts > 500 ? 'Gold' : ($pts > 200 ? 'Silver' : 'Bronze');
+
+        return view('emails.order_receipt', compact('order', 'tier'));
     }
 }

@@ -27,7 +27,6 @@
             if(product.stock_quantity <= 0) return;
             this.selectedProduct = product;
             
-            // 🟢 FIX: Handle products with no sizes (Simple products)
             if (!product.sizes || product.sizes.length === 0) {
                 this.selectedSize = {
                     id: 'standard',
@@ -82,6 +81,10 @@
                                     <svg class="w-12 h-12 text-stone-400 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"></path></svg>
                                 </div>
                             @endif
+                            
+                            <div class="absolute bottom-4 left-6 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+                                <span class="text-[7px] text-white font-black uppercase tracking-widest">+10 Points per order</span>
+                            </div>
                         </div>
                         
                         <div class="p-6 md:p-8 flex-1 flex flex-col">
@@ -92,9 +95,18 @@
                             <p class="text-stone-500 dark:text-stone-400 text-xs font-light leading-relaxed mb-6 flex-1 line-clamp-2">{{ $product->description }}</p>
 
                             <div class="flex items-center justify-between pt-4 border-t border-stone-50 dark:border-stone-800 mt-auto">
-                                <span class="text-xl font-black text-stone-900 dark:text-white">
-                                    ₱{{ $product->sizes->count() > 0 ? number_format($product->sizes->min('price'), 0) : number_format($product->price, 0) }}
-                                </span>
+                                <div class="flex flex-col">
+                                    @if($product->sizes->count() > 0)
+                                        <span class="text-[8px] font-black text-stone-400 uppercase tracking-widest mb-0.5">Starts at</span>
+                                        <span class="text-xl font-black text-stone-900 dark:text-white leading-none">
+                                            ₱{{ number_format($product->sizes->min('price'), 0) }}
+                                        </span>
+                                    @else
+                                        <span class="text-xl font-black text-stone-900 dark:text-white leading-none">
+                                            ₱{{ number_format($product->price, 0) }}
+                                        </span>
+                                    @endif
+                                </div>
                                 
                                 @if($product->stock_quantity > 0)
                                     <button @click='openModal(@json($product->load("sizes")))' class="p-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-lg shadow-amber-600/20 transition-all transform hover:-translate-y-1">
@@ -174,9 +186,8 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    /* 🟢 LOGO FIX: Removing the white background box per your screenshot */
     .group img[src*="favicon.png"], .rounded-full img {
-        mix-blend-mode: multiply; /* Helps blend white backgrounds into dark containers */
+        mix-blend-mode: multiply; 
         background-color: transparent !important;
     }
 </style>
