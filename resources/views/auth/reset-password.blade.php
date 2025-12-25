@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="min-h-screen flex flex-col justify-center items-center bg-stone-50 dark:bg-stone-950 px-4">
+    <div class="min-h-screen flex flex-col justify-center items-center bg-stone-100  dark:bg-stone-950 px-4">
         
         <div class="w-full max-w-md bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-hidden border border-stone-100 dark:border-stone-800">
             <div class="bg-gradient-to-r from-stone-800 to-stone-900 dark:from-stone-700 dark:to-stone-800 p-8 text-center border-b border-stone-200 dark:border-stone-700">
@@ -22,7 +22,7 @@
     </label>
     
     <input id="email" 
-        class="block w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white transition outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" 
+        class="block w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-100  dark:bg-stone-800 text-stone-900 dark:text-white transition outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" 
         type="email" 
         name="email" 
         value="{{ old('email', $request->email ?? '') }}" 
@@ -34,7 +34,7 @@
                     <div>
                         <label for="password" class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-1.5">New Password</label>
                         <div class="relative">
-                            <input :type="showPass ? 'text' : 'password'" id="password" class="block w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none pr-12" 
+                            <input :type="showPass ? 'text' : 'password'" id="password" class="block w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-100  dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none pr-12" 
                                 name="password" required autocomplete="new-password" placeholder="••••••••" />
                             <button type="button" @click="showPass = !showPass" class="absolute inset-y-0 right-0 px-4 text-stone-400 hover:text-stone-600">
                                 <svg x-show="!showPass" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -47,7 +47,7 @@
                     <div>
                         <label for="password_confirmation" class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-1.5">Confirm Password</label>
                         <div class="relative">
-                            <input :type="showConfirm ? 'text' : 'password'" id="password_confirmation" class="block w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none pr-12" 
+                            <input :type="showConfirm ? 'text' : 'password'" id="password_confirmation" class="block w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-100  dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none pr-12" 
                                 name="password_confirmation" required autocomplete="new-password" placeholder="••••••••" />
                             <button type="button" @click="showConfirm = !showConfirm" class="absolute inset-y-0 right-0 px-4 text-stone-400 hover:text-stone-600">
                                 <svg x-show="!showConfirm" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>

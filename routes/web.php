@@ -15,7 +15,7 @@ use App\Http\Controllers\Barista\QueueController;
 use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SupportController; 
-
+use App\Http\Controllers\Admin\ExportController;
 // Models
 use App\Models\Product;
 use App\Models\Category;
@@ -98,7 +98,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Review System
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+Route::get('/orders/export', [OrderController::class, 'exportData'])->name('admin.orders.export');
+Route::get('/orders/export', \App\Http\Controllers\Admin\ExportController::class)->name('admin.orders.export');
+// Inside routes/web.php
 
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // 🟢 FIXED: Alternative Way - Points to ExportController class directly
+    Route::get('/orders/export', ExportController::class)->name('orders.export');
+});
     // Cart
     Route::controller(CartController::class)->group(function () {
         Route::get('/cart', 'index')->name('cart.index');

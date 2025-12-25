@@ -1,3 +1,40 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    /* 🟢 LINKED TO tailwind.config.js */
+    
+    html {
+        /* Prevents layout shift and sets smooth scrolling */
+        scroll-behavior: smooth;
+    }
+
+    body {
+        /* Default Light Mode: Uses your stone-50 (#F5F2EA) */
+        @apply bg-stone-50 text-stone-800 antialiased transition-colors duration-500;
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
+    /* 🟢 DARK MODE OVERRIDE (Connected to stone-950) */
+    .dark body {
+        /* Default Dark Mode: Uses your stone-950 (#0C0B0A) */
+        @apply bg-stone-950 text-stone-100;
+    }
+
+    /* Custom Selection Color using your Amber-500 */
+    ::selection {
+        @apply bg-amber-500/30 text-amber-600;
+    }
+}
+
+@layer components {
+    /* 🟢 NEW FEATURE: The "Premium" Card Base */
+    /* Link your custom 'connected' shadow and stone colors to a reusable class */
+    .premium-card {
+        @apply bg-stone-100 dark:bg-stone-900 
+               border border-stone-200 dark:border-stone-800 
+               rounded-[2.5rem] transition-all duration-500
+               hover:shadow-beige dark:hover:shadow-connected;
+    }
+}

@@ -23,9 +23,65 @@
                 extend: {
                     fontFamily: { sans: ['Outfit', 'sans-serif'] },
                     colors: {
-                        stone: { 50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4', 300: '#d6d3d1', 400: '#a8a29e', 500: '#78716c', 600: '#57534e', 700: '#44403c', 800: '#292524', 900: '#1c1917', 950: '#0c0a09' },
-                        amber: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 700: '#b45309' }
-                    }
+                // 🟢 SOPHISTICATED BEIGE & ESPRESSO THEME (60-30-10 Rule)
+                stone: {
+                    // LIGHT MODE: The 60% and 30% Beige connection
+                    50: '#F5F2EA',  // 60% - Main Beige Background (Soft & Warm)
+                    100: '#EBE6D9', // 30% - Secondary/Card Background
+                    200: '#DED7C5', // 10% - Subtle Beige Borders
+                    
+                    // NEUTRAL STEPS: Typography and Accents
+                    300: '#D1C8B1', //
+                    400: '#B8AD91', //
+                    500: '#8F8366', //
+                    600: '#736852', //
+                    700: '#574F3E', //
+                    800: '#3B352A', //
+                    
+                    // DARK MODE: The "Connected" Charcoal-Beige
+                    900: '#1A1816', // 30% - Secondary Dark BG (Warm Charcoal)
+                    950: '#0C0B0A', // 60% - Primary Dark BG (Deep Espresso)
+                    1000: '#FF0000', // Custom Red Preserved
+                },
+                
+                // 🟢 ACCENT COLORS: 10% Branding
+                amber: {
+                    400: '#FBBF24', //
+                    500: '#F59E0B', // Primary 10% Accent (Brand Orange)
+                    600: '#D97706', //
+                    700: '#B45309', //
+                    1000: '#F59E0B', //
+                },
+
+                // 🟢 COFFEE SPECIFIC PALETTE
+                'coffee': {
+                    100: '#F5E6E0', //
+                    600: '#8D5F46', //
+                    800: '#4B2C20', //
+                    900: '#2C1810', //
+                },
+
+                // 🟢 LEGACY BRANDING: Compatibility
+                'brand': {
+                    orange: '#F59E0B', //
+                },
+
+                'dashboard': {
+                    1000: '#FF0000', //
+                },
+            },
+            boxShadow: {
+                // 🟢 NEW FEATURE: Custom Depth Effects
+                // Soft shadow tuned for light beige backgrounds
+                'beige': '0 20px 40px -15px rgba(143, 131, 102, 0.2)', //
+                // Heavy, atmospheric shadow for dark theme depth
+                'connected': '0 25px 60px -15px rgba(0, 0, 0, 0.7)', //
+            },
+            letterSpacing: {
+                // For that premium high-end look on headers
+                'widest': '0.4em',
+            },
+            
                 }
             }
         }
@@ -54,7 +110,7 @@
     </style>
 </head>
 
-<body class="antialiased bg-stone-50 dark:bg-stone-950 text-stone-800 dark:text-stone-200 font-sans flex flex-col min-h-screen">
+<body class="antialiased bg-stone-100  dark:bg-stone-950 text-stone-800 dark:text-stone-200 font-sans flex flex-col min-h-screen">
     
     <nav class="bg-white/90 dark:bg-stone-900/90 backdrop-blur-md sticky top-0 z-50 border-b border-stone-100 dark:border-stone-800 transition-colors">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -103,7 +159,7 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex-grow w-full">
         
-        <div class="flex items-center gap-3 mb-10 overflow-x-auto pb-4 no-scrollbar px-1 md:justify-center md:flex-wrap sticky top-20 z-30 bg-stone-50/80 dark:bg-stone-950/80 backdrop-blur-md transition-colors">
+        <div class="flex items-center gap-3 mb-10 overflow-x-auto pb-4 no-scrollbar px-1 md:justify-center md:flex-wrap sticky top-20 z-30 bg-stone-100 /80 dark:bg-stone-950/80 backdrop-blur-md transition-colors">
             <a href="{{ route('menu.index') }}" 
                class="whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 {{ !request('category') ? 'bg-amber-600 text-white shadow-xl' : 'bg-white dark:bg-stone-900 text-stone-500 border border-stone-200 dark:border-stone-800' }}">
                 All Items

@@ -14,11 +14,14 @@
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <script>
             tailwind.config = {
+
+
+
                 darkMode: 'class',
                 theme: {
                     extend: {
                         fontFamily: { sans: ['Outfit', 'sans-serif'] },
-                         colors: {
+                        colors: {
                 // 🟢 UPDATED: Sophisticated Beige Theme (60-30-10 Rule)
                 stone: {
                     // LIGHT MODE: The 60% and 30% Beige connection
@@ -40,14 +43,28 @@
                     1000: '#FF0000', // 🔴 Custom Red Preserved
                 },
                 
-               
                 amber: {
                     400: '#FBBF24',
                     500: '#F59E0B', // 🟠 Primary 10% Accent
                     600: '#D97706',
                     700: '#B45309',
                     1000: '#F59E0B',
-                }
+                },
+
+                'coffee': {
+                    100: '#F5E6E0',
+                    600: '#8D5F46',
+                    800: '#4B2C20',
+                    900: '#2C1810',
+                },
+
+                'brand': {
+                    orange: '#F59E0B',
+                },
+
+                'dashboard': {
+                    1000: '#FF0000',
+                },
             },
                         animation: {
                             'float': 'float 6s ease-in-out infinite',
@@ -71,7 +88,7 @@
             }
         </script>
     </head>
-    <body class="antialiased bg-stone-50 dark:bg-stone-950 text-stone-800 dark:text-stone-200 transition-colors duration-300 font-sans flex flex-col min-h-screen">
+    <body class="antialiased bg-stone-100  dark:bg-stone-950 text-stone-800 dark:text-stone-200 transition-colors duration-300 font-sans flex flex-col min-h-screen">
         
         <button id="theme-toggle" type="button" class="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-white/80 dark:bg-stone-800/80 backdrop-blur-md text-stone-500 dark:text-stone-400 shadow-2xl hover:scale-110 transition-transform focus:outline-none ring-1 ring-stone-200 dark:ring-stone-700">
             <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -80,7 +97,7 @@
 
         <nav x-data="{ open: false, scrolled: false }" 
              @scroll.window="scrolled = (window.pageYOffset > 20)"
-             :class="{'bg-white/90 dark:bg-stone-900/90 backdrop-blur-xl shadow-lg border-b border-stone-200/50 dark:border-stone-800/50': scrolled, 'bg-transparent border-transparent': !scrolled}"
+             :class="{'bg-stone-100 dark:bg-stone-900/90 backdrop-blur-xl shadow-lg border-b border-stone-200/50 dark:border-stone-800/50': scrolled, 'bg-transparent border-transparent': !scrolled}"
              class="fixed w-full top-0 z-40 transition-all duration-500 ease-in-out">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-20 items-center">
@@ -94,7 +111,7 @@
                         </div>
                         
                         <div class="flex flex-col">
-                            <h1 class="font-serif italic text-2xl text-stone-900 dark:text-white leading-none tracking-tight">
+                            <h1 class="font-serif italic text-2xl text-stone-600 dark:text-white leading-none tracking-tight">
                                 Mik's
                             </h1>
                             <span class="font-bold text-sm uppercase tracking-[0.25em] text-amber-600">
@@ -124,7 +141,7 @@
                                 </a>
                             @else
                                 <a href="{{ route('login') }}" class="font-bold hover:text-amber-500 transition" :class="{'text-stone-800 dark:text-white': scrolled, 'text-white': !scrolled}">Log in</a>
-                                <a href="{{ route('register') }}" class="bg-white text-stone-900 px-6 py-2.5 rounded-full font-bold hover:bg-amber-500 hover:text100 hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                                <a href="{{ route('register') }}" class="bg-stone-100 text-stone-900 px-6 py-2.5 rounded-full font-bold hover:bg-amber-500 hover:text100 hover:shadow-lg transition-all transform hover:-translate-y-0.5">
                                     Sign Up
                                 </a>
                             @endauth
@@ -201,7 +218,7 @@
             </div>
         </section>
 
-      <section class="py-32 bg-stone-50 dark:bg-stone-950 relative overflow-hidden">
+      <section class="py-32 bg-white dark:bg-stone-950 relative overflow-hidden">
     <div class="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-[120px]"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -216,7 +233,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div class="group relative p-10 rounded-[3rem] bg-white dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.15)]">
+            <div class="group relative p-10 rounded-[3rem] bg-stone-100 dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.15)]">
                 <div class="relative z-10">
                     <div class="w-20 h-20 rounded-3xl bg-amber-500/10 flex items-center justify-center mb-8 border border-amber-500/20 group-hover:bg-amber-500 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner">
                         <svg class="w-10 h-10 text-amber-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,7 +247,7 @@
                 <div class="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/[0.03] rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
 
-            <div class="group relative p-10 rounded-[3rem] bg-white dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.15)]">
+            <div class="group relative p-10 rounded-[3rem] bg-stone-100 dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.15)]">
                 <div class="relative z-10">
                     <div class="w-20 h-20 rounded-3xl bg-amber-500/10 flex items-center justify-center mb-8 border border-amber-500/20 group-hover:bg-amber-500 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500 shadow-inner">
                         <svg class="w-10 h-10 text-amber-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,7 +260,7 @@
                 <div class="absolute inset-0 bg-gradient-to-br from-amber-500/0 via-amber-500/0 to-amber-500/[0.03] rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
 
-            <div class="group relative p-10 rounded-[3rem] bg-white dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.15)]">
+            <div class="group relative p-10 rounded-[3rem] bg-stone-100 dark:bg-stone-900/40 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-3 hover:border-amber-500/50 hover:shadow-[0_30px_60px_-15px_rgba(245,158,11,0.15)]">
                 <div class="relative z-10">
                     <div class="w-20 h-20 rounded-3xl bg-amber-500/10 flex items-center justify-center mb-8 border border-amber-500/20 group-hover:bg-amber-500 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner">
                         <svg class="w-10 h-10 text-amber-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,7 +276,7 @@
     </div>
 </section>
 
-        <section id="featured" class="py-24 bg-white dark:bg-[#121212] relative overflow-hidden">
+        <section id="featured" class="py-24 bg-stone-100 dark:bg-[#121212] relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center mb-16">
             <span class="text-amber-600 font-bold tracking-[0.2em] uppercase text-sm">Our Best Sellers</span>
@@ -370,7 +387,7 @@
             </div>
         </section>
 
-      <footer class="bg-white dark:bg-stone-950 border-t border-stone-200 dark:border-stone-900 pt-24 pb-12">
+      <footer class="bg-stone-100 dark:bg-stone-950 border-t border-stone-200 dark:border-stone-900 pt-24 pb-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-16 mb-20">
             

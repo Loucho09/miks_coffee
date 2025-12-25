@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="min-h-screen flex flex-col justify-center items-center bg-stone-50 dark:bg-stone-950 px-4">
+    <div class="min-h-screen flex flex-col justify-center items-center bg-stone-100  dark:bg-stone-950 px-4">
         
         <div class="w-full max-w-md bg-white dark:bg-stone-900 rounded-3xl shadow-2xl overflow-hidden border border-stone-100 dark:border-stone-800">
             <div class="bg-amber-600 p-8 text-center relative overflow-hidden">
@@ -23,7 +23,7 @@
 
                     <div class="mb-6">
                         <label for="email" class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">Email Address</label>
-                        <input id="email" class="block w-full px-4 py-3.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none" 
+                        <input id="email" class="block w-full px-4 py-3.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-100  dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none" 
                             type="email" name="email" :value="old('email')" required autofocus placeholder="you@example.com" />
                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>

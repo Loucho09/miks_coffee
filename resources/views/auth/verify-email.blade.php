@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="min-h-screen flex flex-col justify-center items-center bg-stone-50 dark:bg-stone-950 px-4">
+    <div class="min-h-screen flex flex-col justify-center items-center bg-stone-100  dark:bg-stone-950 px-4">
         
         <div class="w-full max-w-md bg-white dark:bg-stone-900 rounded-3xl shadow-2xl border border-stone-100 dark:border-stone-800 overflow-hidden">
             <div class="p-10 text-center">

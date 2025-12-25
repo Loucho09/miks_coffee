@@ -20,10 +20,25 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                <div class="bg-amber-600 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+                <div class="bg-stone-500 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
                     <div class="relative z-10">
                         <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-2">Today's Sales Summary</p>
                         <h4 class="text-4xl font-black mb-1">₱{{ number_format($todayRevenue, 2) }}</h4>
+                        
+                        <div class="mt-4 mb-2">
+                            <div class="flex justify-between text-[9px] font-black uppercase tracking-tighter mb-1 opacity-80">
+                                <span>Daily Goal Progress</span>
+                                <span>₱10k Goal</span>
+                            </div>
+                            @php $percentage = min(($todayRevenue / 10000) * 100, 100); @endphp
+                            <div class="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
+                                <div class="bg-white h-full transition-all duration-1000" 
+                                     data-goal-progress="{{ $percentage }}"
+                                     style="width: calc(var(--progress-val, 0) * 1%); --progress-val: {{ $percentage }};">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex items-center gap-2 mt-4">
                             <span class="px-2 py-1 bg-white/20 rounded-lg text-[10px] font-bold">
                                 {{ $todayOrderCount }} Orders
@@ -50,40 +65,18 @@
                     <p class="text-xs text-stone-500 font-bold mt-2">Registered Accounts</p>
                 </div>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                <div class="group bg-white dark:bg-stone-900 p-6 rounded-[2rem] border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)]">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-1">Gross Revenue</p>
-                            <p class="text-2xl font-black text-stone-900 dark:text-white tracking-tighter">
-                                ₱{{ number_format($totalRevenue, 2) }}
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:bg-emerald-500 transition-all duration-500 text-emerald-600 group-hover:text-white shadow-inner">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="group bg-white dark:bg-stone-900 p-6 rounded-[2rem] border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_-15px_rgba(59,130,246,0.1)]">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-1">All-Time Orders</p>
-                            <p class="text-2xl font-black text-stone-900 dark:text-white tracking-tighter">{{ $totalOrders }}</p>
-                        </div>
-                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:bg-blue-500 transition-all duration-500 text-blue-600 group-hover:text-white shadow-inner">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-10">
                 <div class="lg:col-span-2 bg-white dark:bg-stone-900 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 p-10 shadow-sm relative overflow-hidden">
-                    <div class="relative z-10 mb-10">
-                        <span class="text-[10px] font-black uppercase tracking-[0.4em] text-amber-600 mb-1 block">Performance</span>
-                        <h3 class="text-2xl font-bold text-stone-900 dark:text-white tracking-tight">Weekly Sales</h3>
+                    <div class="relative z-10 mb-10 flex justify-between items-start">
+                        <div>
+                            <span class="text-[10px] font-black uppercase tracking-[0.4em] text-stone-00 mb-1 block">Performance</span>
+                            <h3 class="text-2xl font-bold text-stone-900 dark:text-white tracking-tight">Weekly Sales</h3>
+                        </div>
+                        <div class="bg-stone-100 dark:bg-stone-800 px-4 py-2 rounded-2xl border border-stone-200 dark:border-stone-100">
+                            <p class="text-[8px] font-black uppercase text-stone-900 dark:text-white tracking-widest mb-0.5">Peak Traffic</p>
+                            <p class="text-xs font-black text-green-500 tracking-widestuppercase">08:00 AM - 11:00 AM</p>
+                        </div>
                     </div>
                     <div class="relative z-10" style="height: 350px;">
                         <canvas id="revenueChart" 
@@ -93,10 +86,10 @@
                     </div>
                 </div>
 
-                <div class="bg-stone-900 rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden group">
+                <div class="bg-white dark:bg-stone-900 rounded-[3rem] border border-stone-200 dark:border-stone-800  rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden group">
                     <div class="relative z-10">
-                        <span class="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 mb-1 block">Categories</span>
-                        <h3 class="text-2xl font-bold text-white tracking-tight mb-10">Top Performers</h3>
+                        <span class="text-[10px] font-black uppercase tracking-[0.4em] text-stone-900 dark:text-white mb-1 block">Categories</span>
+                        <h3 class="text-2xl font-bold text-stone-900 dark:text-white  tracking-tight mb-10">Top Performers</h3>
                         <div class="relative" style="height: 250px;">
                             <canvas id="categoryChart" 
                                     data-labels='@json($categoryLabels)' 
@@ -114,10 +107,10 @@
                             <span class="text-[10px] font-black uppercase tracking-[0.4em] text-amber-600 mb-1 block">Activity</span>
                             <h3 class="text-2xl font-bold text-stone-900 dark:text-white tracking-tight">Recent Orders</h3>
                         </div>
-                        <button class="flex items-center gap-2 px-5 py-2.5 bg-stone-900 dark:bg-stone-800 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg shadow-amber-600/5">
+                        <a href="{{ route('admin.orders.export') }}" class="flex items-center gap-2 px-5 py-2.5 bg-stone-900 dark:bg-stone-800 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-lg">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             Export Data
-                        </button>
+                        </a>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
@@ -125,25 +118,18 @@
                                 <tr>
                                     <th class="px-10 py-5">Order ID</th>
                                     <th class="px-10 py-5">Customer</th>
-                                    <th class="px-10 py-5">Status</th>
                                     <th class="px-10 py-5 text-right">Amount</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-stone-100 dark:divide-stone-800 text-sm text-stone-700 dark:text-stone-300">
+                            <tbody class="divide-y divide-stone-100 dark:divide-stone-800 text-sm">
                                 @forelse($recentOrders as $order)
                                     <tr class="hover:bg-stone-50/80 dark:hover:bg-stone-800/40 transition-colors">
                                         <td class="px-10 py-6 font-black text-stone-900 dark:text-white">#{{ $order->id }}</td>
-                                        <td class="px-10 py-6 font-medium">{{ $order->user->name ?? 'Guest' }}</td>
-                                        <td class="px-10 py-6">
-                                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
-                                                {{ $order->status === 'pending' ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500' }}">
-                                                {{ $order->status }}
-                                            </span>
-                                        </td>
-                                        <td class="px-10 py-6 text-right font-black">₱{{ number_format($order->total_price, 2) }}</td>
+                                        <td class="px-10 py-6 font-medium text-stone-600 dark:text-stone-400">{{ $order->user->name ?? 'Guest' }}</td>
+                                        <td class="px-10 py-6 text-right font-black text-stone-900 dark:text-white">₱{{ number_format($order->total_price, 2) }}</td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="4" class="px-10 py-20 text-center text-stone-400 italic">No activity today.</td></tr>
+                                    <tr><td colspan="3" class="px-10 py-20 text-center text-stone-400 italic">No activity today.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -165,7 +151,7 @@
                         <div class="space-y-4">
                             @foreach($lowStockItems as $item)
                                 <div class="flex justify-between items-center bg-rose-500/5 p-5 rounded-2xl border border-rose-500/10">
-                                    <span class="text-sm font-bold">{{ $item->name }}</span>
+                                    <span class="text-sm font-bold text-stone-800 dark:text-stone-200">{{ $item->name }}</span>
                                     <span class="text-[10px] font-black text-rose-600 bg-white dark:bg-stone-800 px-3 py-1 rounded-full shadow-sm">
                                         {{ $item->stock_quantity }} left
                                     </span>
@@ -193,11 +179,19 @@
                         datasets: [{
                             label: 'Revenue',
                             data: JSON.parse(revenueCanvas.dataset.values),
-                            backgroundColor: '#D97706',
+                            backgroundColor: '#574F3E',
                             borderRadius: 12
                         }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { display: false }, ticks: { font: { weight: '900' } } },
+                            x: { grid: { display: false }, ticks: { font: { weight: '900' } } }
+                        }
+                    }
                 });
             }
 
@@ -208,7 +202,7 @@
                         labels: JSON.parse(categoryCanvas.dataset.labels),
                         datasets: [{
                             data: JSON.parse(categoryCanvas.dataset.values),
-                            backgroundColor: ['#D97706', '#8D5F46', '#4B2C20', '#A39284', '#F7F3F0'],
+                            backgroundColor: ['#2d2716', '#8F8366', '#4B2C20', '#A39284', '#F7F3F0'],
                             borderWidth: 0
                         }]
                     },

@@ -88,11 +88,11 @@
                     <div class="bg-white dark:bg-stone-900 rounded-[2rem] p-6 border border-stone-100 dark:border-stone-800 shadow-sm">
                         <h3 class="font-bold text-stone-900 dark:text-white mb-6 px-2">Quick Actions</h3>
                         <div class="grid grid-cols-2 gap-4">
-                            <a href="{{ route('home') }}" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-stone-50 dark:bg-stone-800 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors group">
+                            <a href="{{ route('home') }}" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-stone-100  dark:bg-stone-800 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors group">
                                 <div class="w-10 h-10 bg-white dark:bg-stone-700 rounded-xl flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">☕</div>
                                 <span class="text-xs font-bold text-stone-700 dark:text-stone-300">Order Now</span>
                             </a>
-                            <a href="{{ route('profile.edit') }}" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-stone-50 dark:bg-stone-800 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors group">
+                            <a href="{{ route('profile.edit') }}" class="flex flex-col items-center justify-center p-4 rounded-2xl bg-stone-100  dark:bg-stone-800 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors group">
                                 <div class="w-10 h-10 bg-white dark:bg-stone-700 rounded-xl flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform">👤</div>
                                 <span class="text-xs font-bold text-stone-700 dark:text-stone-300">Profile</span>
                             </a>
@@ -110,7 +110,7 @@
                         <div class="p-0">
                             @if(isset($recentOrders) && $recentOrders->count() > 0)
                                 @foreach($recentOrders as $order)
-                                    <div class="p-6 border-b border-stone-50 dark:border-stone-800/50 hover:bg-stone-50/50 dark:hover:bg-stone-800/20 transition-colors">
+                                    <div class="p-6 border-b border-stone-50 dark:border-stone-800/50 hover:bg-stone-100 /50 dark:hover:bg-stone-800/20 transition-colors">
                                         <div class="flex items-center justify-between mb-4">
                                             <div class="flex items-center gap-4">
                                                 <div class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xl">

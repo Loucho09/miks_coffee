@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-stone-50/90 dark:bg-stone-950/90 backdrop-blur-md border-b border-stone-200/50 dark:border-stone-800/50 sticky top-0 z-40 transition-colors">
+<nav x-data="{ open: false }" class="bg-stone-400/50 /90 dark:bg-stone-950/90 backdrop-blur-md border-b border-stone-200/50 dark:border-stone-800/50 sticky top-0 z-40 transition-colors">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20"> 
             <div class="flex">
@@ -60,7 +60,7 @@
 
                     @auth
                         @if(Auth::user()->usertype === 'admin')
-                            <div class="h-6 w-px bg-stone-300 dark:bg-stone-700 self-center mx-4"></div>
+                            <div class="h-6 w-px bg-stone-500 dark:bg-stone-700 self-center mx-4"></div>
                             
                             <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" 
                                 class="!text-stone-1000 hover:!text-amber-1000 font-black uppercase text-[10px] tracking-[0.2em] transition-colors duration-300">
@@ -68,7 +68,8 @@
                             </x-nav-link>
                             
                             <x-nav-link :href="route('admin.menu.index')" :active="request()->routeIs('admin.menu.*')" 
-                                class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em]">
+                                class="text-stone-500 dark:text-stone-400
+                                hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em]">
                                 {{ __('Menu Mgmt') }}
                             </x-nav-link>
 
@@ -95,7 +96,7 @@
                 @auth
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
-                            <button class="inline-flex items-center px-5 py-2.5 border border-stone-200 dark:border-stone-800 text-[11px] font-black uppercase tracking-widest rounded-2xl text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 transition shadow-sm group">
+                            <button class="inline-flex items-center px-5 py-2.5 border border-stone-200 dark:border-stone-800 text-[11px] font-black uppercase tracking-widest rounded-2xl text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 hover:bg-stone-100  dark:hover:bg-stone-800 transition shadow-sm group">
                                 <div class="text-left">
                                     <div class="leading-none mb-1 group-hover:text-amber-600 transition-colors">{{ Auth::user()->name }}</div>
                                     <div class="text-[9px] text-amber-600 font-black tracking-tighter opacity-80">
@@ -136,7 +137,7 @@
         </div>
     </div>
 
-    <div x-show="open" x-transition class="lg:hidden bg-white dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800">
+    <div x-show="open" x-transition class="lg:hidden bg-stone-100 dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800">
         <div class="pt-4 pb-6 space-y-2 px-4">
             <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')" class="rounded-xl font-black uppercase text-[10px] tracking-widest">{{ __('Menu') }}</x-responsive-nav-link>
             

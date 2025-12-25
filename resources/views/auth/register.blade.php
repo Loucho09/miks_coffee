@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="flex min-h-screen bg-stone-50 dark:bg-stone-950 transition-colors duration-300">
+    <div class="flex min-h-screen bg-stone-100  dark:bg-stone-950 transition-colors duration-300">
         
         <div class="hidden lg:flex lg:w-1/2 bg-cover bg-center relative" 
              style="background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2070&auto=format&fit=crop');">
@@ -28,7 +28,7 @@
                     <div>
                         <label for="name" class="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Full Name</label>
                         <input id="name" type="text" name="name" :value="old('name')" required autofocus 
-                            class="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none"
+                            class="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-100  dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none"
                             placeholder="John Doe">
                         <x-input-error :messages="$errors->get('name')" class="mt-2" />
                     </div>
@@ -36,7 +36,7 @@
                     <div>
                         <label for="email" class="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Email</label>
                         <input id="email" type="email" name="email" :value="old('email')" required 
-                            class="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none"
+                            class="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-100  dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none"
                             placeholder="name@example.com">
                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
@@ -45,7 +45,7 @@
                         <label for="password" class="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Password</label>
                         <div class="relative">
                             <input :type="showPass ? 'text' : 'password'" id="password" name="password" required autocomplete="new-password"
-                                class="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none pr-12"
+                                class="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-100  dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none pr-12"
                                 placeholder="Min. 8 characters">
                             
                             <button type="button" @click="showPass = !showPass" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition p-1">
@@ -60,7 +60,7 @@
                         <label for="password_confirmation" class="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Confirm Password</label>
                         <div class="relative">
                             <input :type="showConfirm ? 'text' : 'password'" id="password_confirmation" name="password_confirmation" required
-                                class="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none pr-12"
+                                class="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-100  dark:bg-stone-800 text-stone-900 dark:text-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition outline-none pr-12"
                                 placeholder="Repeat password">
                             
                             <button type="button" @click="showConfirm = !showConfirm" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition p-1">
