@@ -1,169 +1,251 @@
-<nav x-data="{ open: false }" class="bg-stone-400/50 /90 dark:bg-stone-950/90 backdrop-blur-md border-b border-stone-200/50 dark:border-stone-800/50 sticky top-0 z-40 transition-colors">
+@php
+    // 🟢 Logic: Check if the customer has points waiting to be claimed
+    $hasUnclaimedPoints = false;
+    if(Auth::check() && Auth::user()->usertype !== 'admin') {
+        $hasUnclaimedPoints = \App\Models\Order::where('user_id', Auth::id())
+            ->whereIn('status', ['completed', 'ready'])
+            ->whereHas('items', function($query) {
+                $query->whereDoesntHave('review');
+            })->exists();
+    }
+
+    // 🟢 Dynamic Tier Calculation
+    $navPoints = Auth::user()->points ?? 0;
+    $navTier = 'Bronze';
+    if($navPoints >= 500) $navTier = 'Gold';
+    elseif($navPoints >= 200) $navTier = 'Silver';
+
+    // 🟢 NEW FEATURE: Admin Online Status Indicator
+    $isAdminOnline = \App\Models\User::where('email', 'jmloucho09@gmail.com')
+        ->whereNotNull('last_seen_at')
+        ->exists();
+
+    // 🟢 Unread Support Count logic
+    $unreadSupportCount = Auth::check() ? \App\Models\SupportTicket::where('user_id', Auth::id())->where('status', 'replied')->count() : 0;
+@endphp
+
+<style>
+    /* 🟢 This prevents the "Refresh Flicker" issue */
+    [x-cloak] { display: none !important; }
+    
+    /* Custom scrollbar for the mobile drawer to maintain premium feel */
+    .mobile-nav-scrollbar::-webkit-scrollbar { width: 4px; }
+    .mobile-nav-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .mobile-nav-scrollbar::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+</style>
+
+<nav x-data="{ open: false }" class="bg-white/80 dark:bg-stone-950/90 backdrop-blur-xl border-b border-stone-200/50 dark:border-stone-800/50 sticky top-0 z-50 transition-all duration-500">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-20"> 
-            <div class="flex">
+        <div class="flex justify-between h-16 sm:h-20"> 
+            
+            <div class="flex items-center">
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('home') }}" class="flex items-center gap-4 group">
-                        <div class="relative w-14 h-14 rounded-full border border-stone-200  bg-white  flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:border-amber-600 group-hover:shadow-xl shadow-amber-600/10">
-                            <img src="{{ asset('favicon.png') }}" 
-                                 alt="Mik's Coffee Logo" 
-                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-6"
-                                 style="mix-blend-mode: multiply;">
+                    <a href="{{ route('home') }}" class="flex items-center gap-2 sm:gap-4 group">
+                        <div class="relative w-9 h-9 sm:w-12 lg:w-14 sm:h-12 lg:h-14 rounded-full border border-stone-200 dark:border-stone-400 bg-white dark:bg-stone-400 flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:rotate-3 group-hover:shadow-connected shadow-sm">
+                           <img src="{{ asset('favicon.png') }}" alt="Logo" class="w-full h-full object-cover">
                         </div>
-                        
                         <div class="flex flex-col">
-                            <h1 class="font-serif italic text-2xl text-stone-900 dark:text-white leading-none tracking-tight">
-                                Mik's
-                            </h1>
-                            <span class="font-black text-[10px] uppercase tracking-[0.3em] text-amber-600">
-                                COFFEE
-                            </span>
+                            <h1 class="font-serif italic text-base sm:text-xl lg:text-2xl text-stone-600 dark:text-white leading-none tracking-tight">Mik's</h1>
+                            <span class="font-black text-[7px] sm:text-[9px] lg:text-[10px] uppercase tracking-[0.15em] sm:tracking-[0.3em] text-amber-600 leading-none mt-0.5 sm:mt-1">COFFEE</span>
                         </div>
                     </a>
                 </div>
 
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 lg:flex">
-                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')" 
-                        class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] transition-colors">
+                <div class="hidden lg:flex space-x-4 xl:space-x-6 ms-6 xl:ms-10 items-center">
+                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')" class="text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white font-black uppercase text-[10px] tracking-[0.2em] transition-all relative">
                         {{ __('Menu') }}
                     </x-nav-link>
 
-                    @if(!Auth::check() || Auth::user()->usertype !== 'admin')
-                        @auth
-                            <x-nav-link :href="route('rewards.index')" :active="request()->routeIs('rewards.index')"
-                                class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] transition-colors">
-                                {{ __('Rewards') }} 
-                            </x-nav-link>
-
-                            <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')"
-                                class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] transition-colors">
-                                {{ __('My Orders') }} 
-                            </x-nav-link>
-                        @endauth
-
-                        <x-nav-link :href="route('support.index')" :active="request()->routeIs('support.*')"
-                            class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] transition-colors flex items-center gap-2">
-                            {{ __('Support') }} 
-                            <span class="flex h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
-                        </x-nav-link>
-
-                        @auth
-                            <x-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')"
-                                class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] transition-colors">
-                                {{ __('My Cart') }}
-                                @if(session('cart') && count(session('cart')) > 0)
-                                    <span class="ml-2 bg-stone-900 dark:bg-amber-600 text-white text-[9px] px-2 py-0.5 rounded-full font-black">{{ count(session('cart')) }}</span>
+                    @auth
+                        @if(Auth::user()->usertype !== 'admin')
+                            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] transition-all flex items-center gap-2">
+                                {{ __('Dashboard') }}
+                                @if($hasUnclaimedPoints || $unreadSupportCount > 0)
+                                    <span class="relative flex h-2 w-2">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $unreadSupportCount > 0 ? 'bg-amber-600' : 'bg-amber-500' }} opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 {{ $unreadSupportCount > 0 ? 'bg-amber-600' : 'bg-amber-500' }}"></span>
+                                    </span>
                                 @endif
                             </x-nav-link>
-                        @endauth
-                    @endif
+                            <x-nav-link :href="route('rewards.index')" :active="request()->routeIs('rewards.index')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em]">
+                                {{ __('Rewards') }} 
+                            </x-nav-link>
+                            <x-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em]">
+                                {{ __('Cart') }}
+                                @if(session('cart') && count(session('cart')) > 0)
+                                    <span class="ml-2 bg-stone-900 dark:bg-amber-600 text-white text-[9px] px-2 py-0.5 rounded-full font-black animate-bounce">{{ count(session('cart')) }}</span>
+                                @endif
+                            </x-nav-link>
+                        @endif
+                    @endauth
+
+                    <x-nav-link :href="route('support.index')" :active="request()->routeIs('support.*')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] flex items-center gap-2">
+                        {{ __('Support') }} 
+                        <span class="flex h-1.5 w-1.5 rounded-full {{ $isAdminOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse' : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' }}"></span>
+                    </x-nav-link>
 
                     @auth
                         @if(Auth::user()->usertype === 'admin')
-                            <div class="h-6 w-px bg-stone-500 dark:bg-stone-700 self-center mx-4"></div>
-                            
-                            <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" 
-                                class="!text-stone-1000 hover:!text-amber-1000 font-black uppercase text-[10px] tracking-[0.2em] transition-colors duration-300">
-                                {{ __('Dashboard') }}
+                            <div class="h-6 w-px bg-stone-200 dark:bg-stone-800 self-center mx-1"></div>
+                            <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="text-stone-900 dark:text-amber-500 font-black uppercase text-[10px] tracking-[0.2em]">
+                                {{ __('Admin') }}
                             </x-nav-link>
-                            
-                            <x-nav-link :href="route('admin.menu.index')" :active="request()->routeIs('admin.menu.*')" 
-                                class="text-stone-500 dark:text-stone-400
-                                hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em]">
-                                {{ __('Menu Mgmt') }}
+                            <x-nav-link :href="route('admin.menu.index')" :active="request()->routeIs('admin.menu.*')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em]">
+                                {{ __('Menu') }}
                             </x-nav-link>
-
-                            <x-nav-link :href="route('admin.customers.index')" :active="request()->routeIs('admin.customers.*')" 
-                                class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em]">
+                            <x-nav-link :href="route('admin.customers.index')" :active="request()->routeIs('admin.customers.*')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em]">
                                 {{ __('Customers') }}
                             </x-nav-link>
-
-                            <x-nav-link :href="route('barista.queue')" :active="request()->routeIs('barista.queue')" 
-                                class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em]">
+                            <x-nav-link :href="route('barista.queue')" :active="request()->routeIs('barista.queue')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em]">
                                 {{ __('KDS') }}
                             </x-nav-link>
-
-                            <x-nav-link :href="route('admin.support.admin_index')" :active="request()->routeIs('admin.support.*')"
-                                class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] transition-colors">
-                                {{ __('Manage Support') }} 
+                            <x-nav-link :href="route('admin.support.admin_index')" :active="request()->routeIs('admin.support.*')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] flex items-center gap-2">
+                                {{ __('Tickets') }} 
+                                @php $pendingTickets = \App\Models\SupportTicket::where('status', 'pending')->count(); @endphp
+                                @if($pendingTickets > 0)
+                                    <span class="bg-amber-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md leading-none">{{ $pendingTickets }}</span>
+                                @endif
                             </x-nav-link>
                         @endif
                     @endauth
                 </div>
             </div>
 
-            <div class="hidden lg:flex sm:items-center sm:ms-6">
+            <div class="flex items-center">
                 @auth
-                    <x-dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            <button class="inline-flex items-center px-5 py-2.5 border border-stone-200 dark:border-stone-800 text-[11px] font-black uppercase tracking-widest rounded-2xl text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 hover:bg-stone-100  dark:hover:bg-stone-800 transition shadow-sm group">
-                                <div class="text-left">
-                                    <div class="leading-none mb-1 group-hover:text-amber-600 transition-colors">{{ Auth::user()->name }}</div>
-                                    <div class="text-[9px] text-amber-600 font-black tracking-tighter opacity-80">
-                                         {{ Auth::user()->points ?? 0 }} PTS
+                    <div class="hidden lg:flex lg:items-center lg:ms-6">
+                        <x-dropdown align="right" width="48">
+                            <x-slot name="trigger">
+                                <button class="inline-flex items-center px-4 py-2.5 border border-stone-200 dark:border-stone-800 text-[10px] font-black uppercase tracking-widest rounded-2xl text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 transition shadow-sm group">
+                                    <div class="text-left">
+                                        <div class="leading-none mb-1 group-hover:text-amber-600 transition-colors">{{ Auth::user()->name }}</div>
+                                        <div class="text-[8px] text-amber-600 font-black tracking-tighter opacity-80 uppercase">
+                                            {{ Auth::user()->points ?? 0 }} PTS • {{ $navTier }}
+                                        </div>
                                     </div>
-                                </div>
-                                <svg class="ms-3 h-4 w-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </button>
-                        </x-slot>
+                                    <svg class="ms-3 h-4 w-4 text-stone-400 group-hover:text-amber-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                            </x-slot>
+                            <x-slot name="content">
+                                <div class="px-4 py-2 text-[10px] font-black text-stone-400 uppercase tracking-widest border-b border-stone-100 dark:border-stone-800 mb-1">Account</div>
+                                <x-dropdown-link :href="Auth::user()->usertype !== 'admin' ? route('dashboard') : route('admin.dashboard')">{{ __('Portal') }}</x-dropdown-link>
+                                <x-dropdown-link :href="route('profile.edit')">{{ __('Settings') }}</x-dropdown-link>
+                                <div class="border-t border-stone-100 dark:border-stone-800 my-1"></div>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();" class="text-rose-600 font-bold">{{ __('Sign Out') }}</x-dropdown-link>
+                                </form>
+                            </x-slot>
+                        </x-dropdown>
+                    </div>
 
-                        <x-slot name="content">
-                            <div class="px-4 py-2 text-[10px] font-black text-stone-400 uppercase tracking-widest border-b border-stone-100 dark:border-stone-800 mb-1">Account</div>
-                            <x-dropdown-link :href="route('orders.index')">{{ __('Order History') }}</x-dropdown-link>
-                            <x-dropdown-link :href="route('profile.edit')">{{ __('Settings') }}</x-dropdown-link>
-                            <div class="border-t border-stone-100 dark:border-stone-800 my-1"></div>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();" class="text-rose-600 font-bold">
-                                    {{ __('Sign Out') }}
-                                </x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
-                @else
-                    <a href="{{ route('login') }}" class="text-[10px] text-stone-500 dark:text-stone-400 font-black uppercase tracking-[0.2em] hover:text-stone-900 dark:hover:text-white mr-8 transition">Log in</a>
-                    <a href="{{ route('register') }}" class="bg-stone-900 dark:bg-amber-600 text-white px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] hover:bg-amber-600 dark:hover:bg-amber-700 transition transform hover:-translate-y-0.5">Join Now</a>
+                    <div class="flex items-center lg:hidden gap-2 sm:gap-4">
+                        <div class="flex flex-col items-end hidden xs:flex">
+                            <span class="text-[9px] font-black text-amber-600 uppercase tracking-tighter leading-none">{{ Auth::user()->points ?? 0 }} PTS</span>
+                            <span class="text-[7px] font-bold text-stone-400 uppercase leading-tight mt-0.5">{{ $navTier }}</span>
+                        </div>
+                        
+                        <button @click="open = ! open" class="p-2.5 rounded-xl text-stone-500 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition shadow-sm relative focus:outline-none active:scale-95">
+                            <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                                <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
+                                <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            @if($hasUnclaimedPoints || $unreadSupportCount > 0)
+                                <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $unreadSupportCount > 0 ? 'bg-amber-600' : 'bg-amber-400' }} opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 {{ $unreadSupportCount > 0 ? 'bg-amber-600' : 'bg-amber-400' }}"></span>
+                                </span>
+                            @endif
+                        </button>
+                    </div>
                 @endauth
-            </div>
 
-            <div class="-me-2 flex items-center lg:hidden">
-                <button @click="open = ! open" class="p-3 rounded-2xl text-stone-500 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition shadow-sm">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+                @guest
+                    <div class="flex items-center gap-2 sm:gap-4">
+                        <a href="{{ route('login') }}" class="text-[10px] font-black uppercase text-stone-500 tracking-widest hover:text-amber-600 transition">Login</a>
+                        <button @click="open = ! open" class="lg:hidden p-2.5 rounded-xl text-stone-500 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition shadow-sm focus:outline-none">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        </button>
+                    </div>
+                @endguest
             </div>
         </div>
     </div>
 
-    <div x-show="open" x-transition class="lg:hidden bg-stone-100 dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800">
-        <div class="pt-4 pb-6 space-y-2 px-4">
+    <div x-show="open" 
+         x-cloak 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         @click.away="open = false"
+         class="lg:hidden bg-white dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800 shadow-2xl overflow-y-auto max-h-[calc(100vh-64px)] sm:max-h-[calc(100vh-80px)] mobile-nav-scrollbar">
+        <div class="pt-4 pb-8 space-y-1 px-4 sm:px-8">
+            
             <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')" class="rounded-xl font-black uppercase text-[10px] tracking-widest">{{ __('Menu') }}</x-responsive-nav-link>
             
-            @if(!Auth::check() || Auth::user()->usertype !== 'admin')
-                @auth
+            @auth
+                @if(Auth::user()->usertype !== 'admin')
+                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="rounded-xl font-black uppercase text-[10px] tracking-widest text-amber-600 flex justify-between items-center">
+                        {{ __('Dashboard') }}
+                        @if($hasUnclaimedPoints || $unreadSupportCount > 0)
+                            <span class="px-2 py-0.5 {{ $unreadSupportCount > 0 ? 'bg-amber-600' : 'bg-amber-50' }} {{ $unreadSupportCount > 0 ? 'text-white' : 'text-amber-600' }} rounded-full text-[8px] font-black">
+                                {{ $unreadSupportCount > 0 ? $unreadSupportCount . ' NEW' : '+PTS' }}
+                            </span>
+                        @endif
+                    </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('rewards.index')" :active="request()->routeIs('rewards.index')" class="rounded-xl font-black uppercase text-[10px] tracking-widest">{{ __('Rewards') }}</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')" class="rounded-xl font-black uppercase text-[10px] tracking-widest">{{ __('My Orders') }}</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')" class="rounded-xl font-black uppercase text-[10px] tracking-widest">{{ __('My Cart') }}</x-responsive-nav-link>
-                @endauth
-                <x-responsive-nav-link :href="route('support.index')" :active="request()->routeIs('support.*')" class="rounded-xl font-black uppercase text-[10px] tracking-widest">{{ __('Support') }}</x-responsive-nav-link>
-            @endif
+                    <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')" class="rounded-xl font-black uppercase text-[10px] tracking-widest flex justify-between items-center">
+                        {{ __('My Cart') }}
+                        @if(session('cart') && count(session('cart')) > 0)
+                            <span class="bg-stone-900 text-white text-[8px] font-bold px-2 py-0.5 rounded-full">{{ count(session('cart')) }}</span>
+                        @endif
+                    </x-responsive-nav-link>
+                @endif
+            @endauth
+
+            <x-responsive-nav-link :href="route('support.index')" :active="request()->routeIs('support.*')" class="rounded-xl font-black uppercase text-[10px] tracking-widest flex justify-between items-center">
+                {{ __('Support') }}
+                <div class="flex items-center gap-2">
+                    <span class="text-[8px] text-stone-400 font-black uppercase tracking-tighter">{{ $isAdminOnline ? 'ONLINE' : 'OFFLINE' }}</span>
+                    <span class="h-2 w-2 rounded-full {{ $isAdminOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                </div>
+            </x-responsive-nav-link>
             
             @auth
                 @if(Auth::user()->usertype === 'admin')
-                    <div class="h-px bg-stone-200 dark:bg-stone-800 my-2"></div>
-                    <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="text-amber-600 font-black uppercase text-[10px] tracking-widest">{{ __('Dashboard') }}</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.menu.index')" :active="request()->routeIs('admin.menu.*')" class="font-black uppercase text-[10px] tracking-widest">{{ __('Menu Mgmt') }}</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.customers.index')" :active="request()->routeIs('admin.customers.*')" class="font-black uppercase text-[10px] tracking-widest">{{ __('Customers') }}</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('barista.queue')" :active="request()->routeIs('barista.queue')" class="font-black uppercase text-[10px] tracking-widest">{{ __('KDS') }}</x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.support.admin_index')" :active="request()->routeIs('admin.support.*')" class="font-black uppercase text-[10px] tracking-widest">{{ __('Manage Support') }}</x-responsive-nav-link>
+                    <div class="h-px bg-stone-100 dark:bg-stone-800 my-4 mx-2"></div>
+                    <div class="px-3 mb-2 text-[8px] font-black text-stone-400 uppercase tracking-[0.3em]">Management</div>
+                    <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="rounded-xl text-stone-900 dark:text-amber-500 font-black uppercase text-[10px] tracking-widest">{{ __('Admin Panel') }}</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.menu.index')" :active="request()->routeIs('admin.menu.*')" class="rounded-xl font-black uppercase text-[10px] tracking-widest">{{ __('Menu Editor') }}</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.customers.index')" :active="request()->routeIs('admin.customers.*')" class="rounded-xl font-black uppercase text-[10px] tracking-widest">{{ __('Customers') }}</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('barista.queue')" :active="request()->routeIs('barista.queue')" class="rounded-xl font-black uppercase text-[10px] tracking-widest">{{ __('KDS Queue') }}</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.support.admin_index')" :active="request()->routeIs('admin.support.*')" class="rounded-xl font-black uppercase text-[10px] tracking-widest flex justify-between items-center">
+                        {{ __('Tickets') }}
+                        @if($pendingTickets > 0)
+                            <span class="bg-amber-600 text-white text-[8px] font-black px-2 py-0.5 rounded-md">{{ $pendingTickets }} PENDING</span>
+                        @endif
+                    </x-responsive-nav-link>
                 @endif
-                <div class="h-px bg-stone-200 dark:bg-stone-800 my-2"></div>
-                <x-responsive-nav-link :href="route('profile.edit')" class="font-black uppercase text-[10px] tracking-widest">{{ __('Settings') }}</x-responsive-nav-link>
+                
+                <div class="h-px bg-stone-100 dark:bg-stone-800 my-4 mx-2"></div>
+                <div class="px-3 mb-2 text-[8px] font-black text-stone-400 uppercase tracking-[0.3em]">Account</div>
+                
+                <div class="flex items-center gap-3 px-4 py-2 mb-2 bg-stone-50 dark:bg-stone-900/50 rounded-2xl mx-1">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-black text-stone-800 dark:text-stone-200 uppercase">{{ Auth::user()->name }}</span>
+                        <span class="text-[8px] font-bold text-amber-600 uppercase">{{ Auth::user()->points ?? 0 }} PTS • {{ $navTier }}</span>
+                    </div>
+                </div>
+
+                <x-responsive-nav-link :href="route('profile.edit')" class="rounded-xl font-black uppercase text-[10px] tracking-widest">{{ __('Settings') }}</x-responsive-nav-link>
+                
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();" class="text-rose-600 font-black uppercase text-[10px] tracking-widest">{{ __('Sign Out') }}</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('logout')" 
+                        onclick="event.preventDefault(); this.closest('form').submit();" 
+                        class="text-rose-600 font-black uppercase text-[10px] tracking-widest bg-rose-50/30 dark:bg-rose-950/20 mt-3 rounded-xl border border-rose-100 dark:border-rose-900/30">
+                        {{ __('Sign Out') }}
+                    </x-responsive-nav-link>
                 </form>
             @endauth
         </div>

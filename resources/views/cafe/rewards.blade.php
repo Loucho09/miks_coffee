@@ -1,16 +1,10 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-bold text-2xl text-stone-800 dark:text-white leading-tight">
-            {{ __('My Rewards') }}
-        </h2>
-    </x-slot>
-
     @php
         /** @var \App\Models\User $user */
         $user = Auth::user();
         
-        // Ensure points sync correctly across the app
-        $points = $user->points ?? 0; 
+        // 🟢 FIXED: Reference standardized loyalty_points for 68 PTS display
+        $points = $user->loyalty_points ?? 0; 
         
         $target = 100; 
         $progress = min(($points / $target) * 100, 100);
@@ -20,7 +14,6 @@
                     ->latest()
                     ->get();
 
-        // 🟢 NEW FEATURE: Tier Calculation
         $tier = 'Bronze';
         if($points >= 500) $tier = 'Gold';
         elseif($points >= 200) $tier = 'Silver';
@@ -28,113 +21,39 @@
 
     <div class="py-12" x-data="{ progress: {{ $progress }} }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <div class="bg-stone-900 rounded-3xl p-8 md:p-12 text-center text-white mb-12 shadow-2xl relative overflow-hidden border border-stone-800">
+            <div class="bg-stone-900 rounded-3xl p-8 md:p-12 text-center text-white mb-12 shadow-connected relative overflow-hidden border border-stone-800">
                 <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
                     <div class="absolute right-0 top-0 transform translate-x-1/3 -translate-y-1/3 text-[20rem]">☕</div>
                 </div>
 
-                <div class="mb-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
-                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500">{{ $tier }} Member Status</span>
+                <div class="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span>
+                    <span class="text-[10px] font-black uppercase tracking-[0.3em] text-amber-600">{{ $tier }} Tier Status</span>
                 </div>
 
-                <p class="text-stone-400 text-lg uppercase tracking-widest font-bold mb-2">Current Balance</p>
-                <h1 class="text-7xl md:text-9xl font-extrabold text-amber-500 mb-6 drop-shadow-lg">{{ $points }}</h1>
-                <p class="text-2xl font-light text-stone-200">Star Points</p>
+                <p class="text-stone-400 text-lg uppercase tracking-[0.4em] font-black mb-4 italic">Star Points Balance</p>
+                <h1 class="text-8xl md:text-[12rem] font-black text-amber-500 mb-8 drop-shadow-2xl italic tracking-tighter">{{ $points }}</h1>
                 
                 <div class="max-w-xl mx-auto mt-10">
-                    <div class="flex justify-between text-sm text-stone-400 mb-2 font-medium"><span>0</span><span>Goal: {{ $target }}</span></div>
-                    <div class="w-full bg-stone-800 rounded-full h-4 overflow-hidden border border-stone-700">
-                        <div class="bg-amber-600 h-4 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(217,119,6,0.5)]" 
-                             :style="`width: ${progress}%`"
-                             aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="flex justify-between text-[10px] font-black text-stone-500 mb-4 uppercase tracking-[0.3em]"><span>0 Balance</span><span>Goal: {{ $target }}</span></div>
+                    <div class="w-full bg-stone-800 rounded-full h-2 overflow-hidden border border-stone-700 shadow-inner">
+                        <div class="bg-amber-600 h-full rounded-full transition-all duration-[2s] ease-out shadow-[0_0_15px_rgba(217,119,6,0.4)]" :style="`width: ${progress}%`" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
-                    <p class="mt-4 text-stone-300 text-sm md:text-base">
-                        @if($points >= $target) 🎉 You have enough points for a <strong>Free Coffee!</strong> @else You are <strong class="text-white">{{ $remaining }} points</strong> away from your next reward! @endif
-                    </p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                <div class="bg-white dark:bg-stone-900 p-6 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-2">Lifetime Earned</p>
-                    <p class="text-2xl font-bold text-stone-900 dark:text-white">{{ $history->where('amount', '>', 0)->sum('amount') }} <span class="text-xs text-stone-400">PTS</span></p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div class="bg-white dark:bg-stone-900 p-8 rounded-[2rem] border border-stone-100 dark:border-stone-800 shadow-sm transition-all hover:scale-105">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-stone-500 mb-4">Milestones</p>
+                    <p class="text-3xl font-black text-stone-900 dark:text-white">{{ $history->where('amount', '>', 0)->sum('amount') }} <span class="text-xs text-stone-400 italic">PTS</span></p>
                 </div>
-                <div class="bg-white dark:bg-stone-900 p-6 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-2">Total Redeemed</p>
-                    <p class="text-2xl font-bold text-stone-900 dark:text-white">{{ abs($history->where('amount', '<', 0)->sum('amount')) }} <span class="text-xs text-stone-400">PTS</span></p>
+                <div class="bg-white dark:bg-stone-900 p-8 rounded-[2rem] border border-stone-100 dark:border-stone-800 shadow-sm transition-all hover:scale-105">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-stone-500 mb-4">Used</p>
+                    <p class="text-3xl font-black text-stone-900 dark:text-white">{{ abs($history->where('amount', '<', 0)->sum('amount')) }} <span class="text-xs text-stone-400 italic">PTS</span></p>
                 </div>
-                <div class="bg-white dark:bg-stone-900 p-6 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-stone-400 mb-2">Recent Activity</p>
-                    <p class="text-sm font-bold text-amber-600 truncate">{{ $history->first()->description ?? 'No activity yet' }}</p>
-                </div>
-            </div>
-
-            <h3 class="text-2xl font-bold text-stone-900 dark:text-white mb-6 uppercase tracking-tight">Rewards Catalog</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
-                <form action="{{ route('rewards.claim') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="name" value="₱50 Off Voucher">
-                    <input type="hidden" name="points" value="50">
-                    <input type="hidden" name="value" value="50">
-                    <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border-2 {{ $points >= 50 ? 'border-amber-500 shadow-md' : 'border-stone-100 dark:border-stone-800 opacity-60' }} transition group h-full flex flex-col">
-                        <div class="flex justify-between items-start mb-4"><span class="bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 px-3 py-1 rounded-full text-xs font-bold uppercase">50 Stars</span></div>
-                        <h4 class="text-xl font-bold text-stone-900 dark:text-white mb-2">₱50 Off Voucher</h4>
-                        <p class="text-stone-500 dark:text-stone-400 text-sm mb-6 flex-1">Get ₱50 off your total bill instantly.</p>
-                        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm transition {{ $points >= 50 ? 'bg-amber-600 text-white hover:bg-amber-700' : 'bg-stone-100 text-stone-400 cursor-not-allowed' }}" {{ $points < 50 ? 'disabled' : '' }}>
-                            {{ $points >= 50 ? 'Redeem Now' : 'Insufficient Points' }}
-                        </button>
-                    </div>
-                </form>
-
-                <form action="{{ route('rewards.claim') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="name" value="Free Tall Drink">
-                    <input type="hidden" name="points" value="100">
-                    <input type="hidden" name="value" value="120"> 
-                    <div class="bg-white dark:bg-stone-900 rounded-2xl p-6 border-2 {{ $points >= 100 ? 'border-amber-500 shadow-md' : 'border-stone-100 dark:border-stone-800 opacity-60' }} transition group h-full flex flex-col">
-                        <div class="flex justify-between items-start mb-4"><span class="bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 px-3 py-1 rounded-full text-xs font-bold uppercase">100 Stars</span></div>
-                        <h4 class="text-xl font-bold text-stone-900 dark:text-white mb-2">Free Tall Drink</h4>
-                        <p class="text-stone-500 dark:text-stone-400 text-sm mb-6 flex-1">Redeem any Tall (12oz) beverage.</p>
-                        <button type="submit" class="w-full py-3 rounded-xl font-bold text-sm transition {{ $points >= 100 ? 'bg-amber-600 text-white hover:bg-amber-700' : 'bg-stone-100 text-stone-400 cursor-not-allowed' }}" {{ $points < 100 ? 'disabled' : '' }}>
-                            {{ $points >= 100 ? 'Redeem Now' : 'Insufficient Points' }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 overflow-hidden">
-                <div class="px-6 py-4 border-b border-stone-100 dark:border-stone-800">
-                    <h3 class="text-lg font-bold text-stone-900 dark:text-white">Detailed Points History</h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 text-[10px] font-black uppercase tracking-widest">
-                            <tr>
-                                <th class="px-6 py-4">Date</th>
-                                <th class="px-6 py-4">Activity</th>
-                                <th class="px-6 py-4 text-right">Points</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-                            @forelse($history as $item)
-                                <tr class="text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50/50 transition">
-                                    <td class="px-6 py-4 text-xs font-medium">{{ $item->created_at->format('M d, Y') }}</td>
-                                    <td class="px-6 py-4 font-medium text-xs">{{ $item->description }}</td>
-                                    <td class="px-6 py-4 text-right font-bold text-xs">
-                                        <span class="{{ $item->amount > 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $item->amount > 0 ? '+' : '' }}{{ $item->amount }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="px-6 py-8 text-center text-stone-500 italic text-sm">No coffee journeys yet.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                <div class="bg-stone-900 p-8 rounded-[2rem] border border-stone-800 shadow-connected">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-stone-500 mb-4">Latest</p>
+                    <p class="text-xs font-bold text-amber-500 uppercase italic truncate">{{ $history->first()->description ?? 'No Activity' }}</p>
                 </div>
             </div>
         </div>

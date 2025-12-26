@@ -16,6 +16,7 @@ use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SupportController; 
 use App\Http\Controllers\Admin\ExportController;
+
 // Models
 use App\Models\Product;
 use App\Models\Category;
@@ -68,18 +69,33 @@ Route::post('/support/send', [SupportController::class, 'send'])->name('support.
 */
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', function () {
-        $user = Auth::user();
-        $recentOrders = Order::where('user_id', $user->id)
-                            ->with(['items.product', 'items.review', 'items.order'])
-                            ->latest()
-                            ->take(5)
-                            ->get();
-        return view('dashboard', compact('recentOrders'));
-    })->name('dashboard');
+    /**
+     * 🟢 FIXED: Functional Dashboard Route
+     * NEW FEATURE: Triggers the updateStreak() logic upon visit.
+     */
+   Route::get('/dashboard', function () {
+    /** @var \App\Models\User $user */
+    $user = Auth::user();
+    $user->updateStreak();
 
-    // Home / Menu
+    // 1. Fetch Recent Orders (Already exists)
+    $recentOrders = Order::where('user_id', $user->id)
+                        ->with(['items.product', 'items.review', 'items.order'])
+                        ->latest()
+                        ->take(5)
+                        ->get();
+
+    // 2. 🟢 NEW: Fetch Support History with replies
+    $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)
+                        ->with(['replies.user'])
+                        ->latest()
+                        ->take(5)
+                        ->get();
+
+    return view('dashboard', compact('recentOrders', 'supportTickets'));
+})->name('dashboard');
+
+    // Shop Home / Browsing
     Route::get('/home', function (Request $request) {
         $query = Product::with(['category', 'sizes'])->where('is_active', true);
         if ($request->filled('search')) $query->where('name', 'like', '%' . $request->search . '%');
@@ -89,38 +105,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('cafe.index', compact('products', 'categories'));
     })->name('home');
 
-    // Rewards
+    // Rewards & Loyalty System
     Route::get('/rewards', function () {
         return view('cafe.rewards');
     })->name('rewards.index');
 
     Route::post('/claim-reward', [OrderController::class, 'claimReward'])->name('rewards.claim');
 
-    // Review System
+    // Customer Reviews
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
-Route::get('/orders/export', [OrderController::class, 'exportData'])->name('admin.orders.export');
-Route::get('/orders/export', \App\Http\Controllers\Admin\ExportController::class)->name('admin.orders.export');
-// Inside routes/web.php
 
-
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    // 🟢 FIXED: Alternative Way - Points to ExportController class directly
-    Route::get('/orders/export', ExportController::class)->name('orders.export');
-});
-    // Cart
+    // Cart Management (Controller Group)
     Route::controller(CartController::class)->group(function () {
         Route::get('/cart', 'index')->name('cart.index');
         Route::post('/add-to-cart', 'add')->name('cart.add'); 
         Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
     });
 
-    // Orders
+    // Orders & Transactions
     Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     
     /**
-     * 🟢 ALTERNATIVE FIX: Closure-based routing
-     * This bypasses the ControllerDispatcher entirely to fix the 500 error.
+     * 🟢 FIXED: Receipt Logic
+     * Closure-based to prevent ControllerDispatcher 500 errors.
      */
     Route::get('/orders/{id}/receipt', function ($id) {
         /** @var \App\Models\User $user */
@@ -131,44 +139,59 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
             abort(403);
         }
 
-        // Logic for the Loyalty Tier (Feature)
         $pts = $order->user->loyalty_points ?? 0;
         $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
-        
-        // New Feature: Points Milestone calculation
         $nextGoal = $pts >= 500 ? null : ($pts >= 200 ? 500 : 200);
         $diff = $nextGoal ? $nextGoal - $pts : null;
 
         return view('emails.order_receipt', compact('order', 'tier', 'diff'));
     })->name('orders.receipt');
 
-    // Profile
+    // User Profile Settings
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Barista Queue
+    // Barista Queue Access
     Route::prefix('barista')->name('barista.')->group(function () {
         Route::get('/queue', [QueueController::class, 'index'])->name('queue');
         Route::post('/update-status/{id}', [QueueController::class, 'updateStatus'])->name('update_status');
     });
 
-    /* Admin Only */
+    /* |--------------------------------------------------------------------------
+    | 3. ADMIN ONLY ROUTES (Protected Group)
+    |--------------------------------------------------------------------------
+    */
     Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
+        
+        // Admin Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        
+        /**
+         * 🟢 FIXED: Admin Data Export
+         * Points to the Invokable Controller to solve "Undefined Method" crashes.
+         */
+        Route::get('/orders/export', ExportController::class)->name('orders.export');
+
+        // Inventory & Stock
         Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
         
+        // Customer Management
         Route::controller(CustomerController::class)->prefix('customers')->name('customers.')->group(function () {
             Route::get('/', 'index')->name('index');           
             Route::get('/{id}', 'show')->name('show');         
             Route::put('/{id}/password', 'resetPassword')->name('reset_password');
         });
 
+        // Support Requests Management
         Route::controller(SupportController::class)->prefix('support-requests')->name('support.')->group(function () {
-            Route::get('/', 'adminIndex')->name('admin_index');
+           Route::get('/', 'adminIndex')->name('admin_index');
             Route::post('/{id}/resolve', 'resolve')->name('resolve');
+            // 🟢 FIXED: Using {ticket} for Route Model Binding
+            Route::post('/{ticket}/reply', 'reply')->name('reply');
         });
 
+        // Digital Menu Management
         Route::controller(MenuController::class)->prefix('menu')->name('menu.')->group(function () {
             Route::get('/', 'index')->name('index'); 
             Route::get('/create', 'create')->name('create');
@@ -178,6 +201,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
+        // Legal Overlays
         Route::view('/privacy', 'legal.privacy')->name('privacy');
         Route::view('/terms', 'legal.terms')->name('terms');
     });

@@ -1,96 +1,87 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <h2 class="font-black text-3xl text-stone-900 dark:text-white uppercase tracking-tight">
-                    Customer Support
-                </h2>
-                <p class="text-xs md:text-sm text-stone-500 dark:text-stone-400 mt-1 font-medium">
-                    @auth
-                        How can we help you today, {{ Auth::user()->name }}?
-                    @else
-                        How can we help you today?
-                    @endauth
+    <div class="py-12 bg-stone-50 dark:bg-stone-950 min-h-screen transition-colors duration-500">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            {{-- Page Header --}}
+            <div class="text-center mb-12">
+                <span class="text-amber-600 font-black uppercase tracking-[0.4em] text-[10px] mb-3 block">Concierge</span>
+                <h2 class="font-black text-4xl sm:text-5xl text-stone-900 dark:text-white uppercase tracking-tighter italic leading-none">How can we help?</h2>
+                <p class="text-stone-500 dark:text-stone-400 mt-4 font-medium italic text-sm sm:text-base">
+                    Whether it's a brew inquiry or feedback on your experience, <br class="hidden sm:block"> our team is here to brew up a solution.
                 </p>
             </div>
-        </div>
-    </x-slot>
 
-    <div class="py-12 bg-stone-50 dark:bg-stone-950 min-h-screen">
-        <div class="max-w-3xl mx-auto px-6">
-            
+            {{-- Success Notification --}}
             @if(session('success'))
-                <div class="mb-8 p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-3xl flex items-center gap-4 text-green-700 dark:text-green-400 font-bold uppercase text-[10px] tracking-widest">
-                    <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+                     class="mb-8 p-5 bg-amber-500/10 border border-amber-500/20 rounded-[2rem] text-amber-600 font-black text-[10px] uppercase tracking-widest flex items-center gap-4 transition-all shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                     {{ session('success') }}
                 </div>
             @endif
 
-            <div class="bg-white dark:bg-stone-900 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-xl p-8 md:p-12">
-                <form action="{{ route('support.send') }}" method="POST" class="space-y-8">
-                    @csrf
+            {{-- Support Form Card --}}
+            <div class="bg-white dark:bg-stone-900 rounded-[3rem] p-8 sm:p-12 border border-stone-200 dark:border-stone-800 shadow-2xl relative overflow-hidden group">
+                {{-- Decorative Element --}}
+                <div class="absolute top-0 right-0 w-32 h-32 bg-stone-50 dark:bg-stone-950 rounded-full blur-3xl -mr-16 -mt-16 opacity-50"></div>
 
+                <form action="{{ route('support.send') }}" method="POST" class="space-y-8 relative z-10">
+                    @csrf
+                    
+                    {{-- Identity Section for Guests --}}
                     @guest
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-stone-600 mb-3">Your Name</label>
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-stone-400 px-2">Your Name</label>
                                 <input type="text" name="guest_name" required 
-                                    class="w-full px-6 py-4 rounded-2xl bg-stone-50 dark:bg-stone-950 border-none shadow-inner focus:ring-2 focus:ring-amber-500 text-stone-900 dark:text-white transition-all">
+                                    class="w-full bg-stone-50 dark:bg-stone-950 border-none rounded-2xl px-6 py-4 text-stone-900 dark:text-white focus:ring-2 focus:ring-amber-500 transition-all placeholder:text-stone-400/50"
+                                    placeholder="Enter your name">
                             </div>
-                            <div>
-                                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-stone-600 mb-3">Email Address</label>
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-black uppercase tracking-widest text-stone-400 px-2">Email Address</label>
                                 <input type="email" name="guest_email" required 
-                                    class="w-full px-6 py-4 rounded-2xl bg-stone-50 dark:bg-stone-950 border-none shadow-inner focus:ring-2 focus:ring-amber-500 text-stone-900 dark:text-white transition-all">
+                                    class="w-full bg-stone-50 dark:bg-stone-950 border-none rounded-2xl px-6 py-4 text-stone-900 dark:text-white focus:ring-2 focus:ring-amber-500 transition-all placeholder:text-stone-400/50"
+                                    placeholder="Enter your email">
                             </div>
                         </div>
                     @endguest
 
-                    <div>
-                        <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-stone-600 mb-3">Subject</label>
-                        <select name="subject" required class="w-full px-6 py-4 rounded-2xl bg-stone-50 dark:bg-stone-950 border-none shadow-inner focus:ring-2 focus:ring-amber-500 text-stone-900 dark:text-white transition-all appearance-none">
-                            <option value="Order Inquiry">Order Inquiry</option>
-                            <option value="Reward Points Issue">Reward Points Issue</option>
-                            <option value="Feedback">General Feedback</option>
-                            <option value="Technical Support">Technical Support</option>
-                            <option value="Other">Other</option>
-                        </select>
+                    {{-- Subject Section --}}
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-stone-400 px-2">Subject</label>
+                        <input type="text" name="subject" required 
+                            class="w-full bg-stone-50 dark:bg-stone-950 border-none rounded-2xl px-6 py-4 text-stone-900 dark:text-white focus:ring-2 focus:ring-amber-500 transition-all placeholder:text-stone-400/50"
+                            placeholder="What is this regarding? (e.g. Order #123, Loyalty Points)">
                     </div>
 
-                    <div>
-                        <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 mb-3">Describe your concern</label>
+                    {{-- Message Section --}}
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-stone-400 px-2">Message Detail</label>
                         <textarea name="message" rows="6" required 
-                            class="w-full px-6 py-4 rounded-[2rem] bg-stone-50 dark:bg-stone-950 border-none shadow-inner focus:ring-2 focus:ring-amber-500 text-stone-900 dark:text-white transition-all resize-none"
-                            placeholder="Tell us what's on your mind..."></textarea>
+                            class="w-full bg-stone-50 dark:bg-stone-950 border-none rounded-[2rem] px-6 py-5 text-stone-900 dark:text-white focus:ring-2 focus:ring-amber-500 italic transition-all placeholder:text-stone-400/50 text-sm sm:text-base"
+                            placeholder="Tell us more about your request..."></textarea>
                     </div>
 
-                    <button type="submit" 
-                        class="w-full py-5 bg-stone-900 dark:bg-amber-600 text-white rounded-2xl font-black uppercase text-xs tracking-[0.3em] hover:bg-amber-700 transition transform active:scale-[0.98] shadow-xl shadow-amber-600/10">
-                        Send Request
-                    </button>
+                    {{-- Submit Button --}}
+                    <div class="pt-4">
+                        <button type="submit" 
+                            class="w-full py-5 bg-stone-900 dark:bg-stone-50 text-white dark:text-stone-950 rounded-[2rem] font-black uppercase tracking-[0.2em] text-[11px] sm:text-xs hover:bg-amber-600 dark:hover:bg-amber-500 transition-all shadow-xl active:scale-[0.98] group/btn">
+                            <span class="flex items-center justify-center gap-3">
+                                Send Inquiry
+                                <svg class="w-4 h-4 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                </svg>
+                            </span>
+                        </button>
+                    </div>
                 </form>
             </div>
 
-            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 px-6">
-                <div class="flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 border border-amber-500/20">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    </div>
-                    <div>
-                        <p class="text-[9px] font-black uppercase text-stone-400 tracking-widest">Email Us</p>
-                        <p class="text-sm font-bold text-stone-800 dark:text-white">support@mikscoffee.com</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-500/20">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div>
-                        <p class="text-[9px] font-black uppercase text-stone-400 tracking-widest">Typical Response</p>
-                        <p class="text-sm font-bold text-stone-800 dark:text-white">Within 24 Hours</p>
-                    </div>
-                </div>
+            {{-- Footer Info --}}
+            <div class="mt-12 text-center opacity-40">
+                <p class="text-[9px] font-black uppercase tracking-[0.3em] text-stone-500">
+                    Mik's Coffee Shop • Est. 2025 • Freshly Brewed Support
+                </p>
             </div>
         </div>
     </div>

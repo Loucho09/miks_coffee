@@ -22,28 +22,38 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-  /**
-     * Handle an incoming authentication request.
-     */
-public function store(LoginRequest $request): RedirectResponse
-{
-    $request->authenticate();
+    public function store(LoginRequest $request): RedirectResponse
+    {
+        $request->authenticate();
 
-    $request->session()->regenerate();
+        $request->session()->regenerate();
 
-    // FORCE REDIRECTION BASED ON USERTYPE
-    if ($request->user()->usertype === 'admin' || $request->user()->email === 'jmloucho09@gmail.com') {
-        return redirect()->route('admin.dashboard');
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
+        // Admin redirection and Status Update
+        if ($user->usertype === 'admin' || $user->email === 'jmloucho09@gmail.com') {
+            $user->update(['last_seen_at' => now()]);
+            return redirect()->route('admin.dashboard');
+        }
+
+        // Customer redirection
+        return redirect()->to('/dashboard')->with('login_success', "Welcome back, {$user->name}! Brew something special today.");
     }
-
-    return redirect()->intended(route('home'));
-}
 
     /**
      * Destroy an authenticated session.
      */
     public function destroy(Request $request): RedirectResponse
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // Set status to Offline immediately on logout
+        if ($user && ($user->usertype === 'admin' || $user->email === 'jmloucho09@gmail.com')) {
+            $user->update(['last_seen_at' => null]);
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

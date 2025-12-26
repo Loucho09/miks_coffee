@@ -7,7 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product; 
 use App\Models\PointTransaction;
-use App\Models\User; // Ensure this is imported for type hinting
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -65,7 +65,8 @@ class OrderController extends Controller
         $rewardType = null;
 
         if ($claimed) {
-            if (($user->loyalty_points ?? 0) < $claimed['points']) {
+            // FIXED: Changed loyalty_points to points to match the 68 points fix
+            if (($user->points ?? 0) < $claimed['points']) {
                 session()->forget('claimed_reward');
                 return redirect()->route('cart.index')->with('error', 'Insufficient points.');
             }
@@ -117,10 +118,11 @@ class OrderController extends Controller
                 Product::find($realProductId)->decrement('stock_quantity', $details['quantity']);
             }
 
+            // FIXED: Standardized point column names
             if ($pointsRedeemed > 0) {
-                $user->decrement('loyalty_points', $pointsRedeemed);
+                $user->decrement('points', $pointsRedeemed);
             }
-            $user->increment('loyalty_points', 10);
+            $user->increment('points', 10);
 
             DB::commit();
             session()->forget(['cart', 'claimed_reward']); 
@@ -129,7 +131,8 @@ class OrderController extends Controller
                 Mail::to($user->email)->send(new OrderReceipt($order));
             } catch (\Exception $e) { }
 
-            return redirect()->route('orders.index')->with('success', 'Order placed successfully!');
+            // 🟢 REDIRECT CHANGE: Directs to Dashboard instead of Orders Index
+            return redirect()->route('dashboard')->with('success', 'Order placed successfully! Track your brew progress below.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -138,15 +141,13 @@ class OrderController extends Controller
     }
 
     /**
-     * 🟢 FIXED: Resolves 500 error "Call to undefined method exportData()".
-     * 🟢 NEW FEATURE: High-Value Performance flagging in CSV.
+     * Export sales data for admins.
      */
     public function exportData()
     {
         /** @var User $user */
         $user = Auth::user();
 
-        // Security: Ensure only admins can export
         if (!$user->isAdmin()) {
             abort(403, 'Unauthorized access.');
         }
@@ -164,11 +165,9 @@ class OrderController extends Controller
 
         $callback = function() use($orders) {
             $file = fopen('php://output', 'w');
-            // CSV Headers
             fputcsv($file, ['Order ID', 'Customer', 'Amount', 'Date', 'Status', 'Performance']);
 
             foreach ($orders as $order) {
-                // 🟢 NEW FEATURE: Auto-flagging high value orders for management review
                 $performance = ($order->total_price >= 500) ? 'HIGH VALUE' : 'Standard';
 
                 fputcsv($file, [
@@ -199,7 +198,8 @@ class OrderController extends Controller
             abort(403);
         }
 
-        $pts = $user->loyalty_points ?? 0;
+        // FIXED: Changed loyalty_points to points to match global sync
+        $pts = $user->points ?? 0;
         $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
 
         return view('emails.order_receipt', compact('order', 'tier'));

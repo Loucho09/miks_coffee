@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SupportTicket extends Model
 {
+
+    
     /**
      * The attributes that are mass assignable.
      *
@@ -26,4 +28,8 @@ class SupportTicket extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function replies() {
+    return $this->hasMany(SupportReply::class)->latest();
+    return $this->hasMany(SupportReply::class, 'support_ticket_id')->latest();
+}
 }
