@@ -132,8 +132,7 @@ class OrderController extends Controller
             } catch (\Exception $e) { }
 
             // 🟢 REDIRECT CHANGE: Directs to Dashboard instead of Orders Index
-            return redirect()->route('dashboard')->with('success', 'Order placed successfully! Track your brew progress below.');
-
+           return redirect()->route('dashboard')->with('success', 'Order established successfully! Rate your brew below to claim bonus loyalty points.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', $e->getMessage());

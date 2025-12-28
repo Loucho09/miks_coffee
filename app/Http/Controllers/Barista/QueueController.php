@@ -14,19 +14,35 @@ class QueueController extends Controller
      */
     public function index()
     {
-        // 1. Security Check
         if (Auth::user()->usertype !== 'admin') {
             abort(403, 'Unauthorized. Admins/Baristas only.');
         }
 
-        // 2. Fetch Active Orders
-        // Optimized with 'with()' to load relationships efficiently
+        // Standard load for initial page hit
         $orders = Order::whereIn('status', ['pending', 'preparing'])
                         ->with(['items.product', 'user']) 
-                        ->orderBy('id', 'asc') // FIFO
+                        ->orderBy('id', 'asc')
                         ->get();
 
         return view('barista.queue', compact('orders'));
+    }
+
+    /**
+     * 🟢 NEW FEATURE: Fetch Active Orders for Live Updates
+     * Returns raw JSON for the Alpine.js frontend.
+     */
+    public function getActiveOrders()
+    {
+        if (Auth::user()->usertype !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $orders = Order::whereIn('status', ['pending', 'preparing'])
+                        ->with(['items.product', 'user']) 
+                        ->orderBy('id', 'asc')
+                        ->get();
+
+        return response()->json($orders);
     }
 
     /**
@@ -44,13 +60,8 @@ class QueueController extends Controller
             'status' => 'required|in:pending,preparing,ready,served,cancelled'
         ]);
 
-        // 🌟 LOYALTY POINTS LOGIC 🌟
-        // If order becomes 'ready' and hasn't been rewarded yet:
         if ($request->status === 'ready' && $order->status !== 'ready' && $order->user) {
-            // Logic: 1 Point for every 50 Pesos spent
-            $pointsEarned = floor($order->total_amount / 50);
-            
-            // Add points to customer account
+            $pointsEarned = floor($order->total_price / 50); // Standardized to total_price
             $order->user->increment('points', $pointsEarned);
         }
 

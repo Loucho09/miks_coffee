@@ -69,25 +69,20 @@ Route::post('/support/send', [SupportController::class, 'send'])->name('support.
 */
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    /**
-     * 🟢 FIXED: Functional Dashboard Route
-     * NEW FEATURE: Triggers the updateStreak() logic upon visit.
-     */
-   Route::get('/dashboard', function () {
+    Route::get('/dashboard', function () {
     /** @var \App\Models\User $user */
     $user = Auth::user();
     $user->updateStreak();
 
-    // 1. Fetch Recent Orders (Already exists)
     $recentOrders = Order::where('user_id', $user->id)
                         ->with(['items.product', 'items.review', 'items.order'])
                         ->latest()
                         ->take(5)
                         ->get();
 
-    // 2. 🟢 NEW: Fetch Support History with replies
+    // 🟢 FIX: Including 'replies.user' makes the admin messages visible
     $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)
-                        ->with(['replies.user'])
+                        ->with(['replies.user']) 
                         ->latest()
                         ->take(5)
                         ->get();
@@ -156,6 +151,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('barista')->name('barista.')->group(function () {
         Route::get('/queue', [QueueController::class, 'index'])->name('queue');
         Route::post('/update-status/{id}', [QueueController::class, 'updateStatus'])->name('update_status');
+        // 🟢 LIVE FEATURE: Dynamic Data Fetch for KDS
+        Route::get('/active-orders', [QueueController::class, 'getActiveOrders'])->name('active_orders');
     });
 
     /* |--------------------------------------------------------------------------
@@ -169,7 +166,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         /**
          * 🟢 FIXED: Admin Data Export
-         * Points to the Invokable Controller to solve "Undefined Method" crashes.
          */
         Route::get('/orders/export', ExportController::class)->name('orders.export');
 
@@ -185,10 +181,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Support Requests Management
         Route::controller(SupportController::class)->prefix('support-requests')->name('support.')->group(function () {
-           Route::get('/', 'adminIndex')->name('admin_index');
+            Route::get('/', 'adminIndex')->name('admin_index');
             Route::post('/{id}/resolve', 'resolve')->name('resolve');
-            // 🟢 FIXED: Using {ticket} for Route Model Binding
             Route::post('/{ticket}/reply', 'reply')->name('reply');
+            Route::get('/active-tickets', 'getActiveTickets')->name('active_tickets');
+            // 🟢 LIVE FEATURE: Dynamic Data Fetch for Admin Tickets
+            Route::get('/active-json', 'getActiveTickets')->name('active_json');
         });
 
         // Digital Menu Management

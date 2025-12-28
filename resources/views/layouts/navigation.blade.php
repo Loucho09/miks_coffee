@@ -20,8 +20,11 @@
         ->whereNotNull('last_seen_at')
         ->exists();
 
-    // 🟢 Unread Support Count logic
+    // 🟢 Unread Support Count logic: Detects if Admin has replied
     $unreadSupportCount = Auth::check() ? \App\Models\SupportTicket::where('user_id', Auth::id())->where('status', 'replied')->count() : 0;
+
+    // 🟢 Pre-calculate pending tickets for admin badge
+    $pendingTickets = (Auth::check() && Auth::user()->usertype === 'admin') ? \App\Models\SupportTicket::where('status', 'pending')->count() : 0;
 @endphp
 
 <style>
@@ -32,13 +35,14 @@
     .mobile-nav-scrollbar::-webkit-scrollbar { width: 4px; }
     .mobile-nav-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .mobile-nav-scrollbar::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+    .nav-blur { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 </style>
 
 <nav x-data="{ open: false }" class="bg-white/80 dark:bg-stone-950/90 backdrop-blur-xl border-b border-stone-200/50 dark:border-stone-800/50 sticky top-0 z-50 transition-all duration-500">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16 sm:h-20"> 
+        <div class="flex justify-between h-16 sm:h-20 gap-4"> 
             
-            <div class="flex items-center">
+            <div class="flex items-center flex-1 min-w-0">
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('home') }}" class="flex items-center gap-2 sm:gap-4 group">
                         <div class="relative w-9 h-9 sm:w-12 lg:w-14 sm:h-12 lg:h-14 rounded-full border border-stone-200 dark:border-stone-400 bg-white dark:bg-stone-400 flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:rotate-3 group-hover:shadow-connected shadow-sm">
@@ -58,10 +62,12 @@
 
                     @auth
                         @if(Auth::user()->usertype !== 'admin')
-                            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] transition-all flex items-center gap-2">
+                            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] transition-all flex items-center gap-2 relative">
                                 {{ __('Dashboard') }}
+                                
+                                {{-- 🟢 Pulse for Admin Replies OR Unclaimed Points --}}
                                 @if($hasUnclaimedPoints || $unreadSupportCount > 0)
-                                    <span class="relative flex h-2 w-2">
+                                    <span class="absolute -top-1 -right-2 flex h-2 w-2">
                                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $unreadSupportCount > 0 ? 'bg-amber-600' : 'bg-amber-500' }} opacity-75"></span>
                                         <span class="relative inline-flex rounded-full h-2 w-2 {{ $unreadSupportCount > 0 ? 'bg-amber-600' : 'bg-amber-500' }}"></span>
                                     </span>
@@ -101,9 +107,8 @@
                             </x-nav-link>
                             <x-nav-link :href="route('admin.support.admin_index')" :active="request()->routeIs('admin.support.*')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] flex items-center gap-2">
                                 {{ __('Tickets') }} 
-                                @php $pendingTickets = \App\Models\SupportTicket::where('status', 'pending')->count(); @endphp
                                 @if($pendingTickets > 0)
-                                    <span class="bg-amber-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md leading-none">{{ $pendingTickets }}</span>
+                                    <span class="bg-amber-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md leading-none shadow-sm">{{ $pendingTickets }}</span>
                                 @endif
                             </x-nav-link>
                         @endif
@@ -111,19 +116,19 @@
                 </div>
             </div>
 
-            <div class="flex items-center">
+            <div class="flex items-center gap-2 sm:gap-4">
                 @auth
-                    <div class="hidden lg:flex lg:items-center lg:ms-6">
+                    <div class="hidden lg:flex lg:items-center">
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
-                                <button class="inline-flex items-center px-4 py-2.5 border border-stone-200 dark:border-stone-800 text-[10px] font-black uppercase tracking-widest rounded-2xl text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 transition shadow-sm group">
+                                <button class="inline-flex items-center px-4 py-2.5 border border-stone-200 dark:border-stone-800 text-[10px] font-black uppercase tracking-widest rounded-2xl text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 transition shadow-sm group whitespace-nowrap">
                                     <div class="text-left">
                                         <div class="leading-none mb-1 group-hover:text-amber-600 transition-colors">{{ Auth::user()->name }}</div>
                                         <div class="text-[8px] text-amber-600 font-black tracking-tighter opacity-80 uppercase">
                                             {{ Auth::user()->points ?? 0 }} PTS • {{ $navTier }}
                                         </div>
                                     </div>
-                                    <svg class="ms-3 h-4 w-4 text-stone-400 group-hover:text-amber-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                    <svg class="ms-3 h-4 w-4 text-stone-400 group-hover:text-amber-600 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
                             </x-slot>
                             <x-slot name="content">
@@ -139,10 +144,10 @@
                         </x-dropdown>
                     </div>
 
-                    <div class="flex items-center lg:hidden gap-2 sm:gap-4">
-                        <div class="flex flex-col items-end hidden xs:flex">
-                            <span class="text-[9px] font-black text-amber-600 uppercase tracking-tighter leading-none">{{ Auth::user()->points ?? 0 }} PTS</span>
-                            <span class="text-[7px] font-bold text-stone-400 uppercase leading-tight mt-0.5">{{ $navTier }}</span>
+                    <div class="flex items-center lg:hidden gap-3">
+                        <div class="flex flex-col items-end leading-none shrink-0">
+                            <span class="text-[10px] font-black text-amber-600 uppercase">{{ Auth::user()->points ?? 0 }} PTS</span>
+                            <span class="text-[8px] font-bold text-stone-400 uppercase tracking-tighter">{{ $navTier }}</span>
                         </div>
                         
                         <button @click="open = ! open" class="p-2.5 rounded-xl text-stone-500 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition shadow-sm relative focus:outline-none active:scale-95">
@@ -153,7 +158,7 @@
                             @if($hasUnclaimedPoints || $unreadSupportCount > 0)
                                 <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $unreadSupportCount > 0 ? 'bg-amber-600' : 'bg-amber-400' }} opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 {{ $unreadSupportCount > 0 ? 'bg-amber-600' : 'bg-amber-400' }}"></span>
+                                    <span class="relative h-2.5 w-2.5 rounded-full {{ $unreadSupportCount > 0 ? 'bg-amber-600' : 'bg-amber-400' }}"></span>
                                 </span>
                             @endif
                         </button>
@@ -161,26 +166,15 @@
                 @endauth
 
                 @guest
-                    <div class="flex items-center gap-2 sm:gap-4">
-                        <a href="{{ route('login') }}" class="text-[10px] font-black uppercase text-stone-500 tracking-widest hover:text-amber-600 transition">Login</a>
-                        <button @click="open = ! open" class="lg:hidden p-2.5 rounded-xl text-stone-500 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition shadow-sm focus:outline-none">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                        </button>
-                    </div>
+                    <a href="{{ route('login') }}" class="text-[10px] font-black uppercase text-stone-500 tracking-widest hover:text-amber-600 transition px-2">Login</a>
+                    <button @click="open = ! open" class="lg:hidden p-2 text-stone-500"><svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
                 @endguest
             </div>
         </div>
     </div>
 
-    <div x-show="open" 
-         x-cloak 
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-4"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         @click.away="open = false"
-         class="lg:hidden bg-white dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800 shadow-2xl overflow-y-auto max-h-[calc(100vh-64px)] sm:max-h-[calc(100vh-80px)] mobile-nav-scrollbar">
-        <div class="pt-4 pb-8 space-y-1 px-4 sm:px-8">
-            
+    <div x-show="open" x-cloak x-transition:enter="transition duration-200 ease-out" x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="lg:hidden bg-white dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800 shadow-2xl max-h-[calc(100vh-64px)] sm:max-h-[calc(100vh-80px)] overflow-y-auto mobile-nav-scrollbar">
+        <div class="p-6 space-y-1">
             <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')" class="rounded-xl font-black uppercase text-[10px] tracking-widest">{{ __('Menu') }}</x-responsive-nav-link>
             
             @auth

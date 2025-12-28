@@ -81,7 +81,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-stone-900 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 p-6 sm:p-10 shadow-sm relative overflow-hidden group">
+                <div class="bg-white dark:bg-stone-900 rounded-[2.5rem] border border-stone-200 light:border-dandelion-100 dark:border-stone-800 p-6 sm:p-10 shadow-sm relative overflow-hidden group">
                     <div class="relative z-10">
                         <span class="text-[10px] font-black uppercase tracking-[0.4em] text-stone-400 mb-1 block">Categories</span>
                         <h3 class="text-xl sm:text-2xl font-bold text-stone-900 dark:text-white tracking-tight mb-8 sm:mb-10">Top Performers</h3>
@@ -168,7 +168,7 @@
                         datasets: [{
                             label: 'Revenue',
                             data: JSON.parse(revenueCanvas.dataset.values),
-                            backgroundColor: '#574F3E',
+                            backgroundColor: ['#fed639', '#e4c033', '#cbab2d', '#fae1bd', '#d88e21'],
                             borderRadius: 8
                         }]
                     },
@@ -188,7 +188,7 @@
                         labels: JSON.parse(categoryCanvas.dataset.labels),
                         datasets: [{
                             data: JSON.parse(categoryCanvas.dataset.values),
-                            backgroundColor: ['#2d2716', '#8F8366', '#4B2C20', '#A39284', '#F7F3F0'],
+                            backgroundColor: ['#df8c43', '#e5a369', '#ecba8e', '#f2d1b4', '#f9e8d9'],
                             borderWidth: 0
                         }]
                     },

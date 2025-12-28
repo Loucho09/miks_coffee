@@ -67,6 +67,11 @@ export default {
                 'dashboard': {
                     1000: '#FF0000', //
                 },
+
+                'dandelion': {
+                    50: '#f19e25',
+                    100: '#f2a73a', //
+                },
             },
             boxShadow: {
                 // 🟢 NEW FEATURE: Custom Depth Effects

@@ -15,13 +15,15 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // 🟢 NEW FEATURE: Share unread support reply count globally
+        // Share unread support reply count globally for navigation badges
         View::composer('*', function ($view) {
             if (Auth::check()) {
                 $unreadSupportCount = SupportTicket::where('user_id', Auth::id())
                     ->where('status', 'replied')
                     ->count();
                 $view->with('unreadSupportCount', $unreadSupportCount);
+            } else {
+                $view->with('unreadSupportCount', 0);
             }
         });
     }
