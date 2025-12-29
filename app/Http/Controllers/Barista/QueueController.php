@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Barista;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\PointTransaction;
 use Illuminate\Support\Facades\Auth;
 
 class QueueController extends Controller
@@ -18,18 +19,42 @@ class QueueController extends Controller
             abort(403, 'Unauthorized. Admins/Baristas only.');
         }
 
-        // Standard load for initial page hit
         $orders = Order::whereIn('status', ['pending', 'preparing'])
                         ->with(['items.product', 'user']) 
                         ->orderBy('id', 'asc')
                         ->get();
 
-        return view('barista.queue', compact('orders'));
+        $redemptions = PointTransaction::where('amount', '<', 0)
+                        ->where('created_at', '>=', now()->subDay())
+                        ->where('description', 'not like', '[FULFILLED]%')
+                        ->with('user')
+                        ->latest()
+                        ->get();
+
+        return view('barista.queue', compact('orders', 'redemptions'));
     }
 
     /**
-     * 🟢 NEW FEATURE: Fetch Active Orders for Live Updates
-     * Returns raw JSON for the Alpine.js frontend.
+     * Fetch Active Redemptions for Live Updates (No Refresh)
+     */
+    public function getActiveRedemptions()
+    {
+        if (Auth::user()->usertype !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        return response()->json(
+            PointTransaction::where('amount', '<', 0)
+                ->where('created_at', '>=', now()->subDay())
+                ->where('description', 'not like', '[FULFILLED]%')
+                ->with('user')
+                ->latest()
+                ->get()
+        );
+    }
+
+    /**
+     * Fetch Active Orders for Live Updates (No Refresh)
      */
     public function getActiveOrders()
     {
@@ -46,6 +71,24 @@ class QueueController extends Controller
     }
 
     /**
+     * Fulfill a reward claim
+     */
+    public function fulfillRedemption($id)
+    {
+        if (Auth::user()->usertype !== 'admin') {
+            abort(403);
+        }
+
+        $transaction = PointTransaction::findOrFail($id);
+        
+        $transaction->update([
+            'description' => '[FULFILLED] ' . $transaction->description
+        ]);
+
+        return back()->with('success', 'Reward fulfilled and cleared from terminal.');
+    }
+
+    /**
      * Update Order Status & Award Points
      */
     public function updateStatus(Request $request, $id)
@@ -55,20 +98,16 @@ class QueueController extends Controller
         }
 
         $order = Order::with('user')->findOrFail($id);
-
-        $request->validate([
-            'status' => 'required|in:pending,preparing,ready,served,cancelled'
-        ]);
+        $request->validate(['status' => 'required|in:pending,preparing,ready,served,cancelled']);
 
         if ($request->status === 'ready' && $order->status !== 'ready' && $order->user) {
-            $pointsEarned = floor($order->total_price / 50); // Standardized to total_price
+            $pointsEarned = floor($order->total_price / 50); 
             $order->user->increment('points', $pointsEarned);
         }
 
         $order->status = $request->status;
         $order->save();
 
-        return redirect()->route('barista.queue')
-            ->with('success', 'Order #' . $order->id . ' status updated to ' . strtoupper($request->status));
+        return redirect()->route('barista.queue')->with('success', 'Order status updated.');
     }
 }

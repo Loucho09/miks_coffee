@@ -22,38 +22,22 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Order;
 
-/*
-|--------------------------------------------------------------------------
-| 1. PUBLIC ROUTES
-|--------------------------------------------------------------------------
-*/
-
+/* |--------------------------------------------------------------------------
+   | 1. PUBLIC ROUTES
+   | -------------------------------------------------------------------------- */
 Route::get('/', function () {
-    if (Auth::check()) {
-        return redirect()->route('dashboard');
-    }
-    
-    $featured = Product::where('is_active', true)
-                        ->with('sizes')
-                        ->inRandomOrder()
-                        ->take(3)
-                        ->get();
-                        
+    if (Auth::check()) return redirect()->route('dashboard');
+    $featured = Product::where('is_active', true)->with('sizes')->inRandomOrder()->take(3)->get();
     return view('welcome', compact('featured'));
 })->name('welcome');
 
 Route::get('/menu', function (Request $request) {
     $query = Product::with(['category', 'sizes'])->where('is_active', true);
-    
     if ($request->filled('search')) {
         $query->where('name', 'like', '%' . $request->search . '%')
               ->orWhere('description', 'like', '%' . $request->search . '%');
     }
-    
-    if ($request->filled('category')) {
-        $query->where('category_id', $request->category);
-    }
-    
+    if ($request->filled('category')) $query->where('category_id', $request->category);
     $products = $query->get();
     $categories = Category::all();
     return view('public_menu', compact('products', 'categories'));
@@ -62,35 +46,20 @@ Route::get('/menu', function (Request $request) {
 Route::get('/support', [SupportController::class, 'index'])->name('support.index');
 Route::post('/support/send', [SupportController::class, 'send'])->name('support.send');
 
-/*
-|--------------------------------------------------------------------------
-| 2. AUTHENTICATED ROUTES
-|--------------------------------------------------------------------------
-*/
+/* |--------------------------------------------------------------------------
+   | 2. AUTHENTICATED ROUTES
+   | -------------------------------------------------------------------------- */
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard', function () {
-    /** @var \App\Models\User $user */
-    $user = Auth::user();
-    $user->updateStreak();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $user->updateStreak();
+        $recentOrders = Order::where('user_id', $user->id)->with(['items.product', 'items.review', 'items.order'])->latest()->take(5)->get();
+        $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)->with(['replies.user'])->latest()->take(5)->get();
+        return view('dashboard', compact('recentOrders', 'supportTickets'));
+    })->name('dashboard');
 
-    $recentOrders = Order::where('user_id', $user->id)
-                        ->with(['items.product', 'items.review', 'items.order'])
-                        ->latest()
-                        ->take(5)
-                        ->get();
-
-    // 🟢 FIX: Including 'replies.user' makes the admin messages visible
-    $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)
-                        ->with(['replies.user']) 
-                        ->latest()
-                        ->take(5)
-                        ->get();
-
-    return view('dashboard', compact('recentOrders', 'supportTickets'));
-})->name('dashboard');
-
-    // Shop Home / Browsing
     Route::get('/home', function (Request $request) {
         $query = Product::with(['category', 'sizes'])->where('is_active', true);
         if ($request->filled('search')) $query->where('name', 'like', '%' . $request->search . '%');
@@ -100,49 +69,36 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('cafe.index', compact('products', 'categories'));
     })->name('home');
 
-    // Rewards & Loyalty System
     Route::get('/rewards', function () {
-        return view('cafe.rewards');
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $points = $user->points ?? 0; 
+        $goal = ($points >= 200) ? 500 : (($points >= 100) ? 200 : 100);
+        return view('cafe.rewards', compact('user', 'points', 'goal'));
     })->name('rewards.index');
 
     Route::post('/claim-reward', [OrderController::class, 'claimReward'])->name('rewards.claim');
-
-    // Customer Reviews
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 
-    // Cart Management (Controller Group)
     Route::controller(CartController::class)->group(function () {
         Route::get('/cart', 'index')->name('cart.index');
         Route::post('/add-to-cart', 'add')->name('cart.add'); 
         Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
     });
 
-    // Orders & Transactions
     Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     
-    /**
-     * 🟢 FIXED: Receipt Logic
-     * Closure-based to prevent ControllerDispatcher 500 errors.
-     */
     Route::get('/orders/{id}/receipt', function ($id) {
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $order = Order::with(['items.product', 'user'])->findOrFail($id);
-
-        if ($order->user_id !== $user->id && !$user->isAdmin()) {
-            abort(403);
-        }
-
-        $pts = $order->user->loyalty_points ?? 0;
+        if ($order->user_id !== $user->id && !$user->isAdmin()) abort(403);
+        $pts = $order->user->points ?? 0;
         $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
-        $nextGoal = $pts >= 500 ? null : ($pts >= 200 ? 500 : 200);
-        $diff = $nextGoal ? $nextGoal - $pts : null;
-
-        return view('emails.order_receipt', compact('order', 'tier', 'diff'));
+        return view('emails.order_receipt', compact('order', 'tier'));
     })->name('orders.receipt');
 
-    // User Profile Settings
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -151,45 +107,35 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('barista')->name('barista.')->group(function () {
         Route::get('/queue', [QueueController::class, 'index'])->name('queue');
         Route::post('/update-status/{id}', [QueueController::class, 'updateStatus'])->name('update_status');
-        // 🟢 LIVE FEATURE: Dynamic Data Fetch for KDS
         Route::get('/active-orders', [QueueController::class, 'getActiveOrders'])->name('active_orders');
+        
+        // 🟢 FIXED: Missing Reward Terminal Routes
+        Route::get('/active-redemptions', [QueueController::class, 'getActiveRedemptions'])->name('active_redemptions');
+        Route::post('/redemption/{id}/fulfill', [QueueController::class, 'fulfillRedemption'])->name('redemption.fulfill');
     });
 
     /* |--------------------------------------------------------------------------
-    | 3. ADMIN ONLY ROUTES (Protected Group)
-    |--------------------------------------------------------------------------
-    */
+       | 3. ADMIN ONLY ROUTES
+       | -------------------------------------------------------------------------- */
     Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
-        
-        // Admin Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        
-        /**
-         * 🟢 FIXED: Admin Data Export
-         */
         Route::get('/orders/export', ExportController::class)->name('orders.export');
-
-        // Inventory & Stock
         Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
         
-        // Customer Management
         Route::controller(CustomerController::class)->prefix('customers')->name('customers.')->group(function () {
             Route::get('/', 'index')->name('index');           
             Route::get('/{id}', 'show')->name('show');         
             Route::put('/{id}/password', 'resetPassword')->name('reset_password');
         });
 
-        // Support Requests Management
         Route::controller(SupportController::class)->prefix('support-requests')->name('support.')->group(function () {
             Route::get('/', 'adminIndex')->name('admin_index');
             Route::post('/{id}/resolve', 'resolve')->name('resolve');
             Route::post('/{ticket}/reply', 'reply')->name('reply');
             Route::get('/active-tickets', 'getActiveTickets')->name('active_tickets');
-            // 🟢 LIVE FEATURE: Dynamic Data Fetch for Admin Tickets
             Route::get('/active-json', 'getActiveTickets')->name('active_json');
         });
 
-        // Digital Menu Management
         Route::controller(MenuController::class)->prefix('menu')->name('menu.')->group(function () {
             Route::get('/', 'index')->name('index'); 
             Route::get('/create', 'create')->name('create');
@@ -199,7 +145,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
-        // Legal Overlays
         Route::view('/privacy', 'legal.privacy')->name('privacy');
         Route::view('/terms', 'legal.terms')->name('terms');
     });

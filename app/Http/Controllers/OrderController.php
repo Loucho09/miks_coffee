@@ -33,6 +33,44 @@ class OrderController extends Controller
      */
     public function claimReward(Request $request)
     {
+        /** @var User $user */
+        $user = Auth::user();
+
+        // 🟢 NEW FEATURE: Backend Reward Redemption Logic
+        // This handles the immediate point deduction and ledger entry from the Rewards Vault
+        $rewards = [
+            'free_espresso' => ['name' => 'Signature Espresso', 'cost' => 50],
+            'pastry_treat'  => ['name' => 'Artisan Pastry', 'cost' => 80],
+            'premium_brew'  => ['name' => 'Large Premium Brew', 'cost' => 120],
+            'bag_beans'     => ['name' => 'House Blend (250g)', 'cost' => 500],
+        ];
+
+        $rewardKey = $request->input('reward_id');
+
+        // Check if this is a Vault Redemption (Immediate Deduction)
+        if ($rewardKey && isset($rewards[$rewardKey])) {
+            $reward = $rewards[$rewardKey];
+
+            if (($user->points ?? 0) < $reward['cost']) {
+                return back()->with('error', 'Insufficient points for this redemption.');
+            }
+
+            DB::transaction(function () use ($user, $reward) {
+                // Deduct points from User model
+                $user->decrement('points', $reward['cost']);
+
+                // Create the Ledger entry for the History table
+                PointTransaction::create([
+                    'user_id' => $user->id,
+                    'amount' => -$reward['cost'],
+                    'description' => 'Redeemed: ' . $reward['name'],
+                ]);
+            });
+
+            return back()->with('success', 'Redemption authorized! Please present your terminal to the barista.');
+        }
+
+        // Fallback to original session-based reward logic for checkout
         $reward = [
             'name'   => $request->name,
             'points' => $request->points,
@@ -121,8 +159,25 @@ class OrderController extends Controller
             // FIXED: Standardized point column names
             if ($pointsRedeemed > 0) {
                 $user->decrement('points', $pointsRedeemed);
+                
+                // Add ledger entry for redemption during checkout
+                PointTransaction::create([
+                    'user_id' => $user->id,
+                    'amount' => -$pointsRedeemed,
+                    'description' => 'Checkout Redemption: ' . $rewardType,
+                    'order_id' => $order->id
+                ]);
             }
+
             $user->increment('points', 10);
+            
+            // Add ledger entry for points earned from order
+            PointTransaction::create([
+                'user_id' => $user->id,
+                'amount' => 10,
+                'description' => 'Earned from Order #' . $order->id,
+                'order_id' => $order->id
+            ]);
 
             DB::commit();
             session()->forget(['cart', 'claimed_reward']); 

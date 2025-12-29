@@ -19,45 +19,57 @@
     <div class="py-6 sm:py-12 bg-stone-50 dark:bg-stone-950 min-h-screen transition-all duration-500">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
+            {{-- 🟢 NEW FEATURE: Admin Daily Snapshot --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
+                {{-- Today's Sales Card --}}
                 <div class="bg-stone-500 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
                     <div class="relative z-10">
-                        <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-2">Today's Sales Summary</p>
-                        <h4 class="text-3xl sm:text-4xl font-black mb-1">₱{{ number_format($todayRevenue, 2) }}</h4>
-                        
-                        <div class="mt-4 mb-2">
-                            <div class="flex justify-between text-[9px] font-black uppercase tracking-tighter mb-1 opacity-80">
-                                <span>Daily Goal Progress</span>
-                                <span>₱10k Goal</span>
-                            </div>
-                            @php $percentage = min(($todayRevenue / 10000) * 100, 100); @endphp
-                            <div class="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
-                                {{-- ALTERNATIVE FIX: Uses Tailwind class instead of style attribute to clear diagnostic errors --}}
-                                <div class="bg-white h-full transition-all duration-1000 w-[{{ $percentage }}%]"></div>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap items-center gap-2 mt-4">
-                            <span class="px-2 py-1 bg-white/20 rounded-lg text-[10px] font-bold">
-                                {{ $todayOrderCount }} Orders
-                            </span>
-                            <span class="text-[10px] font-bold {{ $revenueChange >= 0 ? 'text-emerald-300' : 'text-rose-300' }}">
-                                {{ $revenueChange >= 0 ? '↑' : '↓' }} {{ number_format(abs($revenueChange), 1) }}% vs Yesterday
-                            </span>
-                        </div>
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-2">Today's Revenue</p>
+                        <h4 class="text-3xl font-black mb-1">₱{{ number_format($todayRevenue, 2) }}</h4>
+                        <p class="text-[10px] font-bold {{ $revenueChange >= 0 ? 'text-emerald-300' : 'text-rose-300' }}">
+                            {{ $revenueChange >= 0 ? '↑' : '↓' }} {{ number_format(abs($revenueChange), 1) }}% vs Yesterday
+                        </p>
                     </div>
                     <div class="absolute -right-4 -bottom-4 text-white/10 group-hover:scale-110 transition-transform duration-700">
-                        <svg class="w-24 h-24 sm:w-32 sm:h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-stone-900 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-sm flex flex-col justify-center">
+                {{-- Loyalty Issued Card --}}
+                <div class="bg-stone-900 p-6 sm:p-8 rounded-[2.5rem] border border-stone-800 shadow-2xl flex flex-col justify-center">
+                    <p class="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-2">Points Issued Today</p>
+                    <h4 class="text-3xl font-black text-amber-500 italic">+{{ number_format($pointsIssued) }}</h4>
+                    <p class="text-[9px] font-bold text-stone-500 uppercase mt-1">New Loyalty Debt</p>
+                </div>
+
+                {{-- Redemptions Card --}}
+                <div class="bg-stone-900 p-6 sm:p-8 rounded-[2.5rem] border border-stone-800 shadow-2xl flex flex-col justify-center">
+                    <p class="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-2">Rewards Redeemed</p>
+                    <h4 class="text-3xl font-black text-rose-500 italic">-{{ number_format($pointsRedeemed) }}</h4>
+                    <p class="text-[9px] font-bold text-stone-500 uppercase mt-1">Inventory Outflow</p>
+                </div>
+
+                {{-- Top Customer Card --}}
+                <div class="bg-amber-600 p-6 sm:p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group flex flex-col justify-center">
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-black text-stone-900 uppercase tracking-[0.3em] mb-2">Today's Top Regular</p>
+                        <h4 class="text-xl font-black text-stone-950 uppercase italic leading-none truncate">
+                            {{ $topCustomer && $topCustomer->orders_count > 0 ? $topCustomer->name : 'No Orders' }}
+                        </h4>
+                        <p class="text-[9px] font-bold text-stone-900/60 uppercase mt-2">Most active customer</p>
+                    </div>
+                    <div class="absolute -bottom-2 -right-2 text-5xl opacity-10">🏆</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-10">
+                <div class="bg-white dark:bg-stone-900 p-6 sm:p-8 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-sm flex flex-col justify-center">
                     <p class="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-2">Pending Prep</p>
                     <h4 class="text-3xl sm:text-4xl font-black text-stone-900 dark:text-white">{{ $pendingOrders }}</h4>
                     <p class="text-xs text-amber-600 font-bold mt-2">Active in Kitchen</p>
                 </div>
 
-                <div class="bg-stone-900 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col justify-center border border-stone-800 sm:col-span-2 lg:col-span-1">
+                <div class="bg-stone-900 p-6 sm:p-8 rounded-[2.5rem] shadow-2xl flex flex-col justify-center border border-stone-800">
                     <p class="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-2">Total Customer Base</p>
                     <h4 class="text-3xl sm:text-4xl font-black text-white">{{ $totalCustomers }}</h4>
                     <p class="text-xs text-stone-500 font-bold mt-2">Registered Accounts</p>

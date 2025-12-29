@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\PointTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -20,19 +21,33 @@ class DashboardController extends Controller
         $pendingOrders = Order::where('status', 'pending')->count();
         $totalCustomers = User::where('usertype', 'user')->count();
 
-        // 2. NEW FEATURE: Daily Sale Summary Reports
-        $todayRevenue = Order::whereDate('created_at', Carbon::today())->sum('total_price');
+        // 2. Daily Sale Summary Reports
+        $today = Carbon::today();
+        $todayRevenue = Order::whereDate('created_at', $today)->sum('total_price');
         $yesterdayRevenue = Order::whereDate('created_at', Carbon::yesterday())->sum('total_price');
-        $todayOrderCount = Order::whereDate('created_at', Carbon::today())->count();
+        $todayOrderCount = Order::whereDate('created_at', $today)->count();
         
         // Calculate growth percentage
         $revenueChange = $yesterdayRevenue > 0 
             ? (($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100 
             : 0;
 
+        // 🟢 NEW FEATURE: Loyalty Snapshot Metrics
+        $pointsIssued = PointTransaction::whereDate('created_at', $today)
+                            ->where('amount', '>', 0)->sum('amount');
+        $pointsRedeemed = abs(PointTransaction::whereDate('created_at', $today)
+                            ->where('amount', '<', 0)->sum('amount'));
+
+        // Identify Top Customer Today
+        $topCustomer = User::where('usertype', 'user')
+            ->withCount(['orders' => function($q) use ($today) {
+                $q->whereDate('created_at', $today);
+            }])
+            ->orderBy('orders_count', 'desc')
+            ->first();
+
         // 3. Recent Orders & Stock Alerts
         $recentOrders = Order::with('user')->latest()->take(10)->get();
-        // Updated Alert: Highlighting critical stock items (less than 10)
         $lowStockItems = Product::where('stock_quantity', '<', 10)
                                 ->orderBy('stock_quantity', 'asc')
                                 ->get();
@@ -73,7 +88,10 @@ class DashboardController extends Controller
             'todayRevenue',
             'yesterdayRevenue',
             'todayOrderCount',
-            'revenueChange'
+            'revenueChange',
+            'pointsIssued',
+            'pointsRedeemed',
+            'topCustomer'
         ));
     }
 }
