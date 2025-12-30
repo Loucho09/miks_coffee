@@ -22,6 +22,7 @@ use App\Http\Controllers\HomeController;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Order;
+use App\Models\User;
 
 /* |--------------------------------------------------------------------------
    | 1. PUBLIC ROUTES
@@ -44,7 +45,6 @@ Route::get('/menu', function (Request $request) {
 Route::get('/support', [SupportController::class, 'index'])->name('support.index');
 Route::post('/support/send', [SupportController::class, 'send'])->name('support.send');
 
-// Legal Routes
 Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/terms', 'legal.terms')->name('terms');
 
@@ -53,51 +53,53 @@ Route::view('/terms', 'legal.terms')->name('terms');
    | -------------------------------------------------------------------------- */
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('/dashboard', function () {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $user->updateStreak();
-        $recentOrders = Order::where('user_id', $user->id)->with(['items.product', 'items.review', 'items.order'])->latest()->take(5)->get();
-        $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)->with(['replies.user'])->latest()->take(5)->get();
-        return view('dashboard', compact('recentOrders', 'supportTickets'));
-    })->name('dashboard');
+    /* --- CUSTOMER ONLY FEATURES --- */
+    Route::middleware(['role:customer'])->group(function () {
+        Route::get('/dashboard', function () {
+            /** @var User $user */
+            $user = Auth::user();
+            $user->updateStreak();
+            $recentOrders = Order::where('user_id', $user->id)->with(['items.product', 'items.review', 'items.order'])->latest()->take(5)->get();
+            $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)->with(['replies.user'])->latest()->take(5)->get();
+            return view('dashboard', compact('recentOrders', 'supportTickets'));
+        })->name('dashboard');
 
-    Route::get('/home', function (Request $request) {
-        $query = Product::with(['category', 'sizes'])->where('is_active', true);
-        if ($request->filled('search')) $query->where('name', 'like', '%' . $request->search . '%');
-        if ($request->filled('category')) $query->where('category_id', $request->category);
-        $products = $query->get();
-        $categories = Category::all();
-        return view('cafe.index', compact('products', 'categories'));
-    })->name('home');
+        Route::get('/home', function (Request $request) {
+            $query = Product::with(['category', 'sizes'])->where('is_active', true);
+            if ($request->filled('search')) $query->where('name', 'like', '%' . $request->search . '%');
+            if ($request->filled('category')) $query->where('category_id', $request->category);
+            $products = $query->get();
+            $categories = Category::all();
+            return view('cafe.index', compact('products', 'categories'));
+        })->name('home');
 
-    Route::get('/rewards', function () {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $points = $user->points ?? 0; 
-        $goal = ($points >= 200) ? 500 : (($points >= 100) ? 200 : 100);
-        return view('cafe.rewards', compact('user', 'points', 'goal'));
-    })->name('rewards.index');
+        Route::get('/rewards', function () {
+            /** @var User $user */
+            $user = Auth::user();
+            $points = $user->points ?? 0; 
+            $goal = ($points >= 200) ? 500 : (($points >= 100) ? 200 : 100);
+            return view('cafe.rewards', compact('user', 'points', 'goal'));
+        })->name('rewards.index');
 
-    Route::post('/claim-reward', [OrderController::class, 'claimReward'])->name('rewards.claim');
-    
-    // Explicitly named route to match dashboard.blade.php
-    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+        Route::post('/claim-reward', [OrderController::class, 'claimReward'])->name('rewards.claim');
+        Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 
-    Route::controller(CartController::class)->group(function () {
-        Route::get('/cart', 'index')->name('cart.index');
-        Route::post('/add-to-cart', 'add')->name('cart.add'); 
-        Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
+        Route::controller(CartController::class)->group(function () {
+            Route::get('/cart', 'index')->name('cart.index');
+            Route::post('/add-to-cart', 'add')->name('cart.add'); 
+            Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
+        });
+
+        Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     });
 
-    Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    
+    /* --- COMMON AUTH ROUTES (Receipts, Profiles) --- */
     Route::get('/orders/{id}/receipt', function ($id) {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
         $order = Order::with(['items.product', 'user'])->findOrFail($id);
-        if ($order->user_id !== $user->id && !$user->isAdmin()) abort(403);
+        /** @var User $user */
+        $user = Auth::user();
+        if ($order->user_id !== Auth::id() && !$user->isAdmin()) abort(403);
         $pts = $order->user->points ?? 0;
         $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
         return view('emails.order_receipt', compact('order', 'tier'));
@@ -106,25 +108,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
-    // Privacy and Data Routes
     Route::get('/profile/data-report', [ProfileController::class, 'showDataReport'])->name('profile.data_report');
     Route::post('/profile/export', [ProfileController::class, 'exportData'])->name('profile.export');
 
-    // Barista Queue Access
-    Route::prefix('barista')->name('barista.')->group(function () {
+    /* --- BARISTA ONLY FEATURES --- */
+    Route::middleware(['role:barista'])->prefix('barista')->name('barista.')->group(function () {
         Route::get('/queue', [QueueController::class, 'index'])->name('queue');
         Route::post('/update-status/{id}', [QueueController::class, 'updateStatus'])->name('update_status');
         Route::get('/active-orders', [QueueController::class, 'getActiveOrders'])->name('active_orders');
-        
         Route::get('/active-redemptions', [QueueController::class, 'getActiveRedemptions'])->name('active_redemptions');
         Route::post('/redemption/{id}/fulfill', [QueueController::class, 'fulfillRedemption'])->name('redemption.fulfill');
     });
 
-    /* |--------------------------------------------------------------------------
-        | 3. ADMIN ONLY ROUTES
-        | -------------------------------------------------------------------------- */
-    Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
+    /* --- ADMIN ONLY FEATURES (Single Session Enforced) --- */
+    Route::middleware(['admin', 'admin.single_session'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/orders/export', ExportController::class)->name('orders.export');
         Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
@@ -150,6 +147,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+
+        /* Operations Mode for Admin (The "Double Feature" Access) */
+        Route::prefix('operations')->name('ops.')->group(function () {
+            Route::get('/barista-view', [QueueController::class, 'index'])->name('barista');
+            Route::get('/customer-view', function () {
+                return redirect()->route('dashboard');
+            })->name('customer');
         });
     });
 });

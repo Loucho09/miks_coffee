@@ -29,6 +29,7 @@ class User extends Authenticatable
         'last_seen_at',
         'referral_code',
         'referred_by',
+        'last_session_id',
     ];
 
     protected $hidden = [
@@ -47,18 +48,12 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * 🟢 FEATURE: Automate referral code generation and point distribution.
-     */
     protected static function booted()
     {
         static::creating(function ($user) {
-            // Generate a code if one doesn't exist
             if (empty($user->referral_code)) {
                 $user->referral_code = 'MIKS-' . strtoupper(Str::random(6));
             }
-            
-            // Capture referral from session
             if (session()->has('referrer_code')) {
                 $referrer = self::where('referral_code', session('referrer_code'))->first();
                 if ($referrer) {
@@ -68,24 +63,16 @@ class User extends Authenticatable
         });
 
         static::created(function ($user) {
-            // Only run if the user was actually referred by someone
             if ($user->referred_by) {
-                $referrer = $user->referrer; // This uses the belongsTo relationship
-                
+                $referrer = $user->referrer;
                 if ($referrer) {
-                    // Reward Referrer
                     $referrer->increment('points', 50);
-                    
-                    // Reward New User
                     $user->increment('points', 50);
-
-                    // Create Logs
                     PointTransaction::create([
                         'user_id' => $referrer->id,
                         'amount' => 50,
                         'description' => "Referral Bonus: {$user->name} joined",
                     ]);
-
                     PointTransaction::create([
                         'user_id' => $user->id,
                         'amount' => 50,
@@ -96,10 +83,6 @@ class User extends Authenticatable
         });
     }
 
-    /**
-     * 🟢 UPDATED FEATURE: Update Streak Logic (Once per day) and handle milestones.
-     * Returns true if streak was incremented (first order of the day), false otherwise.
-     */
     public function updateStreak(): bool
     {
         $today = Carbon::today();
@@ -112,14 +95,12 @@ class User extends Authenticatable
         } elseif ($lastVisit->isYesterday()) {
             $this->streak_count++;
         } else {
-            // Streak broken (more than 1 day missed)
             $this->streak_count = 1;
         }
 
         $this->last_visit_at = now();
         $this->save();
 
-        // 🟢 Handle Milestone Bonus (Every 3 Days)
         if ($this->streak_count >= 3 && $this->streak_count % 3 === 0) {
             $this->increment('points', 20);
             PointTransaction::create([
@@ -147,31 +128,9 @@ class User extends Authenticatable
         return 'Bronze';
     }
 
-    public function referrer(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'referred_by');
-    }
-
-    /**
-     * 🟢 FIXED: Added the referrals relationship required by the Admin Controller
-     */
-    public function referrals(): HasMany
-    {
-        return $this->hasMany(User::class, 'referred_by');
-    }
-
-    public function orders(): HasMany
-    {
-        return $this->hasMany(Order::class);
-    }
-
-    public function pointTransactions(): HasMany
-    {
-        return $this->hasMany(PointTransaction::class);
-    }
-
-    public function getTotalSpentAttribute(): float
-    {
-        return (float) $this->orders()->sum('total_price');
-    }
+    public function referrer(): BelongsTo { return $this->belongsTo(User::class, 'referred_by'); }
+    public function referrals(): HasMany { return $this->hasMany(User::class, 'referred_by'); }
+    public function orders(): HasMany { return $this->hasMany(Order::class); }
+    public function pointTransactions(): HasMany { return $this->hasMany(PointTransaction::class); }
+    public function getTotalSpentAttribute(): float { return (float) $this->orders()->sum('total_price'); }
 }
