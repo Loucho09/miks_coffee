@@ -70,6 +70,18 @@
                         </div>
                     </div>
 
+                    <div class="flex items-start gap-3 py-2">
+                        <input id="terms" type="checkbox" name="terms" required
+                            class="mt-1 h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500 bg-stone-100 dark:bg-stone-800 dark:border-stone-700">
+                        <label for="terms" class="text-xs text-stone-600 dark:text-stone-400 leading-normal">
+                            I agree to the 
+                            <a href="{{ route('terms') }}" class="text-amber-600 font-bold hover:underline" target="_blank">Terms of Service</a> 
+                            and 
+                            <a href="{{ route('privacy') }}" class="text-amber-600 font-bold hover:underline" target="_blank">Privacy Policy</a>.
+                        </label>
+                    </div>
+                    <x-input-error :messages="$errors->get('terms')" class="mt-1" />
+
                     <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.01] transition transform">
                         Create Account
                     </button>

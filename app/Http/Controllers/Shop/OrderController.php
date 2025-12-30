@@ -226,16 +226,8 @@ class OrderController extends Controller
                 'order_id' => $order->id
             ]);
 
+            // 🟢 UPDATED: Let the Model handle the streak and milestone bonus points automatically
             $user->updateStreak();
-            if ($user->streak_count >= 3 && $user->streak_count % 3 === 0) {
-                $user->increment('points', 20);
-                PointTransaction::create([
-                    'user_id' => $user->id,
-                    'amount' => 20,
-                    'description' => "Streak Milestone: {$user->streak_count} Day Order Streak reached",
-                    'order_id' => $order->id
-                ]);
-            }
 
             DB::commit();
             session()->forget(['cart', 'claimed_reward']); 

@@ -9,7 +9,7 @@
                     Manage and respond to customer inquiries.
                 </p>
             </div>
-            {{-- 🟢 Live Monitor Indicator --}}
+            {{-- Live Monitor Indicator --}}
             <div class="flex items-center gap-2 bg-stone-100 dark:bg-stone-900 px-4 py-2 rounded-full border border-stone-200 dark:border-stone-800 shadow-sm">
                 <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -20,10 +20,11 @@
         </div>
     </x-slot>
 
-    {{-- 🟢 Dynamic Alpine Data Wrapper --}}
+    {{-- Dynamic Alpine Data Wrapper --}}
     <div x-data="{ 
         tickets: [], 
         replyModal: false, 
+        resolveModal: false,
         selectedTicketId: null, 
         customerName: '', 
         originalMessage: '',
@@ -127,12 +128,9 @@
                                                     class="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-black uppercase text-[9px] tracking-widest py-2 px-6 rounded-full transition transform hover:scale-105 shadow-md w-32 text-center">
                                                     Reply
                                                 </button>
-                                                <form :action="'/admin/support-requests/' + ticket.id + '/resolve'" method="POST" onsubmit="return confirm('Mark this request as resolved?');">
-                                                    @csrf
-                                                    <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white font-black uppercase text-[9px] tracking-widest py-2 px-6 rounded-full transition transform hover:scale-105 shadow-md w-32 text-center">
-                                                        Resolve
-                                                    </button>
-                                                </form>
+                                                <button type="button" @click="resolveModal = true; selectedTicketId = ticket.id" class="bg-amber-600 hover:bg-amber-700 text-white font-black uppercase text-[9px] tracking-widest py-2 px-6 rounded-full transition transform hover:scale-105 shadow-md w-32 text-center">
+                                                    Resolve
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -186,6 +184,31 @@
                         </div>
                         <button type="submit" class="w-full py-5 bg-stone-900 dark:bg-stone-50 text-white dark:text-stone-900 rounded-[2rem] font-black uppercase tracking-[0.2em] hover:bg-amber-600 transition-all shadow-xl text-[10px]">Send Reply & Update Status</button>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- Resolve Modal --}}
+        <div x-show="resolveModal" class="fixed inset-0 z-[70] overflow-y-auto flex items-center justify-center p-4 bg-stone-950/90 backdrop-blur-lg" x-cloak x-transition>
+            <div class="bg-white dark:bg-stone-900 w-full max-w-md rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden" @click.away="resolveModal = false">
+                <div class="p-10 text-center">
+                    <div class="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <h3 class="text-stone-900 dark:text-white font-black text-xl uppercase tracking-tight italic mb-2">Mark as Resolved?</h3>
+                    <p class="text-stone-500 dark:text-stone-400 text-xs font-medium italic mb-8">This will finalize the request and move it to the resolved archive. This action is artfully permanent.</p>
+                    
+                    <div class="flex flex-col gap-3">
+                        <form :action="'/admin/support-requests/' + selectedTicketId + '/resolve'" method="POST">
+                            @csrf
+                            <button type="submit" class="w-full py-4 bg-amber-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-amber-700 transition-all shadow-lg shadow-amber-600/20">
+                                Authorize Resolution
+                            </button>
+                        </form>
+                        <button @click="resolveModal = false" class="w-full py-4 bg-stone-100 dark:bg-stone-800 text-stone-500 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-stone-200 dark:hover:bg-stone-700 transition-all">
+                            Keep Active
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

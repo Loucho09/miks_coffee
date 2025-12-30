@@ -97,23 +97,39 @@ class User extends Authenticatable
     }
 
     /**
-     * 🟢 NEW FEATURE: Update Streak Logic
+     * 🟢 UPDATED FEATURE: Update Streak Logic (Once per day) and handle milestones.
+     * Returns true if streak was incremented (first order of the day), false otherwise.
      */
-    public function updateStreak(): void
+    public function updateStreak(): bool
     {
         $today = Carbon::today();
         $lastVisit = $this->last_visit_at ? Carbon::parse($this->last_visit_at)->startOfDay() : null;
 
         if (!$lastVisit) {
             $this->streak_count = 1;
+        } elseif ($lastVisit->isToday()) {
+            return false;
         } elseif ($lastVisit->isYesterday()) {
             $this->streak_count++;
-        } elseif ($lastVisit->isBefore($today->subDay())) {
+        } else {
+            // Streak broken (more than 1 day missed)
             $this->streak_count = 1;
         }
 
         $this->last_visit_at = now();
         $this->save();
+
+        // 🟢 Handle Milestone Bonus (Every 3 Days)
+        if ($this->streak_count >= 3 && $this->streak_count % 3 === 0) {
+            $this->increment('points', 20);
+            PointTransaction::create([
+                'user_id' => $this->id,
+                'amount' => 20,
+                'description' => "Streak Milestone: {$this->streak_count} Day Order Streak reached",
+            ]);
+        }
+
+        return true;
     }
 
     public function isAdmin(): bool
@@ -134,6 +150,14 @@ class User extends Authenticatable
     public function referrer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'referred_by');
+    }
+
+    /**
+     * 🟢 FIXED: Added the referrals relationship required by the Admin Controller
+     */
+    public function referrals(): HasMany
+    {
+        return $this->hasMany(User::class, 'referred_by');
     }
 
     public function orders(): HasMany

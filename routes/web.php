@@ -27,9 +27,6 @@ use App\Models\Order;
    | 1. PUBLIC ROUTES
    | -------------------------------------------------------------------------- */
 
-/**
- * Updated root route to utilize HomeController for Leaderboard and Featured Product data.
- */
 Route::get('/', [HomeController::class, 'index'])->name('welcome');
 
 Route::get('/menu', function (Request $request) {
@@ -46,6 +43,10 @@ Route::get('/menu', function (Request $request) {
 
 Route::get('/support', [SupportController::class, 'index'])->name('support.index');
 Route::post('/support/send', [SupportController::class, 'send'])->name('support.send');
+
+// Legal Routes
+Route::view('/privacy', 'legal.privacy')->name('privacy');
+Route::view('/terms', 'legal.terms')->name('terms');
 
 /* |--------------------------------------------------------------------------
    | 2. AUTHENTICATED ROUTES
@@ -79,7 +80,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('rewards.index');
 
     Route::post('/claim-reward', [OrderController::class, 'claimReward'])->name('rewards.claim');
-    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('rewards.store');
 
     Route::controller(CartController::class)->group(function () {
         Route::get('/cart', 'index')->name('cart.index');
@@ -144,9 +145,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
-
-        Route::view('/privacy', 'legal.privacy')->name('privacy');
-        Route::view('/terms', 'legal.terms')->name('terms');
     });
 });
 

@@ -33,6 +33,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'terms' => ['required', 'accepted'],
         ]);
 
         $user = User::create([
@@ -46,7 +47,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        // CHANGED: Redirect to 'home' instead of 'admin.dashboard'
+        // Redirect to 'home' instead of 'admin.dashboard'
         return redirect(route('home', absolute: false));
     }
 }
