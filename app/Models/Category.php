@@ -13,6 +13,7 @@ class Category extends Model
     protected $fillable = [
         'name',
         'slug',
+        'image', // 🟢 Added for Category Banners
         'is_active',
     ];
 

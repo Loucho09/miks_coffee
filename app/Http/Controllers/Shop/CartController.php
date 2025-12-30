@@ -6,13 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductSize;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
     public function index()
     {
         $cart = session()->get('cart', []);
-        return view('shop.cart', compact('cart'));
+        
+        $subtotal = 0;
+        $totalItems = 0;
+
+        foreach ($cart as $details) {
+            $subtotal += $details['price'] * $details['quantity'];
+            $totalItems += $details['quantity'];
+        }
+
+        // Calculate Bulk Savings for the UI
+        $bulkSavings = ($totalItems >= 6) ? ($subtotal * 0.10) : 0;
+
+        return view('cafe.cart', compact('cart', 'subtotal', 'totalItems', 'bulkSavings'));
     }
 
     public function add(Request $request)
@@ -23,18 +36,15 @@ class CartController extends Controller
             return redirect()->back()->with('error', 'Product not found!');
         }
 
-        // Default values
         $sizeName = null;
         $price = $product->price;
         $cartKey = $product->id; 
 
-        // 🟢 Size Selection Logic
         if ($request->has('size_id') && $request->size_id) {
             $size = ProductSize::find($request->size_id);
             if ($size) {
-                $sizeName = $size->size;   // e.g., "16oz"
-                $price = $size->price;     // e.g., 140.00
-                // Unique Key ensures different sizes stay separate in the cart
+                $sizeName = $size->size;
+                $price = $size->price;
                 $cartKey = $product->id . '_' . $size->size; 
             }
         }
@@ -50,7 +60,7 @@ class CartController extends Controller
                 "quantity" => 1,
                 "price" => $price,
                 "image" => $product->image,
-                "size" => $sizeName // 🟢 Size stored in session
+                "size" => $sizeName
             ];
         }
 

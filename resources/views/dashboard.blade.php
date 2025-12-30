@@ -7,7 +7,6 @@
         
         if(isset($recentOrders)) {
             foreach($recentOrders as $order) {
-                // Logic is case-insensitive for 'completed' or 'ready' status
                 $status = strtolower($order->status);
                 if(in_array($status, ['completed', 'ready'])) {
                     foreach($order->items as $item) {
@@ -24,8 +23,12 @@
         $dashTier = $dashPoints >= 500 ? 'Gold' : ($dashPoints >= 200 ? 'Silver' : 'Bronze');
         $perc = min(($dashPoints % 100), 100);
         
-        // Identify the first item to review for the "Claim Now" shortcut
         $firstToReview = $unreviewedItems[0] ?? null;
+        $transactions = $user->pointTransactions()->latest()->take(10)->get();
+
+        $streakCount = $user->streak_count ?? 0;
+        $nextMilestone = (floor($streakCount / 3) + 1) * 3;
+        $streakProgress = (($streakCount % 3) / 3) * 100;
     @endphp
 
     <style>
@@ -50,7 +53,6 @@
                 </div>
             @endif
 
-            {{-- Header Section --}}
             <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div class="min-w-0">
                     <span class="text-stone-500 font-black uppercase tracking-[0.4em] text-[10px] mb-2 block">Command Center</span>
@@ -65,8 +67,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                
-                {{-- Sidebar --}}
                 <div class="lg:col-span-4 space-y-8">
                     <div class="relative overflow-hidden bg-stone-900 rounded-[3rem] p-10 text-white shadow-connected border border-stone-800">
                         <div class="absolute top-0 right-0 w-40 h-40 bg-stone-800/40 rounded-full blur-[80px] -mr-20 -mt-20"></div>
@@ -78,8 +78,23 @@
                                 <span class="text-stone-500 font-black text-xl tracking-widest uppercase">PTS</span>
                             </div>
                             <div class="w-full bg-stone-800 rounded-full h-2 overflow-hidden shadow-inner">
-                                <div class="bg-stone-400 h-full rounded-full transition-all duration-1000" :style="{ width: '{{ $perc }}%' }"></div>
+                                <div class="bg-stone-400 h-full rounded-full transition-all duration-1000" :style="'width: ' + {{ $perc }} + '%'"></div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-stone-900 rounded-[2.5rem] p-8 border border-stone-800 shadow-connected relative overflow-hidden group">
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-center mb-6">
+                                <h4 class="text-white font-black text-[10px] uppercase tracking-[0.4em] italic">Streak Progress</h4>
+                                <span class="text-amber-500 font-black text-[10px] uppercase tracking-widest">{{ $streakCount }}/{{ $nextMilestone }} Days</span>
+                            </div>
+                            <div class="relative h-4 w-full bg-stone-950 rounded-full overflow-hidden border border-stone-800 mb-4 shadow-inner">
+                                <div class="absolute top-0 left-0 h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-full transition-all duration-1000" :style="'width: ' + {{ $streakProgress }} + '%'"></div>
+                            </div>
+                            <p class="text-stone-500 text-[9px] font-bold uppercase tracking-tight leading-relaxed italic">
+                                Order <span class="text-stone-300">{{ $nextMilestone - $streakCount }} more consecutive days</span> to claim a <span class="text-amber-500">+20 PTS Bonus</span>.
+                            </p>
                         </div>
                     </div>
 
@@ -94,8 +109,6 @@
                                 </div>
                                 <h4 class="font-black text-2xl uppercase tracking-tighter mb-2 italic leading-tight">+{{ $claimablePoints }} PTS AVAILABLE</h4>
                                 <p class="text-[10px] mb-8 font-bold uppercase tracking-tight opacity-80 leading-relaxed">You have {{ count($unreviewedItems) }} unrated brews. Start claiming now.</p>
-                                
-                                {{-- 🟢 FIXED SHORTCUT: Automatically opens modal for the first item found --}}
                                 <button @click="reviewModal = true; selectedProduct = '{{ addslashes($firstToReview->product->name) }}'; selectedItemId = '{{ $firstToReview->id }}'" 
                                         class="w-full inline-flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] px-6 py-4 bg-stone-950 text-white rounded-2xl hover:scale-[1.02] transition-all shadow-2xl">
                                     Claim Points Now
@@ -104,6 +117,19 @@
                         </div>
                     @endif
 
+                    <div class="bg-stone-900 rounded-[2.5rem] p-8 border border-stone-800 shadow-connected relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl"></div>
+                        <div class="relative z-10">
+                            <h4 class="text-amber-500 font-black text-[10px] uppercase tracking-[0.4em] mb-4 italic">Invite the Crew</h4>
+                            <p class="text-stone-400 text-[10px] mb-6 leading-relaxed font-bold italic uppercase">Share the love. They get <span class="text-white">50 PTS</span> on first order, you get <span class="text-white">50 PTS</span> too.</p>
+                            <div class="relative flex items-center">
+                                <input type="text" readonly id="refLink" value="{{ route('register', ['ref' => $user->referral_code]) }}" 
+                                    class="w-full bg-stone-950 border-stone-800 text-stone-300 rounded-xl py-3 pl-4 pr-20 text-[9px] font-bold focus:ring-amber-600 focus:border-amber-600 transition-all shadow-inner">
+                                <button onclick="copyReferralLink()" class="absolute right-1.5 bg-amber-600 hover:bg-amber-500 text-stone-950 font-black px-3 py-1.5 rounded-lg text-[8px] uppercase tracking-tighter transition-all active:scale-95 shadow-lg">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="bg-stone-100 dark:bg-stone-900 rounded-[2.5rem] p-8 border border-stone-200 dark:border-stone-800 shadow-sm">
                         <h4 class="text-stone-400 font-black text-[10px] uppercase tracking-[0.4em] mb-4 italic">The Daily Roast</h4>
                         <p class="text-stone-500 text-[10px] mb-6 leading-relaxed font-medium italic">Maintaining a streak? You deserve a <span class="font-black text-stone-900 dark:text-white uppercase">Premium Espresso</span>.</p>
@@ -111,7 +137,6 @@
                     </div>
                 </div>
 
-                {{-- History Section --}}
                 <div class="lg:col-span-8 space-y-12">
                     <div class="flex items-center justify-between px-2">
                         <h3 class="font-black text-stone-900 dark:text-white uppercase tracking-tighter italic shrink-0" style="font-size: var(--fluid-18-32)">Brewing History</h3>
@@ -175,12 +200,47 @@
                         <div class="py-24 text-center opacity-40 italic font-black uppercase text-stone-500 tracking-widest text-[10px]">No active brews in terminal</div>
                     @endforelse
 
-                    {{-- Support History section for Admin Replies --}}
+                    <div class="mt-12">
+                        <div class="flex items-center justify-between px-2 mb-6">
+                            <h3 class="font-black text-stone-900 dark:text-white uppercase tracking-tighter italic" style="font-size: var(--fluid-18-32)">Points Ledger</h3>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-stone-400">Recent Activity</span>
+                        </div>
+                        <div class="bg-white dark:bg-stone-900 rounded-[3rem] border border-stone-100 dark:border-stone-800 shadow-connected overflow-hidden">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-stone-50 dark:border-stone-800">
+                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-stone-400">Detail</th>
+                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-stone-400">Date</th>
+                                        <th class="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-stone-400 text-right">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-stone-50 dark:divide-stone-800">
+                                    @forelse($transactions as $tx)
+                                        <tr class="group hover:bg-stone-50 dark:hover:bg-stone-950/50 transition-colors">
+                                            <td class="px-8 py-6">
+                                                <p class="font-bold text-stone-900 dark:text-white text-sm uppercase tracking-tight">{{ $tx->description }}</p>
+                                            </td>
+                                            <td class="px-8 py-6">
+                                                <p class="text-[10px] font-black text-stone-400 uppercase italic">{{ $tx->created_at->format('M d, Y') }}</p>
+                                            </td>
+                                            <td class="px-8 py-6 text-right">
+                                                <span class="font-black italic {{ $tx->amount > 0 ? 'text-emerald-500' : 'text-rose-500' }}">
+                                                    {{ $tx->amount > 0 ? '+' : '' }}{{ $tx->amount }} PTS
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="3" class="px-8 py-12 text-center opacity-30 italic font-black uppercase text-stone-500 tracking-widest text-[10px]">No transactions on record</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <div class="mt-20 space-y-12">
                         <div class="flex items-center justify-between px-2">
                             <h3 class="font-black text-stone-900 dark:text-white uppercase tracking-tighter italic" style="font-size: var(--fluid-18-32)">Concierge History</h3>
                         </div>
-
                         @if(isset($supportTickets))
                             @forelse($supportTickets as $ticket)
                                 <div class="bg-white dark:bg-stone-900 rounded-[2.5rem] p-8 sm:p-10 border border-stone-100 dark:border-stone-800 shadow-connected">
@@ -190,7 +250,6 @@
                                     </div>
                                     <h4 class="text-xl font-black text-stone-900 dark:text-white uppercase italic mb-2">{{ $ticket->subject }}</h4>
                                     <p class="text-sm text-stone-500 dark:text-stone-400 italic">"{{ $ticket->message }}"</p>
-
                                     @if($ticket->replies && $ticket->replies->count() > 0)
                                         <div class="mt-8 pt-8 border-t border-stone-50 dark:border-stone-800 space-y-6">
                                             @foreach($ticket->replies as $reply)
@@ -219,7 +278,6 @@
             </div>
         </div>
 
-        {{-- Review Modal --}}
         <div x-show="reviewModal" class="fixed inset-0 z-[60] overflow-y-auto flex items-center justify-center p-4 bg-stone-950/90 backdrop-blur-md" x-cloak x-transition>
             <div class="bg-white dark:bg-stone-900 w-full max-w-lg rounded-[3rem] border border-stone-200 dark:border-stone-800 shadow-2xl overflow-hidden" @click.away="reviewModal = false">
                 <div class="p-8 sm:p-12">
@@ -254,4 +312,23 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function copyReferralLink() {
+            const copyText = document.getElementById("refLink");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
+
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "COPIED";
+            btn.classList.replace('bg-amber-600', 'bg-emerald-600');
+            
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.replace('bg-emerald-600', 'bg-amber-600');
+            }, 2000);
+        }
+    </script>
 </x-app-layout>

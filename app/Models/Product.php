@@ -40,6 +40,14 @@ class Product extends Model
         });
     }
 
+    /**
+     * 🟢 NEW FEATURE: Relationship to track sales volume
+     */
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     // 🟢 Stock Status Helper
     public function getStockStatusAttribute()
     {

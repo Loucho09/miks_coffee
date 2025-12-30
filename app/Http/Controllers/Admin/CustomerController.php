@@ -16,7 +16,7 @@ class CustomerController extends Controller
                     ->withCount('orders')
                     ->latest();
 
-        // 🟢 NEW FEATURE: Admin Customer Search
+        // Admin Customer Search
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
@@ -24,20 +24,27 @@ class CustomerController extends Controller
             });
         }
 
-        // 🟢 Optimized for performance with Pagination
+        // Optimized for performance with Pagination
         $customers = $query->paginate(15)->withQueryString();
 
         return view('admin.customers.index', compact('customers'));
     }
 
-    // 2. Show Customer Details & Order History
+    // 2. Show Customer Details, Order History, Streak Progress, and Point Ledger
     public function show($id)
     {
         $customer = User::with(['orders' => function($query) {
             $query->latest();
-        }, 'orders.items'])->findOrFail($id);
+        }, 'orders.items', 'pointTransactions' => function($query) {
+            $query->latest();
+        }, 'referrals'])->findOrFail($id);
 
-        return view('admin.customers.show', compact('customer'));
+        // Calculate milestones for streak tracking
+        $streakCount = $customer->streak_count ?? 0;
+        $nextMilestone = (floor($streakCount / 3) + 1) * 3;
+        $streakProgress = (($streakCount % 3) / 3) * 100;
+
+        return view('admin.customers.show', compact('customer', 'streakCount', 'nextMilestone', 'streakProgress'));
     }
 
     // 3. Reset Password

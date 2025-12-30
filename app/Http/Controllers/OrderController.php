@@ -12,13 +12,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\OrderReceipt;
+use App\Mail\LowStockAlert;
 
 class OrderController extends Controller
 {
-    /**
-     * Display customer order history.
-     */
     public function index()
     {
         $orders = Order::with(['items.product', 'items.review'])
@@ -28,16 +27,11 @@ class OrderController extends Controller
         return view('cafe.orders', compact('orders'));
     }
 
-    /**
-     * Apply a reward to the session.
-     */
     public function claimReward(Request $request)
     {
         /** @var User $user */
         $user = Auth::user();
 
-        // 🟢 NEW FEATURE: Backend Reward Redemption Logic
-        // This handles the immediate point deduction and ledger entry from the Rewards Vault
         $rewards = [
             'free_espresso' => ['name' => 'Signature Espresso', 'cost' => 50],
             'pastry_treat'  => ['name' => 'Artisan Pastry', 'cost' => 80],
@@ -47,7 +41,6 @@ class OrderController extends Controller
 
         $rewardKey = $request->input('reward_id');
 
-        // Check if this is a Vault Redemption (Immediate Deduction)
         if ($rewardKey && isset($rewards[$rewardKey])) {
             $reward = $rewards[$rewardKey];
 
@@ -56,10 +49,8 @@ class OrderController extends Controller
             }
 
             DB::transaction(function () use ($user, $reward) {
-                // Deduct points from User model
                 $user->decrement('points', $reward['cost']);
 
-                // Create the Ledger entry for the History table
                 PointTransaction::create([
                     'user_id' => $user->id,
                     'amount' => -$reward['cost'],
@@ -70,7 +61,6 @@ class OrderController extends Controller
             return back()->with('success', 'Redemption authorized! Please present your terminal to the barista.');
         }
 
-        // Fallback to original session-based reward logic for checkout
         $reward = [
             'name'   => $request->name,
             'points' => $request->points,
@@ -84,9 +74,6 @@ class OrderController extends Controller
             ->with('success', $request->name . ' applied! Place order to claim.');
     }
 
-    /**
-     * Store a new order.
-     */
     public function store(Request $request)
     {
         $cart = session()->get('cart');
@@ -103,7 +90,6 @@ class OrderController extends Controller
         $rewardType = null;
 
         if ($claimed) {
-            // FIXED: Changed loyalty_points to points to match the 68 points fix
             if (($user->points ?? 0) < $claimed['points']) {
                 session()->forget('claimed_reward');
                 return redirect()->route('cart.index')->with('error', 'Insufficient points.');
@@ -112,36 +98,54 @@ class OrderController extends Controller
             $pointsRedeemed = $claimed['points'];
             $rewardType = $claimed['name'];
             $discount = $claimed['value']; 
+        } elseif ($request->has('redeem_points') && ($user->points ?? 0) >= 50) {
+            $discount = 50;
+            $pointsRedeemed = 50;
+            $rewardType = 'Standard Discount';
         }
 
-        $total = 0;
+        $subtotal = 0;
+        $bulkSavings = 0;
         foreach ($cart as $details) {
-            $total += $details['price'] * $details['quantity'];
+            $linePrice = $details['price'] * $details['quantity'];
+            if ($details['quantity'] >= 6) {
+                $lineDiscount = $linePrice * 0.10;
+                $bulkSavings += $lineDiscount;
+                $linePrice -= $lineDiscount;
+            }
+            $subtotal += $linePrice;
         }
 
-        $finalTotal = number_format((float)(max(0, $total - $discount)), 2, '.', '');
+        if ($subtotal < $discount) {
+            $discount = $subtotal;
+        }
+
+        $finalTotal = number_format((float)(max(0, $subtotal - $discount)), 2, '.', '');
 
         DB::beginTransaction();
         try {
-            // Stock Check
             foreach ($cart as $key => $details) {
                 $productId = $details['product_id'] ?? intval($key);
                 $product = Product::where('id', $productId)->lockForUpdate()->first();
                 
                 if (!$product || $product->stock_quantity < $details['quantity']) {
-                    throw new \Exception("Insufficient stock for " . ($product->name ?? 'item'));
+                    throw new \Exception("Sorry, " . ($product->name ?? 'item') . " is low on stock.");
                 }
             }
 
             $order = Order::create([
                 'user_id' => $user->id,
+                'customer_name' => $request->customer_name ?? $user->name,
+                'customer_email' => $request->customer_email ?? $user->email,
                 'total_price' => $finalTotal,
                 'status' => 'pending',
                 'payment_method' => 'cash',
                 'points_earned' => 10,
                 'points_redeemed' => $pointsRedeemed,
                 'reward_type' => $rewardType,
-                'notes' => $rewardType ? "Used Reward: $rewardType" : null,
+                'notes' => ($bulkSavings > 0) 
+                            ? ($rewardType ? "Reward: $rewardType | Bulk Savings: ₱".number_format($bulkSavings, 2) : "Bulk Savings: ₱".number_format($bulkSavings, 2)) 
+                            : ($rewardType ? "Reward: $rewardType" : null),
             ]);
 
             foreach ($cart as $key => $details) {
@@ -149,18 +153,50 @@ class OrderController extends Controller
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $realProductId,
+                    'product_name' => $details['name'] ?? null,
                     'quantity' => $details['quantity'],
                     'price' => $details['price'],
                     'size' => $details['size'] ?? 'Regular',
                 ]);
-                Product::find($realProductId)->decrement('stock_quantity', $details['quantity']);
+
+                $product = Product::find($realProductId);
+                $product->decrement('stock_quantity', $details['quantity']);
+
+                if ($product->stock_quantity < 5) {
+                    try {
+                        Mail::to('admin@mikscoffee.com')->send(new LowStockAlert($product));
+                    } catch (\Exception $e) {
+                        Log::error("Low Stock Mail Failed: " . $e->getMessage());
+                    }
+                }
             }
 
-            // FIXED: Standardized point column names
+            // 🟢 NEW FEATURE: Reward Referral System on first order
+            if ($user->referred_by && $user->orders()->count() === 1) {
+                $referrer = $user->referrer;
+                if ($referrer) {
+                    // Reward Referrer
+                    $referrer->increment('points', 50);
+                    PointTransaction::create([
+                        'user_id' => $referrer->id,
+                        'amount' => 50,
+                        'description' => 'Referral Bonus: ' . $user->name . ' first order',
+                        'order_id' => $order->id
+                    ]);
+
+                    // Reward Customer
+                    $user->increment('points', 50);
+                    PointTransaction::create([
+                        'user_id' => $user->id,
+                        'amount' => 50,
+                        'description' => 'Welcome Referral Bonus from ' . $referrer->name,
+                        'order_id' => $order->id
+                    ]);
+                }
+            }
+
             if ($pointsRedeemed > 0) {
                 $user->decrement('points', $pointsRedeemed);
-                
-                // Add ledger entry for redemption during checkout
                 PointTransaction::create([
                     'user_id' => $user->id,
                     'amount' => -$pointsRedeemed,
@@ -170,8 +206,6 @@ class OrderController extends Controller
             }
 
             $user->increment('points', 10);
-            
-            // Add ledger entry for points earned from order
             PointTransaction::create([
                 'user_id' => $user->id,
                 'amount' => 10,
@@ -184,19 +218,16 @@ class OrderController extends Controller
 
             try {
                 Mail::to($user->email)->send(new OrderReceipt($order));
-            } catch (\Exception $e) { }
+            } catch (\Exception $e) {}
 
-            // 🟢 REDIRECT CHANGE: Directs to Dashboard instead of Orders Index
-           return redirect()->route('dashboard')->with('success', 'Order established successfully! Rate your brew below to claim bonus loyalty points.');
+            return redirect()->route('dashboard')->with('success', 'Order established! Bulk discount applied if applicable.');
+            
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
-    /**
-     * Export sales data for admins.
-     */
     public function exportData()
     {
         /** @var User $user */
@@ -223,7 +254,6 @@ class OrderController extends Controller
 
             foreach ($orders as $order) {
                 $performance = ($order->total_price >= 500) ? 'HIGH VALUE' : 'Standard';
-
                 fputcsv($file, [
                     $order->id,
                     $order->user->name ?? 'Guest',
@@ -239,9 +269,6 @@ class OrderController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    /**
-     * Display the order receipt.
-     */
     public function downloadReceipt($id)
     {
         /** @var User $user */
@@ -252,7 +279,6 @@ class OrderController extends Controller
             abort(403);
         }
 
-        // FIXED: Changed loyalty_points to points to match global sync
         $pts = $user->points ?? 0;
         $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
 

@@ -38,7 +38,6 @@ class OrderController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        // Backend Reward Redemption Logic for immediate deduction (Rewards Vault)
         $rewards = [
             'free_espresso' => ['name' => 'Signature Espresso', 'cost' => 50],
             'pastry_treat'  => ['name' => 'Artisan Pastry', 'cost' => 80],
@@ -68,7 +67,6 @@ class OrderController extends Controller
             return back()->with('success', 'Redemption authorized! Please present your terminal to the barista.');
         }
 
-        // Original session-based reward logic for checkout
         $reward = [
             'name'   => $request->name,
             'points' => $request->points,
@@ -96,7 +94,7 @@ class OrderController extends Controller
         $user = Auth::user(); 
         $claimed = session()->get('claimed_reward');
         
-        $discount = 0;
+        $pointsDiscount = 0;
         $pointsRedeemed = 0;
         $rewardType = null;
 
@@ -108,27 +106,36 @@ class OrderController extends Controller
             
             $pointsRedeemed = $claimed['points'];
             $rewardType = $claimed['name'];
-            $discount = $claimed['value']; 
+            $pointsDiscount = $claimed['value']; 
         } elseif ($request->has('redeem_points') && ($user->points ?? 0) >= 50) {
-            $discount = 50;
+            $pointsDiscount = 50;
             $pointsRedeemed = 50;
             $rewardType = 'Standard Discount';
         }
 
-        $total = 0;
+        $subtotal = 0;
+        $totalItemsInCart = 0;
+        
         foreach ($cart as $details) {
-            $total += $details['price'] * $details['quantity'];
+            $subtotal += $details['price'] * $details['quantity'];
+            $totalItemsInCart += $details['quantity'];
         }
 
-        if ($total < $discount) {
-            $discount = $total;
+        $bulkSavings = 0;
+        if ($totalItemsInCart >= 6) {
+            $bulkSavings = $subtotal * 0.10;
         }
 
-        $finalTotal = number_format((float)(max(0, $total - $discount)), 2, '.', '');
+        $finalSubtotal = $subtotal - $bulkSavings;
+
+        if ($finalSubtotal < $pointsDiscount) {
+            $pointsDiscount = $finalSubtotal;
+        }
+
+        $finalTotal = number_format((float)(max(0, $finalSubtotal - $pointsDiscount)), 2, '.', '');
 
         DB::beginTransaction();
         try {
-            // Stock Check
             foreach ($cart as $key => $details) {
                 $productId = $details['product_id'] ?? intval($key);
                 $product = Product::where('id', $productId)->lockForUpdate()->first();
@@ -137,6 +144,11 @@ class OrderController extends Controller
                     throw new \Exception("Sorry, " . ($product->name ?? 'item') . " is low on stock.");
                 }
             }
+
+            $noteArr = [];
+            if ($rewardType) $noteArr[] = "Reward: $rewardType";
+            if ($bulkSavings > 0) $noteArr[] = "Bulk Cart Discount (10%): ₱" . number_format($bulkSavings, 2);
+            $finalNotes = implode(' | ', $noteArr);
 
             $order = Order::create([
                 'user_id' => $user->id,
@@ -148,7 +160,7 @@ class OrderController extends Controller
                 'points_earned' => 10,
                 'points_redeemed' => $pointsRedeemed,
                 'reward_type' => $rewardType,
-                'notes' => $rewardType ? "Reward: $rewardType" : null,
+                'notes' => $finalNotes ?: null,
             ]);
 
             foreach ($cart as $key => $details) {
@@ -166,7 +178,6 @@ class OrderController extends Controller
                 $product = Product::find($realProductId);
                 $product->decrement('stock_quantity', $details['quantity']);
 
-                // 🟢 NEW FEATURE: Automatic Low-Stock Email Alert
                 if ($product->stock_quantity < 5) {
                     try {
                         Mail::to('admin@mikscoffee.com')->send(new LowStockAlert($product));
@@ -176,9 +187,29 @@ class OrderController extends Controller
                 }
             }
 
+            if ($user->referred_by && $user->orders()->count() === 1) {
+                $referrer = $user->referrer;
+                if ($referrer) {
+                    $referrer->increment('points', 50);
+                    PointTransaction::create([
+                        'user_id' => $referrer->id,
+                        'amount' => 50,
+                        'description' => 'Referral Bonus: ' . $user->name . ' first order',
+                        'order_id' => $order->id
+                    ]);
+
+                    $user->increment('points', 50);
+                    PointTransaction::create([
+                        'user_id' => $user->id,
+                        'amount' => 50,
+                        'description' => 'Welcome Referral Bonus from ' . $referrer->name,
+                        'order_id' => $order->id
+                    ]);
+                }
+            }
+
             if ($pointsRedeemed > 0) {
                 $user->decrement('points', $pointsRedeemed);
-                
                 PointTransaction::create([
                     'user_id' => $user->id,
                     'amount' => -$pointsRedeemed,
@@ -188,13 +219,23 @@ class OrderController extends Controller
             }
 
             $user->increment('points', 10);
-            
             PointTransaction::create([
                 'user_id' => $user->id,
                 'amount' => 10,
                 'description' => 'Earned from Order #' . $order->id,
                 'order_id' => $order->id
             ]);
+
+            $user->updateStreak();
+            if ($user->streak_count >= 3 && $user->streak_count % 3 === 0) {
+                $user->increment('points', 20);
+                PointTransaction::create([
+                    'user_id' => $user->id,
+                    'amount' => 20,
+                    'description' => "Streak Milestone: {$user->streak_count} Day Order Streak reached",
+                    'order_id' => $order->id
+                ]);
+            }
 
             DB::commit();
             session()->forget(['cart', 'claimed_reward']); 
@@ -203,7 +244,7 @@ class OrderController extends Controller
                 Mail::to($user->email)->send(new OrderReceipt($order));
             } catch (\Exception $e) {}
 
-            return redirect()->route('dashboard')->with('success', 'Order established successfully! Rate your brew below to claim bonus loyalty points.');
+            return redirect()->route('dashboard')->with('success', 'Order established! Bulk discount and streak progress applied.');
             
         } catch (\Exception $e) {
             DB::rollBack();

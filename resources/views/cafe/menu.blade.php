@@ -30,29 +30,64 @@
                         <a href="{{ route('menu.index') }}" 
                            class="px-4 py-1 rounded-full text-sm font-semibold whitespace-nowrap border transition
                            {{ !request('category') ? 'bg-brand-orange text-white border-brand-orange' : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200' }}">
-                           All
+                            All
                         </a>
                         
                         @foreach($categories as $category)
                             <a href="{{ route('menu.index', ['category' => $category->slug]) }}" 
                                class="px-4 py-1 rounded-full text-sm font-semibold whitespace-nowrap border transition
                                {{ request('category') == $category->slug ? 'bg-brand-orange text-white border-brand-orange' : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200' }}">
-                               {{ $category->name }}
+                                 {{ $category->name }}
                             </a>
                         @endforeach
                     </div>
                 </form>
             </div>
+
+            @if(request('category'))
+                @php $currentCategory = $categories->where('slug', request('category'))->first(); @endphp
+                @if($currentCategory && $currentCategory->image)
+                    <div class="relative h-48 sm:h-64 w-full rounded-[2.5rem] overflow-hidden mb-10 shadow-lg border border-gray-100 group">
+                        <img src="{{ asset('storage/' . $currentCategory->image) }}" alt="{{ $currentCategory->name }}" 
+                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-8 sm:p-12">
+                            <div>
+                                <span class="text-amber-400 text-[10px] font-black uppercase tracking-[0.4em] mb-2 block">Menu Section</span>
+                                <h1 class="text-white text-3xl sm:text-5xl font-black uppercase tracking-tighter italic leading-none">{{ $currentCategory->name }}</h1>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endif
+
             @if($products->isEmpty())
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-10 text-center">
                     <p class="text-gray-500 text-xl">No items found matching your search. ☕</p>
                     <a href="{{ route('menu.index') }}" class="text-brand-orange hover:underline mt-2 inline-block">View Full Menu</a>
                 </div>
             @else
+                @php
+                    $popularIds = \App\Models\OrderItem::select('product_id', \DB::raw('SUM(quantity) as total_sold'))
+                        ->groupBy('product_id')
+                        ->orderByDesc('total_sold')
+                        ->take(10)
+                        ->pluck('product_id')
+                        ->toArray();
+                @endphp
+
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($products as $product)
-                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-300">
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-300 relative">
                             
+                            @if(in_array($product->id, $popularIds))
+                                <div class="absolute top-4 left-4 z-10">
+                                    <span class="bg-amber-500 text-stone-900 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest flex items-center gap-1.5 shadow-lg animate-pulse">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        Most Popular
+                                    </span>
+                                </div>
+                            @endif
+
                             <div class="h-48 w-full overflow-hidden bg-gray-200 relative group">
                                 @if($product->image)
                                     <img src="{{ asset('storage/' . $product->image) }}" 
@@ -72,6 +107,13 @@
                                     </span>
                                     <span class="text-lg font-bold text-gray-900">
                                         ₱{{ number_format($product->price, 2) }}
+                                    </span>
+                                </div>
+
+                                {{-- 🟢 NEW FEATURE: Bulk Discount Badge --}}
+                                <div class="mt-1">
+                                    <span class="inline-block bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200">
+                                        PROMO: 10% OFF ON 6+ UNITS
                                     </span>
                                 </div>
 
@@ -102,7 +144,6 @@
                     @endforeach
                 </div>
             @endif
-
         </div>
     </div>
 </x-app-layout>

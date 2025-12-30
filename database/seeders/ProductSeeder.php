@@ -12,7 +12,7 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        // Disable foreign key checks to allow clearing the tables
+        // Disable foreign key checks to allow clearing the tables safely
         DB::statement('PRAGMA foreign_keys = OFF;');
         Product::truncate();
         Category::truncate();
@@ -88,9 +88,10 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($menu as $categoryName => $items) {
+            // 🟢 NEW FEATURE: The seeder now assigns a header image to each category
             $category = Category::create([
                 'name' => $categoryName,
-                'slug' => Str::slug($categoryName),
+                'image' => 'banners/' . Str::slug($categoryName) . '.jpg',
                 'is_active' => true
             ]);
 
@@ -98,9 +99,9 @@ class ProductSeeder extends Seeder
                 Product::create([
                     'category_id' => $category->id,
                     'name' => $item['name'],
-                    'slug' => Str::slug($item['name']),
                     'description' => $item['desc'],
                     'price' => $item['price'],
+                    'image' => 'products/' . Str::slug($item['name']) . '.jpg',
                     'stock_quantity' => 50,
                     'is_active' => true
                 ]);

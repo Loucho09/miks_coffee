@@ -14,54 +14,41 @@
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <script>
             tailwind.config = {
-
-
-
                 darkMode: 'class',
                 theme: {
                     extend: {
                         fontFamily: { sans: ['Outfit', 'sans-serif'] },
                         colors: {
-                // 🟢 UPDATED: Sophisticated Beige Theme (60-30-10 Rule)
                 stone: {
-                    // LIGHT MODE: The 60% and 30% Beige connection
-                    50: '#F5F2EA',  // 60% - Main Beige Background (Soft & Warm)
-                    100: '#EBE6D9', // 30% - Secondary/Card Background
-                    200: '#DED7C5', // 10% - Subtle Beige Borders
-                    
-                    // DARK MODE: The "Connected" Charcoal-Beige
-                    950: '#0C0B0A', // 60% - Primary Dark BG (Deep Espresso)
-                    900: '#1A1816', // 30% - Secondary Dark BG (Warm Charcoal)
-                    
-                    // Neutral Steps for Typography and Accents
+                    50: '#F5F2EA',
+                    100: '#EBE6D9',
+                    200: '#DED7C5',
+                    950: '#0C0B0A',
+                    900: '#1A1816',
                     300: '#D1C8B1',
                     400: '#B8AD91',
                     500: '#8F8366',
                     600: '#736852',
                     700: '#574F3E',
                     800: '#3B352A',
-                    1000: '#FF0000', // 🔴 Custom Red Preserved
+                    1000: '#FF0000',
                 },
-                
                 amber: {
                     400: '#FBBF24',
-                    500: '#F59E0B', // 🟠 Primary 10% Accent
+                    500: '#F59E0B',
                     600: '#D97706',
                     700: '#B45309',
                     1000: '#F59E0B',
                 },
-
                 'coffee': {
                     100: '#F5E6E0',
                     600: '#8D5F46',
                     800: '#4B2C20',
                     900: '#2C1810',
                 },
-
                 'brand': {
                     orange: '#F59E0B',
                 },
-
                 'dashboard': {
                     1000: '#FF0000',
                 },
@@ -80,15 +67,17 @@
             }
         </script>
         <script>
-            // Dark Mode Logic
             if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
             } else {
                 document.documentElement.classList.remove('dark');
             }
         </script>
+        <style>
+            .shadow-connected { box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5); }
+        </style>
     </head>
-    <body class="antialiased bg-stone-100  dark:bg-stone-950 text-stone-800 dark:text-stone-200 transition-colors duration-300 font-sans flex flex-col min-h-screen">
+    <body class="antialiased bg-stone-100 dark:bg-stone-950 text-stone-800 dark:text-stone-200 transition-colors duration-300 font-sans flex flex-col min-h-screen">
         
         <button id="theme-toggle" type="button" class="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-white/80 dark:bg-stone-800/80 backdrop-blur-md text-stone-500 dark:text-stone-400 shadow-2xl hover:scale-110 transition-transform focus:outline-none ring-1 ring-stone-200 dark:ring-stone-700">
             <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -226,7 +215,7 @@
             <span class="text-amber-500 font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">The Craftsmanship</span>
             <h2 class="text-4xl md:text-6xl font-black text-stone-900 dark:text-white tracking-tight">Why Mik's Coffee?</h2>
             <div class="mt-8 flex justify-center gap-1.5">
-                <div class="w-16 h-1 bg-amber-500 rounded-full"></div>
+                <div class="w-16 h-1 bg-amber-50 rounded-full"></div>
                 <div class="w-2 h-1 bg-amber-500/20 rounded-full"></div>
                 <div class="w-2 h-1 bg-amber-500/10 rounded-full"></div>
             </div>
@@ -276,6 +265,61 @@
     </div>
 </section>
 
+        <section id="leaderboard" class="py-24 bg-stone-50 dark:bg-stone-900/20 relative overflow-hidden border-t border-stone-200 dark:border-stone-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="flex flex-col lg:flex-row gap-16 items-center">
+                    <div class="w-full lg:w-1/2">
+                        <span class="text-amber-500 font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">Community Engagement</span>
+                        <h2 class="text-4xl md:text-5xl font-black text-stone-900 dark:text-white tracking-tight mb-6 uppercase italic leading-none">Streak Giants</h2>
+                        <p class="text-stone-500 dark:text-stone-400 leading-relaxed font-light text-lg mb-8">
+                            Join our community of daily regulars. Maintain a consecutive ordering streak to climb the leaderboard and earn exclusive bonus points. Every milestone reached brings unique rewards to your dashboard.
+                        </p>
+                        <div class="flex items-center gap-6">
+                            <div class="px-6 py-4 bg-white dark:bg-stone-900 rounded-[2rem] border border-stone-200 dark:border-stone-800 shadow-sm">
+                                <p class="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">Active Milestone</p>
+                                <p class="text-lg font-bold text-amber-600 tracking-tight">20 PTS Bonus / 3 Days</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full lg:w-1/2">
+                        <div class="bg-stone-900 rounded-[3rem] p-10 text-white shadow-connected border border-stone-800">
+                            <div class="flex items-center justify-between mb-10">
+                                <h3 class="font-black text-xl uppercase tracking-tighter italic">Public Standings</h3>
+                                <span class="px-3 py-1 bg-amber-600 text-stone-950 rounded-full text-[8px] font-black uppercase tracking-widest">Live</span>
+                            </div>
+
+                            <div class="space-y-6">
+                                @forelse($topStreaks as $index => $leader)
+                                    <div class="flex items-center justify-between p-4 rounded-2xl bg-stone-950/50 border border-stone-800">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-8 h-8 rounded-xl flex items-center justify-center font-black italic text-xs {{ $index == 0 ? 'bg-amber-600 text-stone-950' : 'bg-stone-800 text-stone-400' }}">
+                                                {{ $index + 1 }}
+                                            </div>
+                                            <div>
+                                                <p class="font-bold text-sm uppercase tracking-tight text-white">{{ $leader->name }}</p>
+                                                <p class="text-[9px] font-black text-stone-500 uppercase tracking-widest">
+                                                    {{ $leader->loyalty_tier ?? 'Bronze' }} Member
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-xl font-black italic text-amber-500 leading-none">{{ $leader->streak_count }}</p>
+                                            <p class="text-[8px] font-black text-stone-500 uppercase tracking-widest">Day Streak</p>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="py-10 text-center opacity-30 italic font-black uppercase text-stone-500 tracking-widest text-[10px]">
+                                        No active streaks recorded.
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="featured" class="py-24 bg-stone-100 dark:bg-[#121212] relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center mb-16">
@@ -284,7 +328,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-            @foreach($featured as $product)
+            @foreach($featuredProducts as $product)
                 <div class="group relative">
                     <div class="aspect-[4/5] rounded-[2rem] overflow-hidden bg-stone-100 dark:bg-stone-800 relative shadow-2xl transition-all duration-500 hover:shadow-amber-500/20 hover:-translate-y-2">
                         @if($product->image)
@@ -352,8 +396,7 @@
                 Brgy. Osorio, Trece Martires City
             </p>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest text-amber-400">
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                Landmark: Tapat ng High School
+                 Landmark: Tapat ng High School
             </div>
         </div>
     </div>

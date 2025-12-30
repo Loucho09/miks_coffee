@@ -31,7 +31,7 @@
                         {{ $customers->total() }} <span class="text-xs font-normal text-stone-500">Members</span>
                     </h3>
                 </div>
-                </div>
+            </div>
 
             <div class="bg-white dark:bg-stone-900 overflow-hidden shadow-sm rounded-[2.5rem] border border-stone-200 dark:border-stone-800">
                 <div class="overflow-x-auto">
@@ -41,6 +41,7 @@
                                 <th class="py-6 px-8">Member</th>
                                 <th class="py-6 px-6">Email Address</th>
                                 <th class="py-6 px-6 text-center">Loyalty (Orders)</th>
+                                <th class="py-6 px-6 text-center">Active Streak</th>
                                 <th class="py-6 px-6">Member Since</th>
                                 <th class="py-6 px-8 text-right">Actions</th>
                             </tr>
@@ -67,20 +68,31 @@
                                             {{ $user->orders_count }} Orders
                                         </span>
                                     </td>
+                                    <td class="py-6 px-6 text-center">
+                                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 dark:bg-amber-900/20 rounded-full border border-amber-100 dark:border-amber-800/30">
+                                            <svg class="w-3 h-3 {{ $user->streak_count > 1 ? 'text-amber-500 animate-pulse' : 'text-stone-300' }}" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-1.513-1.155-2.452a10.11 10.11 0 00-.4-1.045zM10 17a1 1 0 100-2 1 1 0 000 2z" />
+                                            </svg>
+                                            <span class="text-[10px] font-black uppercase text-amber-700 dark:text-amber-500">{{ $user->streak_count ?? 0 }} Days</span>
+                                        </div>
+                                    </td>
                                     <td class="py-6 px-6">
                                         <div class="text-stone-900 dark:text-white font-bold text-xs">{{ $user->created_at->format('M d, Y') }}</div>
                                         <div class="text-[8px] text-stone-400 font-black uppercase mt-0.5">Joined</div>
                                     </td>
                                     <td class="py-6 px-8 text-right">
                                         <a href="{{ route('admin.customers.show', $user->id) }}" class="inline-flex items-center gap-2 bg-stone-900 dark:bg-stone-800 text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all shadow-sm">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
                                             Profile
                                         </a>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="py-20 text-center">
+                                    <td colspan="6" class="py-20 text-center">
                                         <div class="font-serif italic text-3xl text-stone-300 dark:text-stone-700 mb-2">No customers found</div>
                                         <p class="text-[10px] font-black uppercase tracking-widest text-stone-400">Try adjusting your search filters.</p>
                                     </td>

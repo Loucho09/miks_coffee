@@ -39,6 +39,29 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 <div class="space-y-8">
+                    <div class="bg-stone-900 rounded-[2.5rem] p-8 border border-stone-800 shadow-2xl relative overflow-hidden group">
+                        <p class="text-[10px] uppercase tracking-[0.4em] text-stone-500 font-black mb-10 italic">Engagement Data</p>
+                        <div class="space-y-6">
+                            <div>
+                                <p class="text-[10px] uppercase tracking-[0.4em] text-stone-500 font-black mb-2">Current Streak</p>
+                                <p class="text-4xl font-black italic text-white">{{ $streakCount }} Days</p>
+                            </div>
+                            <div class="pt-6 border-t border-stone-800">
+                                <div class="flex justify-between items-center mb-4">
+                                    <p class="text-[10px] uppercase tracking-[0.4em] text-stone-500 font-black">Milestone Progress</p>
+                                    <span class="text-amber-500 font-black text-[10px] uppercase">{{ $streakCount }}/{{ $nextMilestone }}</span>
+                                </div>
+                                <div class="h-2 w-full bg-stone-800 rounded-full overflow-hidden shadow-inner">
+                                    <div class="h-full bg-amber-500 transition-all duration-1000" :style="'width: ' + {{ $streakProgress }} + '%'"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-[0.4em] text-stone-500 font-black mb-2">Referrals</p>
+                                <p class="text-xl font-black italic text-white">{{ $customer->referrals->count() }} <span class="text-[10px] text-stone-500 uppercase font-bold tracking-widest ml-2">Friends Invited</span></p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="bg-white dark:bg-stone-900 p-8 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-sm">
                         <h3 class="font-black text-xs uppercase tracking-widest text-stone-900 dark:text-white mb-6 flex items-center gap-2">
                             <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
@@ -96,59 +119,94 @@
                     </div>
                 </div>
 
-                <div class="lg:col-span-2 bg-white dark:bg-stone-900 p-8 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-sm">
-                    <h3 class="font-black text-xs uppercase tracking-widest text-stone-900 dark:text-white mb-8 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                        Order History
-                    </h3>
-
-                    @if($customer->orders->isEmpty())
-                        <div class="text-center py-20">
-                            <p class="font-serif italic text-2xl text-stone-300 dark:text-stone-700">No coffee journeys yet.</p>
-                        </div>
-                    @else
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="bg-white dark:bg-stone-900 p-8 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-sm">
+                        <h3 class="font-black text-xs uppercase tracking-widest text-stone-900 dark:text-white mb-8 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Point Ledger
+                        </h3>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left">
+                            <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="text-stone-400 dark:text-stone-500 text-[9px] font-black uppercase tracking-[0.2em] border-b border-stone-100 dark:border-stone-800">
-                                        <th class="pb-4 px-2">Order ID</th>
+                                        <th class="pb-4 px-2">Transaction Detail</th>
                                         <th class="pb-4 px-2">Date</th>
-                                        <th class="pb-4 px-2">Status</th>
-                                        <th class="pb-4 px-2">Items</th>
-                                        <th class="pb-4 px-2 text-right">Total</th>
+                                        <th class="pb-4 px-2 text-right">Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-stone-50 dark:divide-stone-800/50">
-                                    @foreach($customer->orders as $order)
-                                        <tr class="group">
-                                            <td class="py-6 px-2 font-black text-stone-900 dark:text-white text-sm">#{{ $order->id }}</td>
-                                            <td class="py-6 px-2 text-stone-500 text-[11px] font-medium">{{ $order->created_at->format('M d, Y') }}</td>
-                                            <td class="py-6 px-2">
-                                                <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest
-                                                    {{ $order->status == 'completed' ? 'bg-green-500/10 text-green-600' : '' }}
-                                                    {{ $order->status == 'pending' ? 'bg-amber-500/10 text-amber-600' : '' }}
-                                                    {{ $order->status == 'cancelled' ? 'bg-rose-500/10 text-rose-600' : '' }}">
-                                                    {{ $order->status }}
+                                    @forelse($customer->pointTransactions as $tx)
+                                        <tr>
+                                            <td class="py-4 px-2 text-sm font-bold uppercase text-stone-600 dark:text-stone-300 tracking-tight">{{ $tx->description }}</td>
+                                            <td class="py-4 px-2 text-[10px] font-black text-stone-400 uppercase italic">{{ $tx->created_at->format('M d, Y') }}</td>
+                                            <td class="py-4 px-2 text-right">
+                                                <span class="font-black italic {{ $tx->amount > 0 ? 'text-emerald-500' : 'text-rose-500' }}">
+                                                    {{ $tx->amount > 0 ? '+' : '' }}{{ $tx->amount }} PTS
                                                 </span>
                                             </td>
-                                            <td class="py-6 px-2">
-                                                <div class="flex flex-col gap-1">
-                                                    @foreach($order->items as $item)
-                                                        <span class="text-[10px] text-stone-600 dark:text-stone-400 font-medium">
-                                                            <strong class="text-stone-900 dark:text-white">{{ $item->quantity }}x</strong> {{ $item->product->name ?? 'Deleted Item' }}
-                                                        </span>
-                                                    @endforeach
-                                                </div>
-                                            </td>
-                                            <td class="py-6 px-2 font-black text-right text-stone-900 dark:text-white">
-                                                ₱{{ number_format($order->total_price ?? $order->total_amount, 2) }}
-                                            </td>
                                         </tr>
-                                    @endforeach
+                                    @empty
+                                        <tr><td colspan="3" class="py-12 text-center opacity-30 italic font-black uppercase text-stone-500 tracking-widest text-[9px]">No transactions on record</td></tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
-                    @endif
+                    </div>
+
+                    <div class="bg-white dark:bg-stone-900 p-8 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-sm">
+                        <h3 class="font-black text-xs uppercase tracking-widest text-stone-900 dark:text-white mb-8 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                            Order History
+                        </h3>
+
+                        @if($customer->orders->isEmpty())
+                            <div class="text-center py-20">
+                                <p class="font-serif italic text-2xl text-stone-300 dark:text-stone-700">No coffee journeys yet.</p>
+                            </div>
+                        @else
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left">
+                                    <thead>
+                                        <tr class="text-stone-400 dark:text-stone-500 text-[9px] font-black uppercase tracking-[0.2em] border-b border-stone-100 dark:border-stone-800">
+                                            <th class="pb-4 px-2">Order ID</th>
+                                            <th class="pb-4 px-2">Date</th>
+                                            <th class="pb-4 px-2">Status</th>
+                                            <th class="pb-4 px-2">Items</th>
+                                            <th class="pb-4 px-2 text-right">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-stone-50 dark:divide-stone-800/50">
+                                        @foreach($customer->orders as $order)
+                                            <tr class="group">
+                                                <td class="py-6 px-2 font-black text-stone-900 dark:text-white text-sm">#{{ $order->id }}</td>
+                                                <td class="py-6 px-2 text-stone-500 text-[11px] font-medium">{{ $order->created_at->format('M d, Y') }}</td>
+                                                <td class="py-6 px-2">
+                                                    <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest
+                                                        {{ $order->status == 'completed' ? 'bg-green-500/10 text-green-600' : '' }}
+                                                        {{ $order->status == 'pending' ? 'bg-amber-500/10 text-amber-600' : '' }}
+                                                        {{ $order->status == 'cancelled' ? 'bg-rose-500/10 text-rose-600' : '' }}">
+                                                        {{ $order->status }}
+                                                    </span>
+                                                </td>
+                                                <td class="py-6 px-2">
+                                                    <div class="flex flex-col gap-1">
+                                                        @foreach($order->items as $item)
+                                                            <span class="text-[10px] text-stone-600 dark:text-stone-400 font-medium">
+                                                                <strong class="text-stone-900 dark:text-white">{{ $item->quantity }}x</strong> {{ $item->product->name ?? 'Deleted Item' }}
+                                                            </span>
+                                                        @endforeach
+                                                    </div>
+                                                </td>
+                                                <td class="py-6 px-2 font-black text-right text-stone-900 dark:text-white">
+                                                    ₱{{ number_format($order->total_price ?? $order->total_amount, 2) }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

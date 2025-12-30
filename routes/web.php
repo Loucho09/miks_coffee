@@ -16,6 +16,7 @@ use App\Http\Controllers\Shop\CartController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SupportController; 
 use App\Http\Controllers\Admin\ExportController;
+use App\Http\Controllers\HomeController;
 
 // Models
 use App\Models\Product;
@@ -25,11 +26,11 @@ use App\Models\Order;
 /* |--------------------------------------------------------------------------
    | 1. PUBLIC ROUTES
    | -------------------------------------------------------------------------- */
-Route::get('/', function () {
-    if (Auth::check()) return redirect()->route('dashboard');
-    $featured = Product::where('is_active', true)->with('sizes')->inRandomOrder()->take(3)->get();
-    return view('welcome', compact('featured'));
-})->name('welcome');
+
+/**
+ * Updated root route to utilize HomeController for Leaderboard and Featured Product data.
+ */
+Route::get('/', [HomeController::class, 'index'])->name('welcome');
 
 Route::get('/menu', function (Request $request) {
     $query = Product::with(['category', 'sizes'])->where('is_active', true);
@@ -109,7 +110,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/update-status/{id}', [QueueController::class, 'updateStatus'])->name('update_status');
         Route::get('/active-orders', [QueueController::class, 'getActiveOrders'])->name('active_orders');
         
-        // 🟢 FIXED: Missing Reward Terminal Routes
         Route::get('/active-redemptions', [QueueController::class, 'getActiveRedemptions'])->name('active_redemptions');
         Route::post('/redemption/{id}/fulfill', [QueueController::class, 'fulfillRedemption'])->name('redemption.fulfill');
     });

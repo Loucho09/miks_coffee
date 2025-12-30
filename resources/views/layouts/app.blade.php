@@ -102,7 +102,7 @@
 
     @if (isset($header))
         <header class="bg-stone-100 /80 dark:bg-stone-900/80 backdrop-blur-md border-b border-stone-200/50 dark:border-stone-800/50 sticky top-16 z-30 transition-colors">
-            <div class="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-">
+            <div class="max-w-7xl mx-auto py-3.5 px-4 sm:px-6 lg:px-">
                 <div class="font-serif italic text-3xl text-stone-900 dark:text-white leading-tight">
                     {{ $header }}
                 </div>
