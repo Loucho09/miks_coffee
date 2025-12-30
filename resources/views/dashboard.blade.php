@@ -135,6 +135,29 @@
                         <p class="text-stone-500 text-[10px] mb-6 leading-relaxed font-medium italic">Maintaining a streak? You deserve a <span class="font-black text-stone-900 dark:text-white uppercase">Premium Espresso</span>.</p>
                         <a href="{{ route('home') }}" class="w-full inline-flex items-center justify-center text-[9px] font-black uppercase tracking-[0.2em] px-6 py-4 bg-stone-900 dark:bg-stone-50 text-white dark:text-stone-950 rounded-2xl hover:bg-stone-800 transition-all shadow-md">Order Now</a>
                     </div>
+
+                    {{-- Data Management Section --}}
+                    <div class="bg-stone-900 rounded-[2.5rem] p-8 border border-stone-800 shadow-connected relative overflow-hidden group">
+                        <div class="relative z-10">
+                            <span class="text-[10px] font-black text-stone-500 uppercase tracking-[0.4em] block mb-4">Privacy Management</span>
+                            <h4 class="text-xl font-black text-white uppercase italic tracking-tighter mb-4">Your Records</h4>
+                            <p class="text-[9px] text-stone-400 font-medium italic leading-relaxed mb-8 uppercase tracking-tight">
+                                Review all stored information including your brewing history and loyalty milestones in a clean, readable format.
+                            </p>
+                            <div class="flex flex-col gap-3">
+                                <a href="{{ route('profile.data_report') }}" class="w-full py-4 bg-stone-50 text-stone-950 rounded-2xl font-black uppercase tracking-widest text-[9px] hover:bg-amber-500 hover:text-white transition-all transform active:scale-95 shadow-xl flex items-center justify-center gap-3">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    View Data Report
+                                </a>
+                                <form action="{{ route('profile.export') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="w-full py-3 text-stone-500 rounded-2xl font-black uppercase tracking-widest text-[8px] border border-stone-800 hover:text-amber-500 transition-all flex items-center justify-center gap-2">
+                                        Download Raw Portability Data (JSON)
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="lg:col-span-8 space-y-12">

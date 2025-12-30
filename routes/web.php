@@ -80,7 +80,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('rewards.index');
 
     Route::post('/claim-reward', [OrderController::class, 'claimReward'])->name('rewards.claim');
-    Route::post('/reviews', [ReviewController::class, 'store'])->name('rewards.store');
+    
+    // Explicitly named route to match dashboard.blade.php
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 
     Route::controller(CartController::class)->group(function () {
         Route::get('/cart', 'index')->name('cart.index');
@@ -104,6 +106,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Privacy and Data Routes
+    Route::get('/profile/data-report', [ProfileController::class, 'showDataReport'])->name('profile.data_report');
+    Route::post('/profile/export', [ProfileController::class, 'exportData'])->name('profile.export');
 
     // Barista Queue Access
     Route::prefix('barista')->name('barista.')->group(function () {
@@ -116,8 +122,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     /* |--------------------------------------------------------------------------
-       | 3. ADMIN ONLY ROUTES
-       | -------------------------------------------------------------------------- */
+        | 3. ADMIN ONLY ROUTES
+        | -------------------------------------------------------------------------- */
     Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/orders/export', ExportController::class)->name('orders.export');
