@@ -27,7 +27,15 @@ class CheckRole
         }
 
         // Strict role check for non-admins
-        if ($user->role !== $role) {
+        // Normalize naming: If the route asks for 'customer', allow users with 'user' or 'customer' type
+        $userRole = strtolower($user->role ?? $user->usertype);
+        $requiredRole = strtolower($role);
+
+        if ($requiredRole === 'customer' && ($userRole === 'customer' || $userRole === 'user')) {
+            return $next($request);
+        }
+
+        if ($userRole !== $requiredRole) {
             abort(403, 'Unauthorized action.');
         }
 

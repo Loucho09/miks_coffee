@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -24,6 +25,15 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        // Check if the admin is already logged in on another device before authenticating
+        $user = User::where('email', $request->email)->first();
+
+        if ($user && $user->isAdmin() && !empty($user->last_session_id)) {
+            return back()->withErrors([
+                'email' => 'Access Denied: This admin account is already logged in on another device. Concurrent sessions are restricted for admins.',
+            ]);
+        }
+
         $request->authenticate();
 
         $request->session()->regenerate();
@@ -32,7 +42,7 @@ class AuthenticatedSessionController extends Controller
         $user = $request->user();
 
         // Admin redirection and Status Update
-        if ($user->usertype === 'admin' || $user->email === 'jmloucho09@gmail.com') {
+        if ($user->isAdmin()) {
             $user->update([
                 'last_seen_at' => now(),
                 'last_session_id' => $request->session()->getId()
@@ -55,7 +65,7 @@ class AuthenticatedSessionController extends Controller
         // NEW FEATURE: Clear session ID on logout to allow immediate re-login
         if ($user) {
             $updateData = [];
-            if ($user->usertype === 'admin' || $user->email === 'jmloucho09@gmail.com') {
+            if ($user->isAdmin()) {
                 $updateData['last_seen_at'] = null;
             }
             $updateData['last_session_id'] = null;

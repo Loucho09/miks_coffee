@@ -40,14 +40,15 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'usertype' => 'user', // Explicitly marking them as a customer
+            'role' => 'customer',     // Set role to customer for middleware compatibility
+            'usertype' => 'customer', // Fixed: Match the 'customer' role used in web.php
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        // Redirect to 'home' instead of 'admin.dashboard'
-        return redirect(route('home', absolute: false));
+        // Redirect to customer dashboard
+        return redirect()->to('/dashboard');
     }
 }
