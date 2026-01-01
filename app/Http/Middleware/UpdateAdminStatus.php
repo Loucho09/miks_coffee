@@ -8,16 +8,26 @@ use Illuminate\Support\Facades\Auth;
 
 class UpdateAdminStatus
 {
+    /**
+     * Handle an incoming request.
+     */
     public function handle(Request $request, Closure $next)
     {
         if (Auth::check()) {
             /** @var \App\Models\User $user */
             $user = Auth::user();
 
-            // Check if the user is the Admin (by usertype or specific email)
-            if ($user->usertype === 'admin' || $user->email === 'jmloucho09@gmail.com') {
-                // Update the last activity timestamp
-                $user->update(['last_seen_at' => now()]);
+            // Check using the robust isAdmin logic
+            if ($user->isAdmin()) {
+                /**
+                 * SNAP-TIER SYNC:
+                 * We use update() to ensure the database record is physically 
+                 * changed. This ensures the Green dot is accurate.
+                 */
+                $user->update([
+                    'is_online' => true,
+                    'last_seen_at' => now(),
+                ]);
             }
         }
         

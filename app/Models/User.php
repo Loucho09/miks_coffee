@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\PointTransaction;
 use App\Models\LoginHistory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends Authenticatable
 {
@@ -31,6 +32,7 @@ class User extends Authenticatable
         'referral_code',
         'referred_by',
         'last_session_id',
+        'is_online',
     ];
 
     protected $hidden = [
@@ -44,9 +46,22 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'is_online' => 'boolean',
             'last_visit_at' => 'datetime',
             'last_seen_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Ensure is_online is always returned as a strict boolean.
+     * This fixes the "empty" display issues in Tinker/SQLite.
+     */
+    protected function isOnline(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => (bool) $value,
+            set: fn ($value) => (bool) $value,
+        );
     }
 
     protected static function booted()
