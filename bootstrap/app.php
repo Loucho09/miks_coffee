@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
 
+        // Removed EnsureSingleAdminSession from global append to prevent customer lag
         $middleware->append(\App\Http\Middleware\UpdateAdminStatus::class);
         $middleware->append(\App\Http\Middleware\HandleReferral::class);
     })

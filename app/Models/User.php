@@ -114,6 +114,9 @@ class User extends Authenticatable
         return true;
     }
 
+    /**
+     * Optimized Admin Check for speed.
+     */
     public function isAdmin(): bool
     {
         return $this->role === 'admin' || 

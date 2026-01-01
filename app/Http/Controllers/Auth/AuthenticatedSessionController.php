@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use App\Models\User;
 
@@ -43,10 +44,12 @@ class AuthenticatedSessionController extends Controller
 
         // Admin redirection and Status Update
         if ($user->isAdmin()) {
+            $sessionId = $request->session()->getId();
             $user->update([
                 'last_seen_at' => now(),
-                'last_session_id' => $request->session()->getId()
+                'last_session_id' => $sessionId
             ]);
+            Cache::put("admin_session_{$user->id}", $sessionId, 3600);
             return redirect()->route('admin.dashboard');
         }
 
@@ -62,13 +65,13 @@ class AuthenticatedSessionController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // NEW FEATURE: Clear session ID on logout to allow immediate re-login
+        // Clear session ID and Cache on logout to allow immediate re-login
         if ($user) {
-            $updateData = [];
+            Cache::forget("admin_session_{$user->id}");
+            $updateData = ['last_session_id' => null];
             if ($user->isAdmin()) {
                 $updateData['last_seen_at'] = null;
             }
-            $updateData['last_session_id'] = null;
             $user->update($updateData);
         }
 

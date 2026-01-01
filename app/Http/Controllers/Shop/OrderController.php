@@ -18,9 +18,6 @@ use App\Mail\LowStockAlert;
 
 class OrderController extends Controller
 {
-    /**
-     * Display customer order history.
-     */
     public function index()
     {
         $orders = Order::with(['items.product', 'items.review'])
@@ -30,9 +27,6 @@ class OrderController extends Controller
         return view('cafe.orders', compact('orders'));
     }
 
-    /**
-     * Apply a reward to the session.
-     */
     public function claimReward(Request $request)
     {
         /** @var User $user */
@@ -80,9 +74,6 @@ class OrderController extends Controller
             ->with('success', $request->name . ' applied! Place order to claim.');
     }
 
-    /**
-     * Store a new order.
-     */
     public function store(Request $request)
     {
         $cart = session()->get('cart');
@@ -94,7 +85,7 @@ class OrderController extends Controller
         $user = Auth::user(); 
         $claimed = session()->get('claimed_reward');
         
-        $pointsDiscount = 0;
+        $discount = 0;
         $pointsRedeemed = 0;
         $rewardType = null;
 
@@ -106,33 +97,30 @@ class OrderController extends Controller
             
             $pointsRedeemed = $claimed['points'];
             $rewardType = $claimed['name'];
-            $pointsDiscount = $claimed['value']; 
+            $discount = $claimed['value']; 
         } elseif ($request->has('redeem_points') && ($user->points ?? 0) >= 50) {
-            $pointsDiscount = 50;
+            $discount = 50;
             $pointsRedeemed = 50;
             $rewardType = 'Standard Discount';
         }
 
         $subtotal = 0;
-        $totalItemsInCart = 0;
-        
-        foreach ($cart as $details) {
-            $subtotal += $details['price'] * $details['quantity'];
-            $totalItemsInCart += $details['quantity'];
-        }
-
         $bulkSavings = 0;
-        if ($totalItemsInCart >= 6) {
-            $bulkSavings = $subtotal * 0.10;
+        foreach ($cart as $details) {
+            $linePrice = $details['price'] * $details['quantity'];
+            if ($details['quantity'] >= 6) {
+                $lineDiscount = $linePrice * 0.10;
+                $bulkSavings += $lineDiscount;
+                $linePrice -= $lineDiscount;
+            }
+            $subtotal += $linePrice;
         }
 
-        $finalSubtotal = $subtotal - $bulkSavings;
-
-        if ($finalSubtotal < $pointsDiscount) {
-            $pointsDiscount = $finalSubtotal;
+        if ($subtotal < $discount) {
+            $discount = $subtotal;
         }
 
-        $finalTotal = number_format((float)(max(0, $finalSubtotal - $pointsDiscount)), 2, '.', '');
+        $finalTotal = number_format((float)(max(0, $subtotal - $discount)), 2, '.', '');
 
         DB::beginTransaction();
         try {
@@ -145,11 +133,6 @@ class OrderController extends Controller
                 }
             }
 
-            $noteArr = [];
-            if ($rewardType) $noteArr[] = "Reward: $rewardType";
-            if ($bulkSavings > 0) $noteArr[] = "Bulk Cart Discount (10%): ₱" . number_format($bulkSavings, 2);
-            $finalNotes = implode(' | ', $noteArr);
-
             $order = Order::create([
                 'user_id' => $user->id,
                 'customer_name' => $request->customer_name ?? $user->name,
@@ -160,12 +143,13 @@ class OrderController extends Controller
                 'points_earned' => 10,
                 'points_redeemed' => $pointsRedeemed,
                 'reward_type' => $rewardType,
-                'notes' => $finalNotes ?: null,
+                'notes' => ($bulkSavings > 0) 
+                            ? ($rewardType ? "Reward: $rewardType | Bulk Savings: ₱".number_format($bulkSavings, 2) : "Bulk Savings: ₱".number_format($bulkSavings, 2)) 
+                            : ($rewardType ? "Reward: $rewardType" : null),
             ]);
 
             foreach ($cart as $key => $details) {
                 $realProductId = $details['product_id'] ?? intval($key);
-                
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $realProductId,
@@ -187,9 +171,11 @@ class OrderController extends Controller
                 }
             }
 
+            // 🟢 NEW FEATURE: Reward Referral System on first order
             if ($user->referred_by && $user->orders()->count() === 1) {
                 $referrer = $user->referrer;
                 if ($referrer) {
+                    // Reward Referrer
                     $referrer->increment('points', 50);
                     PointTransaction::create([
                         'user_id' => $referrer->id,
@@ -198,6 +184,7 @@ class OrderController extends Controller
                         'order_id' => $order->id
                     ]);
 
+                    // Reward Customer
                     $user->increment('points', 50);
                     PointTransaction::create([
                         'user_id' => $user->id,
@@ -226,9 +213,6 @@ class OrderController extends Controller
                 'order_id' => $order->id
             ]);
 
-            // 🟢 UPDATED: Let the Model handle the streak and milestone bonus points automatically
-            $user->updateStreak();
-
             DB::commit();
             session()->forget(['cart', 'claimed_reward']); 
 
@@ -236,7 +220,7 @@ class OrderController extends Controller
                 Mail::to($user->email)->send(new OrderReceipt($order));
             } catch (\Exception $e) {}
 
-            return redirect()->route('dashboard')->with('success', 'Order established! Bulk discount and streak progress applied.');
+            return redirect()->route('dashboard')->with('success', 'Order established! Bulk discount applied if applicable.');
             
         } catch (\Exception $e) {
             DB::rollBack();
@@ -244,9 +228,6 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * Export sales data for admins.
-     */
     public function exportData()
     {
         /** @var User $user */
@@ -273,7 +254,6 @@ class OrderController extends Controller
 
             foreach ($orders as $order) {
                 $performance = ($order->total_price >= 500) ? 'HIGH VALUE' : 'Standard';
-
                 fputcsv($file, [
                     $order->id,
                     $order->user->name ?? 'Guest',
@@ -289,9 +269,6 @@ class OrderController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    /**
-     * Display the order receipt.
-     */
     public function downloadReceipt($id)
     {
         /** @var User $user */

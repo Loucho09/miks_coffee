@@ -6,6 +6,7 @@ use Illuminate\Auth\Events\Login;
 use App\Models\LoginHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cache;
 
 class LogSuccessfulLogin
 {
@@ -21,10 +22,15 @@ class LogSuccessfulLogin
         /** @var \App\Models\User $user */
         $user = $event->user;
 
-        // NEW FEATURE: Update Admin session ID on login to prevent lockout
         if ($user->isAdmin()) {
-            $user->last_session_id = Session::getId();
-            $user->save();
+            $sessionId = Session::getId();
+            
+            // Use updateQuietly to prevent triggering unnecessary observers/events
+            $user->last_session_id = $sessionId;
+            $user->saveQuietly();
+
+            // Update Cache immediately to keep middleware fast
+            Cache::put("admin_session_{$user->id}", $sessionId, 600);
         }
 
         LoginHistory::create([

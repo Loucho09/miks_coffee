@@ -94,7 +94,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     });
 
-    /* --- COMMON AUTH ROUTES (Receipts, Profiles) --- */
+    /* --- COMMON AUTH ROUTES --- */
     Route::get('/orders/{id}/receipt', function ($id) {
         $order = Order::with(['items.product', 'user'])->findOrFail($id);
         /** @var User $user */
@@ -121,7 +121,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/redemption/{id}/fulfill', [QueueController::class, 'fulfillRedemption'])->name('redemption.fulfill');
     });
 
-    /* --- ADMIN ONLY FEATURES (Single Session Enforced) --- */
+    /* --- ADMIN ONLY FEATURES (Strict Session Applied ONLY Here) --- */
     Route::middleware(['admin', 'admin.single_session'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/orders/export', ExportController::class)->name('orders.export');
@@ -138,7 +138,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/{id}/resolve', 'resolve')->name('resolve');
             Route::post('/{ticket}/reply', 'reply')->name('reply');
             Route::get('/active-tickets', 'getActiveTickets')->name('active_tickets');
-            Route::get('/active-json', 'getActiveTickets')->name('active_json');
         });
 
         Route::controller(MenuController::class)->prefix('menu')->name('menu.')->group(function () {
@@ -148,14 +147,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
-        });
-
-        /* Operations Mode for Admin (The "Double Feature" Access) */
-        Route::prefix('operations')->name('ops.')->group(function () {
-            Route::get('/barista-view', [QueueController::class, 'index'])->name('barista');
-            Route::get('/customer-view', function () {
-                return redirect()->route('dashboard');
-            })->name('customer');
         });
     });
 });

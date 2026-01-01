@@ -3,69 +3,49 @@
 namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Models\ProductSize;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Product;
 
 class CartController extends Controller
 {
     public function index()
     {
         $cart = session()->get('cart', []);
-        
-        $subtotal = 0;
-        $totalItems = 0;
+        $total = 0;
 
-        foreach ($cart as $details) {
-            $subtotal += $details['price'] * $details['quantity'];
-            $totalItems += $details['quantity'];
+        foreach($cart as $details) {
+            $total += $details['price'] * $details['quantity'];
         }
 
-        // Calculate Bulk Savings for the UI
-        $bulkSavings = ($totalItems >= 6) ? ($subtotal * 0.10) : 0;
-
-        return view('cafe.cart', compact('cart', 'subtotal', 'totalItems', 'bulkSavings'));
+        return view('cafe.cart', compact('cart', 'total'));
     }
 
     public function add(Request $request)
     {
-        $product = Product::find($request->product_id);
-
-        if(!$product) {
-            return redirect()->back()->with('error', 'Product not found!');
-        }
-
-        $sizeName = null;
-        $price = $product->price;
-        $cartKey = $product->id; 
-
-        if ($request->has('size_id') && $request->size_id) {
-            $size = ProductSize::find($request->size_id);
-            if ($size) {
-                $sizeName = $size->size;
-                $price = $size->price;
-                $cartKey = $product->id . '_' . $size->size; 
-            }
-        }
-
+        $product = Product::findOrFail($request->product_id);
         $cart = session()->get('cart', []);
+
+        // 🟢 FIXED: Handle defaults if size/price aren't provided by the modal logic
+        $size = $request->size ?: 'Regular';
+        $price = $request->price ?: $product->price;
+
+        // Create a unique key based on Product ID and Size 
+        $cartKey = $product->id . '_' . $size;
 
         if(isset($cart[$cartKey])) {
             $cart[$cartKey]['quantity']++;
         } else {
             $cart[$cartKey] = [
-                "product_id" => $product->id,
                 "name" => $product->name,
                 "quantity" => 1,
-                "price" => $price,
-                "image" => $product->image,
-                "size" => $sizeName
+                "price" => $price, 
+                "size" => $size,
+                "image" => $product->image
             ];
         }
 
         session()->put('cart', $cart);
-        return redirect()->back()->with('success', 'Added to cart successfully!');
+        return redirect()->back()->with('success', 'Brew added to cart!');
     }
 
     public function remove(Request $request)
@@ -76,7 +56,7 @@ class CartController extends Controller
                 unset($cart[$request->id]);
                 session()->put('cart', $cart);
             }
-            return redirect()->back()->with('success', 'Item removed');
+            return redirect()->back()->with('success', 'Item removed.');
         }
     }
 }
