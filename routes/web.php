@@ -110,6 +110,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile/data-report', [ProfileController::class, 'showDataReport'])->name('profile.data_report');
     Route::post('/profile/export', [ProfileController::class, 'exportData'])->name('profile.export');
+    Route::get('/settings-privacy', [ProfileController::class, 'settings'])->name('profile.settings');
 
     /* --- BARISTA ONLY FEATURES --- */
     Route::middleware(['role:barista'])->prefix('barista')->name('barista.')->group(function () {

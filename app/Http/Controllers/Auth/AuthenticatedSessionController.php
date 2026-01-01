@@ -33,7 +33,10 @@ class AuthenticatedSessionController extends Controller
 
         // Admin redirection and Status Update
         if ($user->usertype === 'admin' || $user->email === 'jmloucho09@gmail.com') {
-            $user->update(['last_seen_at' => now()]);
+            $user->update([
+                'last_seen_at' => now(),
+                'last_session_id' => $request->session()->getId()
+            ]);
             return redirect()->route('admin.dashboard');
         }
 
@@ -49,9 +52,14 @@ class AuthenticatedSessionController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Set status to Offline immediately on logout
-        if ($user && ($user->usertype === 'admin' || $user->email === 'jmloucho09@gmail.com')) {
-            $user->update(['last_seen_at' => null]);
+        // NEW FEATURE: Clear session ID on logout to allow immediate re-login
+        if ($user) {
+            $updateData = [];
+            if ($user->usertype === 'admin' || $user->email === 'jmloucho09@gmail.com') {
+                $updateData['last_seen_at'] = null;
+            }
+            $updateData['last_session_id'] = null;
+            $user->update($updateData);
         }
 
         Auth::guard('web')->logout();

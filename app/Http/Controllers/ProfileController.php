@@ -18,6 +18,7 @@ class ProfileController extends Controller
     {
         return view('profile.edit', [
             'user' => $request->user(),
+            'loginHistory' => $request->user()->loginHistory()->latest()->take(5)->get(),
         ]);
     }
 

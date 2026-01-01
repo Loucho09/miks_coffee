@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\PointTransaction;
+use App\Models\LoginHistory;
 
 class User extends Authenticatable
 {
@@ -132,5 +133,6 @@ class User extends Authenticatable
     public function referrals(): HasMany { return $this->hasMany(User::class, 'referred_by'); }
     public function orders(): HasMany { return $this->hasMany(Order::class); }
     public function pointTransactions(): HasMany { return $this->hasMany(PointTransaction::class); }
+    public function loginHistory(): HasMany { return $this->hasMany(LoginHistory::class); }
     public function getTotalSpentAttribute(): float { return (float) $this->orders()->sum('total_price'); }
 }
