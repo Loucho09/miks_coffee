@@ -40,22 +40,18 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         /** @var \App\Models\User $user */
-        $user = Auth::user();
+        $user = $request->user();
 
-        // DIRECT SYNC: Force status update on login
-        $user->is_online = true;
-        $user->last_seen_at = now();
-        
+        // Admin redirection and Status Update
         if ($user->isAdmin()) {
             $sessionId = $request->session()->getId();
-            $user->last_session_id = $sessionId;
-            $user->save(); // Commit to DB
-
+            $user->update([
+                'last_seen_at' => now(),
+                'last_session_id' => $sessionId
+            ]);
             Cache::put("admin_session_{$user->id}", $sessionId, 3600);
             return redirect()->route('admin.dashboard');
         }
-
-        $user->save(); // Commit to DB for Customer
 
         // Customer redirection
         return redirect()->to('/dashboard')->with('login_success', "Welcome back, {$user->name}! Brew something special today.");
@@ -69,14 +65,14 @@ class AuthenticatedSessionController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // DIRECT SYNC: Force status to offline before session destruction
+        // Clear session ID and Cache on logout to allow immediate re-login
         if ($user) {
             Cache::forget("admin_session_{$user->id}");
-            
-            $user->is_online = false;
-            $user->last_session_id = null;
-            $user->last_seen_at = now();
-            $user->save(); // Commit to DB
+            $updateData = ['last_session_id' => null];
+            if ($user->isAdmin()) {
+                $updateData['last_seen_at'] = null;
+            }
+            $user->update($updateData);
         }
 
         Auth::guard('web')->logout();
