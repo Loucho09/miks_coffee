@@ -16,7 +16,16 @@
         </div>
     </x-slot>
 
-    <div class="py-12 bg-stone-50 dark:bg-stone-950 min-h-screen">
+    <div class="py-12 bg-stone-50 dark:bg-stone-950 min-h-screen" x-data="{ 
+        showDeleteModal: false, 
+        deleteUrl: '', 
+        productName: '',
+        confirmDelete(url, name) {
+            this.deleteUrl = url;
+            this.productName = name;
+            this.showDeleteModal = true;
+        }
+    }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             @if(session('success'))
@@ -98,13 +107,11 @@
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                             </a>
                                             
-                                            <form action="{{ route('admin.menu.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Archive this item from the menu?');" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="p-2.5 bg-stone-100 dark:bg-stone-800 text-stone-400 hover:bg-rose-600 hover:text-white rounded-xl transition-all shadow-sm" title="Delete Item">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                </button>
-                                            </form>
+                                            <button @click="confirmDelete('{{ route('admin.menu.destroy', $product->id) }}', '{{ $product->name }}')" 
+                                                    class="p-2.5 bg-stone-100 dark:bg-stone-800 text-stone-400 hover:bg-rose-600 hover:text-white rounded-xl transition-all shadow-sm" 
+                                                    title="Delete Item">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -119,5 +126,47 @@
                 @endif
             </div>
         </div>
+
+        <div x-show="showDeleteModal" 
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             x-cloak>
+            
+            <div class="fixed inset-0 bg-stone-950/80 backdrop-blur-sm transition-opacity" @click="showDeleteModal = false"></div>
+
+            <div class="relative bg-white dark:bg-stone-900 rounded-[2rem] shadow-2xl max-w-md w-full p-8 border border-stone-200 dark:border-stone-800 transition-colors">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-black text-stone-900 dark:text-white uppercase tracking-tight mb-2">Archive Item?</h3>
+                    <p class="text-sm text-stone-500 dark:text-stone-400 mb-8 font-medium">Are you sure you want to archive <span class="font-bold italic text-stone-900 dark:text-white" x-text="productName"></span>? This will hide it from your customers.</p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button @click="showDeleteModal = false" 
+                                class="flex-1 px-6 py-3 bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-black uppercase text-[10px] tracking-widest rounded-full hover:bg-stone-200 dark:hover:bg-stone-700 transition">
+                            Cancel
+                        </button>
+                        <form :action="deleteUrl" method="POST" class="flex-1">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" 
+                                    class="w-full px-6 py-3 bg-rose-600 text-white font-black uppercase text-[10px] tracking-widest rounded-full shadow-lg shadow-rose-600/20 hover:bg-rose-700 transition transform active:scale-95">
+                                Archive Item
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </x-app-layout>
+
+<style>
+    [x-cloak] { display: none !important; }
+</style>

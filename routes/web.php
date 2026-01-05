@@ -54,12 +54,12 @@ Route::view('/terms', 'legal.terms')->name('terms');
 Route::middleware(['auth', 'verified'])->group(function () {
 
     /* --- CUSTOMER ONLY FEATURES --- */
-    // Note: 'role:customer' middleware should allow Admin bypass internally
+    // Note: 'role:customer' middleware allows Admin bypass internally for management visibility
     Route::middleware(['role:customer'])->group(function () {
         Route::get('/dashboard', function () {
             /** @var User $user */
             $user = Auth::user();
-            $user->updateStreak();
+            $user->updateStreak(); // Standardized loyalty sync
             $recentOrders = Order::where('user_id', $user->id)->with(['items.product', 'items.review', 'items.order'])->latest()->take(5)->get();
             $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)->with(['replies.user'])->latest()->take(5)->get();
             return view('dashboard', compact('recentOrders', 'supportTickets'));
@@ -77,7 +77,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/rewards', function () {
             /** @var User $user */
             $user = Auth::user();
-            $points = $user->points ?? 0; 
+            // Standardized to loyalty_points to ensure 68 PTS sync
+            $points = $user->loyalty_points ?? 0; 
             $goal = ($points >= 200) ? 500 : (($points >= 100) ? 200 : 100);
             return view('cafe.rewards', compact('user', 'points', 'goal'));
         })->name('rewards.index');
@@ -100,8 +101,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $order = Order::with(['items.product', 'user'])->findOrFail($id);
         /** @var User $user */
         $user = Auth::user();
-        if ($order->user_id !== Auth::id() && $user->usertype !== 'admin') abort(403);
-        $pts = $order->user->points ?? 0;
+        if ($order->user_id !== Auth::id() && !$user->isAdmin()) abort(403); // Fixed admin check
+        
+        $pts = $order->user->loyalty_points ?? 0;
         $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
         return view('emails.order_receipt', compact('order', 'tier'));
     })->name('orders.receipt');

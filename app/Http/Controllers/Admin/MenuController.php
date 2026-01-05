@@ -14,19 +14,22 @@ class MenuController extends Controller
 {
     /**
      * Display a listing of the menu items.
-     * NEW FEATURE: Added Search and Pagination support for Admin.
+     * Includes Search and Pagination support for Admin.
      */
     public function index(Request $request)
     {
+        // 🟢 FIXED: Fetch all products with their relationships
         $query = Product::with(['category', 'sizes'])->latest();
 
-        // 🟢 NEW FEATURE: Admin Search Functionality
+        // Admin Search Functionality
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%')
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
                   ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
         }
 
-        // 🟢 FIX: Changed get() to paginate(10) to support the UI pagination links
+        // 🟢 FIXED: Pagination ensured for the UI
         $products = $query->paginate(10)->withQueryString();
 
         return view('admin.menu.index', compact('products'));
@@ -141,7 +144,6 @@ class MenuController extends Controller
 
         // Handle Sizes Update (Preserved & Fixed Logic)
         if ($request->has('has_sizes') && $request->filled('size_prices')) {
-            // Optional: Remove sizes not present in the new list to keep data clean
             foreach ($request->size_prices as $sizeLabel => $price) {
                 $product->sizes()->updateOrCreate(
                     ['size' => $sizeLabel],

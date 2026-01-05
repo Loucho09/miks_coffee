@@ -23,65 +23,21 @@
                 extend: {
                     fontFamily: { sans: ['Outfit', 'sans-serif'] },
                     colors: {
-                // 🟢 SOPHISTICATED BEIGE & ESPRESSO THEME (60-30-10 Rule)
-                stone: {
-                    // LIGHT MODE: The 60% and 30% Beige connection
-                    50: '#F5F2EA',  // 60% - Main Beige Background (Soft & Warm)
-                    100: '#EBE6D9', // 30% - Secondary/Card Background
-                    200: '#DED7C5', // 10% - Subtle Beige Borders
-                    
-                    // NEUTRAL STEPS: Typography and Accents
-                    300: '#D1C8B1', //
-                    400: '#B8AD91', //
-                    500: '#8F8366', //
-                    600: '#736852', //
-                    700: '#574F3E', //
-                    800: '#3B352A', //
-                    
-                    // DARK MODE: The "Connected" Charcoal-Beige
-                    900: '#1A1816', // 30% - Secondary Dark BG (Warm Charcoal)
-                    950: '#0C0B0A', // 60% - Primary Dark BG (Deep Espresso)
-                    1000: '#FF0000', // Custom Red Preserved
-                },
-                
-                // 🟢 ACCENT COLORS: 10% Branding
-                amber: {
-                    400: '#FBBF24', //
-                    500: '#F59E0B', // Primary 10% Accent (Brand Orange)
-                    600: '#D97706', //
-                    700: '#B45309', //
-                    1000: '#F59E0B', //
-                },
-
-                // 🟢 COFFEE SPECIFIC PALETTE
-                'coffee': {
-                    100: '#F5E6E0', //
-                    600: '#8D5F46', //
-                    800: '#4B2C20', //
-                    900: '#2C1810', //
-                },
-
-                // 🟢 LEGACY BRANDING: Compatibility
-                'brand': {
-                    orange: '#F59E0B', //
-                },
-
-                'dashboard': {
-                    1000: '#FF0000', //
-                },
-            },
-            boxShadow: {
-                // 🟢 NEW FEATURE: Custom Depth Effects
-                // Soft shadow tuned for light beige backgrounds
-                'beige': '0 20px 40px -15px rgba(143, 131, 102, 0.2)', //
-                // Heavy, atmospheric shadow for dark theme depth
-                'connected': '0 25px 60px -15px rgba(0, 0, 0, 0.7)', //
-            },
-            letterSpacing: {
-                // For that premium high-end look on headers
-                'widest': '0.4em',
-            },
-            
+                        stone: {
+                            50: '#F5F2EA', 100: '#EBE6D9', 200: '#DED7C5', 300: '#D1C8B1', 400: '#B8AD91',
+                            500: '#8F8366', 600: '#736852', 700: '#574F3E', 800: '#3B352A', 900: '#1A1816',
+                            950: '#0C0B0A', 1000: '#FF0000',
+                        },
+                        amber: { 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 1000: '#F59E0B' },
+                        'coffee': { 100: '#F5E6E0', 600: '#8D5F46', 800: '#4B2C20', 900: '#2C1810' },
+                        'brand': { orange: '#F59E0B' },
+                        'dashboard': { 1000: '#FF0000' },
+                    },
+                    boxShadow: {
+                        'beige': '0 20px 40px -15px rgba(143, 131, 102, 0.2)',
+                        'connected': '0 25px 60px -15px rgba(0, 0, 0, 0.7)',
+                    },
+                    letterSpacing: { 'widest': '0.4em' },
                 }
             }
         }
@@ -97,20 +53,13 @@
     
     <style>
         [x-cloak] { display: none !important; }
-        /* Hide scrollbars for the category swiper */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Prevent any horizontal overflow at the root level */
-        body, html {
-            overflow-x: hidden;
-            width: 100%;
-            position: relative;
-        }
+        body, html { overflow-x: hidden; width: 100%; position: relative; }
     </style>
 </head>
 
-<body class="antialiased bg-stone-100  dark:bg-stone-950 text-stone-800 dark:text-stone-200 font-sans flex flex-col min-h-screen">
+<body class="antialiased bg-stone-100 dark:bg-stone-950 text-stone-800 dark:text-stone-200 font-sans flex flex-col min-h-screen">
     
     <nav class="bg-white/90 dark:bg-stone-900/90 backdrop-blur-md sticky top-0 z-50 border-b border-stone-100 dark:border-stone-800 transition-colors">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -159,7 +108,7 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex-grow w-full">
         
-        <div class="flex items-center gap-3 mb-10 overflow-x-auto pb-4 no-scrollbar px-1 md:justify-center md:flex-wrap sticky top-20 z-30 bg-stone-100 /80 dark:bg-stone-950/80 backdrop-blur-md transition-colors">
+        <div class="flex items-center gap-3 mb-10 overflow-x-auto pb-4 no-scrollbar px-1 md:justify-center md:flex-wrap sticky top-20 z-30 bg-stone-100/80 dark:bg-stone-950/80 backdrop-blur-md transition-colors">
             <a href="{{ route('menu.index') }}" 
                class="whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 {{ !request('category') ? 'bg-amber-600 text-white shadow-xl' : 'bg-white dark:bg-stone-900 text-stone-500 border border-stone-200 dark:border-stone-800' }}">
                 All Items
@@ -172,51 +121,59 @@
             @endforeach
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             @foreach($products as $product)
-                <div class="group relative flex flex-col h-full bg-white dark:bg-stone-900 rounded-[2rem] border border-stone-100 dark:border-stone-800 transition-all duration-500 hover:border-amber-500/40 overflow-hidden shadow-sm hover:shadow-xl">
+                {{-- 🟢 UPDATED CARD UI (A/B Style) --}}
+                <div class="group relative flex flex-col h-full bg-white dark:bg-stone-900 rounded-[2.5rem] border border-stone-100 dark:border-stone-800 transition-all duration-500 overflow-hidden shadow-sm hover:shadow-2xl">
                     
-                    <div class="relative h-64 overflow-hidden bg-stone-100 dark:bg-stone-800">
+                    {{-- Floating Price --}}
+                    <div class="absolute top-4 right-4 z-10">
+                        <div class="bg-white/90 dark:bg-stone-800/90 backdrop-blur-md px-3 py-1 rounded-xl shadow-sm border border-white/20">
+                            <span class="text-sm font-black text-stone-900 dark:text-amber-500">
+                                @if($product->sizes->count() > 0)
+                                    ₱{{ number_format($product->sizes->min('price'), 0) }}
+                                @else
+                                    ₱{{ number_format($product->price, 0) }}
+                                @endif
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- Image Area --}}
+                    <div class="relative h-64 overflow-hidden bg-stone-100 dark:bg-stone-800 rounded-b-[2rem]">
                         @if($product->image)
                             <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $product->name }}">
                         @else
                             <div class="w-full h-full flex items-center justify-center bg-stone-200 dark:bg-stone-900">
-                                <span class="font-serif italic text-[14rem] text-stone-800 dark:text-stone-200 opacity-[0.03] uppercase tracking-tighter select-none z-0 leading-none">
-                                    {{ strtoupper(substr($product->name, 0, 1)) }}
+                                <span class="font-serif italic text-8xl text-stone-800 dark:text-stone-200 opacity-[0.05] uppercase select-none">
+                                    {{ substr($product->name, 0, 1) }}
                                 </span>
                             </div>
-                            @endif
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                        @endif
                     </div>
                     
+                    {{-- Content Area --}}
                     <div class="p-6 flex-1 flex flex-col">
-                        <span class="text-[9px] font-black text-amber-600 uppercase tracking-[0.3em] mb-1">
-                            {{ $product->category->name ?? 'Special' }}
-                        </span>
-                        <h3 class="text-xl font-bold text-stone-900 dark:text-white tracking-tight mb-2">
-                            {{ $product->name }}
-                        </h3>
-                        <p class="text-stone-500 dark:text-stone-400 text-xs font-light leading-relaxed mb-6 flex-1 line-clamp-2">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-stone-900 dark:text-white tracking-tight">
+                                {{ $product->name }}
+                            </h3>
+                            <a href="{{ route('login') }}" class="text-[10px] font-black uppercase tracking-widest text-stone-400 group-hover:text-amber-600 transition-colors">
+                                Order Now ↗
+                            </a>
+                        </div>
+                        
+                        <p class="text-stone-500 dark:text-stone-400 text-[11px] font-light leading-relaxed mb-4 line-clamp-2">
                             {{ $product->description }}
                         </p>
 
-                        <div class="flex items-center justify-between pt-6 border-t border-stone-50 dark:border-stone-800 mt-auto">
-                            <div class="flex flex-col">
-                                @if($product->sizes->count() > 0)
-                                    <span class="text-[8px] font-black text-stone-400 uppercase tracking-widest">Starts at</span>
-                                    <span class="text-2xl font-black text-stone-900 dark:text-white leading-none">₱{{ number_format($product->sizes->min('price'), 0) }}</span>
-                                @else
-                                    <span class="text-2xl font-black text-stone-900 dark:text-white leading-none">₱{{ number_format($product->price, 0) }}</span>
-                                @endif
-                            </div>
-                            
-                            @auth
-                                <a href="{{ route('cart.add', $product->id) }}" class="p-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-1">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                </a>
-                            @else
-                                <a href="{{ route('login') }}" class="text-[9px] font-black uppercase tracking-widest text-stone-400 hover:text-amber-500 border border-stone-200 dark:border-stone-800 px-4 py-2 rounded-full transition-colors">Login</a>
-                            @endauth
+                        {{-- Tag Pills --}}
+                        <div class="flex flex-wrap gap-2 mt-auto">
+                            <span class="px-3 py-1 bg-stone-100 dark:bg-stone-800 rounded-full text-[9px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-tighter">Handcrafted</span>
+                            <span class="px-3 py-1 bg-stone-100 dark:bg-stone-800 rounded-full text-[9px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-tighter">Premium</span>
+                            @if($product->category)
+                                <span class="px-3 py-1 bg-amber-500/10 rounded-full text-[9px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-tighter">{{ $product->category->name }}</span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -225,7 +182,7 @@
     </div>
 
     <footer class="bg-white dark:bg-stone-950 border-t border-stone-100 dark:border-stone-900 py-10 mt-auto text-center px-4 transition-colors">
-        <p class="text-stone-500 text-[10px] font-black uppercase tracking-[0.4em]">© 2025 Mik's Coffee Shop.</p>
+        <p class="text-stone-500 text-[10px] font-black uppercase tracking-[0.4em]">© 2026 Mik's Coffee Shop.</p>
     </footer>
 
     <button id="theme-toggle" type="button" class="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 shadow-2xl border border-stone-200 dark:border-stone-700 transition-colors">
