@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminMiddleware
 {
+    /**
+     * Handle an incoming request.
+     * Checks if the user has administrative privileges using standardized model logic.
+     */
     public function handle(Request $request, Closure $next): Response
     {
         // 1. If NOT logged in -> Go to Login Page
@@ -16,12 +20,17 @@ class AdminMiddleware
             return redirect()->route('login');
         }
 
-        // 2. MASTER BYPASS: If email is yours OR usertype is admin, let them in
-        if (Auth::user()->email === 'jmloucho09@gmail.com' || Auth::user()->usertype === 'admin') {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // 2. Standardized Role Check
+        // Uses the fixed isAdmin() method from User.php which handles the email bypass 
+        // and the usertype check without crashing on missing columns.
+        if ($user->isAdmin()) {
             return $next($request);
         }
 
-        // 3. Otherwise, kick to Home Page
-        return redirect()->route('home')->with('error', 'Access Denied');
+        // 3. Unauthorized access -> Redirect to Customer Dashboard
+        return redirect()->route('dashboard')->with('error', 'Access Denied: Admin privileges required.');
     } 
 }

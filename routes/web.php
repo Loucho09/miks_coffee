@@ -54,6 +54,7 @@ Route::view('/terms', 'legal.terms')->name('terms');
 Route::middleware(['auth', 'verified'])->group(function () {
 
     /* --- CUSTOMER ONLY FEATURES --- */
+    // Note: 'role:customer' middleware should allow Admin bypass internally
     Route::middleware(['role:customer'])->group(function () {
         Route::get('/dashboard', function () {
             /** @var User $user */
@@ -99,7 +100,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $order = Order::with(['items.product', 'user'])->findOrFail($id);
         /** @var User $user */
         $user = Auth::user();
-        if ($order->user_id !== Auth::id() && !$user->isAdmin()) abort(403);
+        if ($order->user_id !== Auth::id() && $user->usertype !== 'admin') abort(403);
         $pts = $order->user->points ?? 0;
         $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
         return view('emails.order_receipt', compact('order', 'tier'));
@@ -121,7 +122,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/redemption/{id}/fulfill', [QueueController::class, 'fulfillRedemption'])->name('redemption.fulfill');
     });
 
-    /* --- ADMIN ONLY FEATURES (Strict Session Applied ONLY Here) --- */
+    /* --- ADMIN ONLY FEATURES --- */
     Route::middleware(['admin', 'admin.single_session'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/orders/export', ExportController::class)->name('orders.export');

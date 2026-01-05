@@ -9,10 +9,13 @@ use Illuminate\Support\Facades\Hash;
 
 class CustomerController extends Controller
 {
-    // 1. List all customers (Enhanced with Search & Pagination)
+    /**
+     * List all customers (Enhanced to catch both 'user' and 'customer' types).
+     */
     public function index(Request $request)
     {
-        $query = User::where('usertype', 'user')
+        // 🟢 FIXED: Now captures both 'user' and 'customer' usertypes
+        $query = User::whereIn('usertype', ['user', 'customer'])
                     ->withCount('orders')
                     ->latest();
 
@@ -30,7 +33,9 @@ class CustomerController extends Controller
         return view('admin.customers.index', compact('customers'));
     }
 
-    // 2. Show Customer Details, Order History, Streak Progress, and Point Ledger
+    /**
+     * Show Customer Details and History.
+     */
     public function show($id)
     {
         $customer = User::with(['orders' => function($query) {
@@ -39,7 +44,6 @@ class CustomerController extends Controller
             $query->latest();
         }, 'referrals'])->findOrFail($id);
 
-        // Calculate milestones for streak tracking
         $streakCount = $customer->streak_count ?? 0;
         $nextMilestone = (floor($streakCount / 3) + 1) * 3;
         $streakProgress = (($streakCount % 3) / 3) * 100;
@@ -47,7 +51,9 @@ class CustomerController extends Controller
         return view('admin.customers.show', compact('customer', 'streakCount', 'nextMilestone', 'streakProgress'));
     }
 
-    // 3. Reset Password
+    /**
+     * Reset Password securely.
+     */
     public function resetPassword(Request $request, $id)
     {
         $request->validate([

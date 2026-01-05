@@ -10,7 +10,7 @@ class AdminUserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * Use environment variables to prevent sensitive data exposure in the codebase.
+     * Uses standardized loyalty_points and usertype to ensure compatibility.
      */
     public function run(): void
     {
@@ -18,10 +18,11 @@ class AdminUserSeeder extends Seeder
             ['email' => env('ADMIN_EMAIL', 'jmloucho09@gmail.com')], 
             [
                 'name' => env('ADMIN_NAME', 'Admin User'),
-                'password' => Hash::make(env('ADMIN_PASSWORD', 'password123')),
+                'password' => Hash::make(env('ADMIN_PASSWORD', 'YourExtremelySecurePassword123!')),
                 'usertype' => 'admin',
-                'points' => 1000,
                 'role' => 'admin',
+                'loyalty_points' => 68, // 🟢 Setting standardized 68 PTS balance
+                'points' => 0,          // Deprecated legacy column
             ]
         );
     }

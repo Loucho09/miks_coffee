@@ -21,7 +21,6 @@ class User extends Authenticatable
         'email',
         'password',
         'usertype',
-        'is_admin',
         'points',
         'role',
         'loyalty_points',
@@ -43,7 +42,6 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_admin' => 'boolean',
             'last_visit_at' => 'datetime',
             'last_seen_at' => 'datetime',
         ];
@@ -67,8 +65,10 @@ class User extends Authenticatable
             if ($user->referred_by) {
                 $referrer = $user->referrer;
                 if ($referrer) {
-                    $referrer->increment('points', 50);
-                    $user->increment('points', 50);
+                    // 🟢 Standardized to loyalty_points for bonuses (Ensures 68 PTS sync)
+                    $referrer->increment('loyalty_points', 50);
+                    $user->increment('loyalty_points', 50);
+                    
                     PointTransaction::create([
                         'user_id' => $referrer->id,
                         'amount' => 50,
@@ -103,7 +103,8 @@ class User extends Authenticatable
         $this->save();
 
         if ($this->streak_count >= 3 && $this->streak_count % 3 === 0) {
-            $this->increment('points', 20);
+            // 🟢 Standardized to loyalty_points for streak rewards
+            $this->increment('loyalty_points', 20);
             PointTransaction::create([
                 'user_id' => $this->id,
                 'amount' => 20,
@@ -115,16 +116,20 @@ class User extends Authenticatable
     }
 
     /**
-     * Optimized Admin Check for speed.
+     * 🟢 Standardized Admin Check
+     * Validates admin access against DB records and the Master Bypass email.
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin' || 
-               $this->usertype === 'admin' || 
-               $this->is_admin === true ||
+        return strtolower($this->usertype ?? '') === 'admin' || 
+               strtolower($this->role ?? '') === 'admin' || 
                $this->email === 'jmloucho09@gmail.com';
     }
 
+    /**
+     * 🟢 Standardized Tier Logic
+     * Dynamically calculates status based on the 68 PTS balance.
+     */
     public function getLoyaltyTierAttribute(): string
     {
         $pts = $this->loyalty_points ?? 0;
