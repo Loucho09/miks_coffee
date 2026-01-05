@@ -11,22 +11,28 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Global web middleware
+        // Register globally in the web group
         $middleware->web(append: [
+            \App\Http\Middleware\UpdateAdminStatus::class,
             \App\Http\Middleware\HandleReferral::class,
         ]);
 
-        // Define Aliases
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'admin.single_session' => \App\Http\Middleware\EnsureSingleAdminSession::class,
             'role' => \App\Http\Middleware\CheckRole::class,
-            'is_admin' => \App\Http\Middleware\IsAdmin::class, // Added for redundancy
+            'is_admin' => \App\Http\Middleware\IsAdmin::class,
         ]);
 
-        // Appending Status and Referral trackers globally
-        $middleware->append(\App\Http\Middleware\UpdateAdminStatus::class);
-        $middleware->append(\App\Http\Middleware\HandleReferral::class);
+        // STRIKE TEAM PRIORITY: Forces the timeout check to run before route security
+        $middleware->priority([
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \Illuminate\Auth\Middleware\Authenticate::class,
+            \App\Http\Middleware\UpdateAdminStatus::class, // Must be early
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\EnsureSingleAdminSession::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

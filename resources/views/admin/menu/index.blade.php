@@ -29,9 +29,17 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             @if(session('success'))
-                <div class="mb-8 p-4 bg-green-500/10 border border-green-500/20 rounded-2xl text-green-600 font-bold text-[10px] uppercase tracking-widest flex items-center gap-3">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    {{ session('success') }}
+                <div class="mb-10 p-5 bg-white dark:bg-stone-900 border-l-4 border-green-600 shadow-sm rounded-r-2xl overflow-hidden transition-all">
+                    <div class="flex items-center gap-4">
+                        <div class="relative flex items-center justify-center">
+                            <span class="absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75 animate-ping"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
+                        </div>
+                        <div>
+                            <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-green-600">System Notification</h3>
+                            <p class="text-[11px] text-stone-500 dark:text-stone-400 font-medium mt-1 uppercase tracking-widest">{{ session('success') }}</p>
+                        </div>
+                    </div>
                 </div>
             @endif
 

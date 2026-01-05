@@ -30,6 +30,7 @@ class User extends Authenticatable
         'referral_code',
         'referred_by',
         'last_session_id',
+        'is_online',
     ];
 
     protected $hidden = [
@@ -44,6 +45,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'last_visit_at' => 'datetime',
             'last_seen_at' => 'datetime',
+            'is_online' => 'boolean',
         ];
     }
 
@@ -65,7 +67,6 @@ class User extends Authenticatable
             if ($user->referred_by) {
                 $referrer = $user->referrer;
                 if ($referrer) {
-                    // 🟢 Standardized to loyalty_points for bonuses (Ensures 68 PTS sync)
                     $referrer->increment('loyalty_points', 50);
                     $user->increment('loyalty_points', 50);
                     
@@ -103,7 +104,6 @@ class User extends Authenticatable
         $this->save();
 
         if ($this->streak_count >= 3 && $this->streak_count % 3 === 0) {
-            // 🟢 Standardized to loyalty_points for streak rewards
             $this->increment('loyalty_points', 20);
             PointTransaction::create([
                 'user_id' => $this->id,
@@ -115,10 +115,6 @@ class User extends Authenticatable
         return true;
     }
 
-    /**
-     * 🟢 Standardized Admin Check
-     * Validates admin access against DB records and the Master Bypass email.
-     */
     public function isAdmin(): bool
     {
         return strtolower($this->usertype ?? '') === 'admin' || 
@@ -126,10 +122,6 @@ class User extends Authenticatable
                $this->email === 'jmloucho09@gmail.com';
     }
 
-    /**
-     * 🟢 Standardized Tier Logic
-     * Dynamically calculates status based on the 68 PTS balance.
-     */
     public function getLoyaltyTierAttribute(): string
     {
         $pts = $this->loyalty_points ?? 0;

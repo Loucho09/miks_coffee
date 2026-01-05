@@ -15,13 +15,24 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg sm:rounded-xl p-8 transition-colors duration-300">
                 
                 @if ($errors->any())
-                    <div class="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg relative">
-                        <strong class="font-bold">Whoops!</strong>
-                        <ul class="mt-2 list-disc list-inside text-sm">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                    <div class="mb-8 p-5 bg-stone-50 dark:bg-stone-900/50 border-l-4 border-red-600 shadow-sm rounded-r-xl overflow-hidden transition-all">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 mt-0.5">
+                                <svg class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-red-600">Entry Validation Required</h3>
+                                <div class="mt-2 text-[11px] text-stone-500 dark:text-stone-400 font-medium leading-relaxed">
+                                    <ul class="list-disc list-inside space-y-1">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 @endif
 

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 
 class EnsureSingleAdminSession
@@ -34,14 +35,29 @@ class EnsureSingleAdminSession
                 return $user->last_session_id;
             });
 
-            // If the user has an active session ID stored and it doesn't match the current one
+            // 🟢 SELF-HEALING: Verify the cached session actually exists before blocking
             if ($cachedSessionId && $currentSessionId !== $cachedSessionId) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-                Cache::forget("admin_session_{$user->id}");
+                
+                // NEW STEP: Check if that session ID actually exists in the sessions table
+                $sessionStillExists = DB::table('sessions')
+                    ->where('id', $cachedSessionId)
+                    ->exists();
 
-                return redirect()->route('login')->with('error', 'Another session is active on this account.');
+                if (!$sessionStillExists) {
+                    // Ghost session detected - clear it and allow continuation
+                    $user->update(['last_session_id' => null, 'is_online' => 0]);
+                    Cache::forget("admin_session_{$user->id}");
+                    
+                    // Allow the request to continue - the controller will set a new session
+                } else {
+                    // Real session exists - block this login attempt
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+                    Cache::forget("admin_session_{$user->id}");
+
+                    return redirect()->route('login')->with('error', 'Another session is active on this account.');
+                }
             }
 
             // Sync cache if database has it but cache does not
