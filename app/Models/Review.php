@@ -12,7 +12,7 @@ class Review extends Model
     protected $fillable = [
         'user_id',
         'product_id',
-        'order_item_id', // 🟢 This must be here now
+        'order_item_id', // Required for point tracking logic
         'rating',
         'comment',
     ];
@@ -24,6 +24,13 @@ class Review extends Model
 
     public function product()
     {
+        // 🟢 FIX: Added ::class to resolve the class name correctly
         return $this->belongsTo(Product::class);
+    }
+    
+    public function orderItem()
+    {
+        // 🟢 FIX: Added ::class to resolve the class name correctly
+        return $this->belongsTo(OrderItem::class);
     }
 }
