@@ -10,32 +10,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\PointTransaction;
-use App\Models\LoginHistory;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'usertype',
-        'points',
-        'role',
-        'loyalty_points',
-        'streak_count',
-        'last_visit_at', 
-        'last_seen_at',
-        'referral_code',
-        'referred_by',
-        'last_session_id',
-        'is_online',
+        'name', 'email', 'password', 'usertype', 'points', 'role', 
+        'loyalty_points', 'streak_count', 'last_visit_at', 
+        'last_seen_at', 'referral_code', 'referred_by', 
+        'last_session_id', 'is_online',
     ];
 
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 'remember_token',
     ];
 
     protected function casts(): array
@@ -47,6 +35,12 @@ class User extends Authenticatable
             'last_seen_at' => 'datetime',
             'is_online' => 'boolean',
         ];
+    }
+
+    // 🟢 ACCESOR FIX: Forces 'points' in UI to read from 'loyalty_points' column
+    public function getPointsAttribute()
+    {
+        return $this->loyalty_points ?? 0;
     }
 
     protected static function booted()
@@ -87,7 +81,6 @@ class User extends Authenticatable
 
     public function updateStreak(): bool
     {
-        $today = Carbon::today();
         $lastVisit = $this->last_visit_at ? Carbon::parse($this->last_visit_at)->startOfDay() : null;
 
         if (!$lastVisit) {
@@ -134,6 +127,4 @@ class User extends Authenticatable
     public function referrals(): HasMany { return $this->hasMany(User::class, 'referred_by'); }
     public function orders(): HasMany { return $this->hasMany(Order::class); }
     public function pointTransactions(): HasMany { return $this->hasMany(PointTransaction::class); }
-    public function loginHistory(): HasMany { return $this->hasMany(LoginHistory::class); }
-    public function getTotalSpentAttribute(): float { return (float) $this->orders()->sum('total_price'); }
 }

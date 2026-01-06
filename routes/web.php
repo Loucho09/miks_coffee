@@ -17,6 +17,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SupportController; 
 use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\CheckoutController;
 
 // Models
 use App\Models\Product;
@@ -25,16 +26,18 @@ use App\Models\Order;
 use App\Models\User;
 
 /* |--------------------------------------------------------------------------
-   | 1. PUBLIC ROUTES
-   | -------------------------------------------------------------------------- */
+   | 1. PUBLIC ROUTES
+   | -------------------------------------------------------------------------- */
 
 Route::get('/', [HomeController::class, 'index'])->name('welcome');
 
 Route::get('/menu', function (Request $request) {
     $query = Product::with(['category', 'sizes'])->where('is_active', true);
     if ($request->filled('search')) {
-        $query->where('name', 'like', '%' . $request->search . '%')
+        $query->where(function($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->search . '%')
               ->orWhere('description', 'like', '%' . $request->search . '%');
+        });
     }
     if ($request->filled('category')) $query->where('category_id', $request->category);
     $products = $query->get();
@@ -49,17 +52,16 @@ Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/terms', 'legal.terms')->name('terms');
 
 /* |--------------------------------------------------------------------------
-   | 2. AUTHENTICATED ROUTES
-   | -------------------------------------------------------------------------- */
+   | 2. AUTHENTICATED ROUTES
+   | -------------------------------------------------------------------------- */
 Route::middleware(['auth', 'verified'])->group(function () {
 
     /* --- CUSTOMER ONLY FEATURES --- */
-    // Note: 'role:customer' middleware allows Admin bypass internally for management visibility
     Route::middleware(['role:customer'])->group(function () {
         Route::get('/dashboard', function () {
             /** @var User $user */
             $user = Auth::user();
-            $user->updateStreak(); // Standardized loyalty sync
+            $user->updateStreak(); 
             $recentOrders = Order::where('user_id', $user->id)->with(['items.product', 'items.review', 'items.order'])->latest()->take(5)->get();
             $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)->with(['replies.user'])->latest()->take(5)->get();
             return view('dashboard', compact('recentOrders', 'supportTickets'));
@@ -77,7 +79,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/rewards', function () {
             /** @var User $user */
             $user = Auth::user();
-            // Standardized to loyalty_points to ensure 68 PTS sync
             $points = $user->loyalty_points ?? 0; 
             $goal = ($points >= 200) ? 500 : (($points >= 100) ? 200 : 100);
             return view('cafe.rewards', compact('user', 'points', 'goal'));
@@ -92,6 +93,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
         });
 
+        // 🟢 FIX: Updated to use CheckoutController instead of OrderController for point deduction logic
         Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     });
@@ -101,7 +103,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $order = Order::with(['items.product', 'user'])->findOrFail($id);
         /** @var User $user */
         $user = Auth::user();
-        if ($order->user_id !== Auth::id() && !$user->isAdmin()) abort(403); // Fixed admin check
+        if ($order->user_id !== Auth::id() && !$user->isAdmin()) abort(403); 
         
         $pts = $order->user->loyalty_points ?? 0;
         $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
@@ -149,6 +151,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/', 'store')->name('store');
             Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
+            Route::delete('/bulk-destroy', 'bulkDestroy')->name('bulk-destroy');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
     });

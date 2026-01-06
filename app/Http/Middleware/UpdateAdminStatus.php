@@ -28,42 +28,31 @@ class UpdateAdminStatus
                         ->exists();
                     
                     if (!$sessionStillExists) {
-                        // Ghost session detected - clear it
+                        // Ghost session detected - clear it and link current
                         $user->update([
                             'last_session_id' => $currentSessionId,
                             'last_seen_at' => now(),
                             'is_online' => 1
                         ]);
-                        Cache::put("admin_session_{$user->id}", $currentSessionId, 7200);
+                        Cache::put("admin_session_{$user->id}", $currentSessionId, 43200); // Extended cache
+                        
+                        // 🔧 FIX: Force cache refresh for support status
+                        Cache::put("support_online_status", true, 43200);
+                        Cache::put("admin_online_{$user->id}", true, 43200);
                     }
                 }
                 
-                $lastSeen = $user->last_seen_at ? Carbon::parse($user->last_seen_at) : null;
+                // 🟢 REMOVED: 120-minute inactivity check/forced logout logic
+
+                // Standard activity update to keep the admin status "Online"
+                $user->update([
+                    'last_seen_at' => now(), 
+                    'is_online' => 1
+                ]);
                 
-                // Trigger timeout after 120 minutes of inactivity
-                if ($lastSeen && $lastSeen->diffInMinutes(now()) >= 120) {
-                    
-                    // 1. Wipe database tracking data
-                    $user->update([
-                        'last_session_id' => null,
-                        'last_seen_at' => null,
-                        'is_online' => 0
-                    ]);
-                    
-                    Cache::forget("admin_session_{$user->id}");
-
-                    // 2. Force logout and session invalidation
-                    Auth::guard('web')->logout();
-                    $request->session()->invalidate();
-                    $request->session()->regenerateToken();
-
-                    return redirect()->route('login')->withErrors([
-                        'email' => 'Security Notice: Session expired after 2 hours of inactivity.'
-                    ]);
-                }
-
-                // Refresh activity timestamp to extend the 2-hour window
-                $user->update(['last_seen_at' => now(), 'is_online' => 1]);
+                // 🔧 FIX: Update cache to ensure support status matches admin status
+                Cache::put("support_online_status", true, 43200);
+                Cache::put("admin_online_{$user->id}", true, 43200);
             }
         }
 

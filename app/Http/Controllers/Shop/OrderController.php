@@ -24,7 +24,7 @@ class OrderController extends Controller
             ->where('user_id', Auth::id())
             ->latest()
             ->get();
-        return view('cafe.orders', compact('orders'));
+        return view('cafe::orders', compact('orders'));
     }
 
     public function claimReward(Request $request)
@@ -44,12 +44,14 @@ class OrderController extends Controller
         if ($rewardKey && isset($rewards[$rewardKey])) {
             $reward = $rewards[$rewardKey];
 
-            if (($user->points ?? 0) < $reward['cost']) {
+            // Use loyalty_points for check
+            if (($user->loyalty_points ?? 0) < $reward['cost']) {
                 return back()->with('error', 'Insufficient points for this redemption.');
             }
 
             DB::transaction(function () use ($user, $reward) {
-                $user->decrement('points', $reward['cost']);
+                // Deduct from loyalty_points
+                $user->decrement('loyalty_points', $reward['cost']);
 
                 PointTransaction::create([
                     'user_id' => $user->id,
@@ -89,8 +91,9 @@ class OrderController extends Controller
         $pointsRedeemed = 0;
         $rewardType = null;
 
+        // Use loyalty_points column for logic
         if ($claimed) {
-            if (($user->points ?? 0) < $claimed['points']) {
+            if (($user->loyalty_points ?? 0) < $claimed['points']) {
                 session()->forget('claimed_reward');
                 return redirect()->route('cart.index')->with('error', 'Insufficient points.');
             }
@@ -98,7 +101,7 @@ class OrderController extends Controller
             $pointsRedeemed = $claimed['points'];
             $rewardType = $claimed['name'];
             $discount = $claimed['value']; 
-        } elseif ($request->has('redeem_points') && ($user->points ?? 0) >= 50) {
+        } elseif ($request->has('redeem_points') && ($user->loyalty_points ?? 0) >= 50) {
             $discount = 50;
             $pointsRedeemed = 50;
             $rewardType = 'Standard Discount';
@@ -171,12 +174,12 @@ class OrderController extends Controller
                 }
             }
 
-            // 🟢 NEW FEATURE: Reward Referral System on first order
+            // 🟢 Referral System Logic: Check for first order
             if ($user->referred_by && $user->orders()->count() === 1) {
                 $referrer = $user->referrer;
                 if ($referrer) {
-                    // Reward Referrer
-                    $referrer->increment('points', 50);
+                    // Reward Referrer (+50 PTS)
+                    $referrer->increment('loyalty_points', 50);
                     PointTransaction::create([
                         'user_id' => $referrer->id,
                         'amount' => 50,
@@ -184,8 +187,8 @@ class OrderController extends Controller
                         'order_id' => $order->id
                     ]);
 
-                    // Reward Customer
-                    $user->increment('points', 50);
+                    // Reward Customer (+50 PTS)
+                    $user->increment('loyalty_points', 50);
                     PointTransaction::create([
                         'user_id' => $user->id,
                         'amount' => 50,
@@ -195,8 +198,9 @@ class OrderController extends Controller
                 }
             }
 
+            // 🟢 Deduction Logic: Reduce loyalty_points if redeemed
             if ($pointsRedeemed > 0) {
-                $user->decrement('points', $pointsRedeemed);
+                $user->decrement('loyalty_points', $pointsRedeemed);
                 PointTransaction::create([
                     'user_id' => $user->id,
                     'amount' => -$pointsRedeemed,
@@ -205,7 +209,8 @@ class OrderController extends Controller
                 ]);
             }
 
-            $user->increment('points', 10);
+            // 🟢 Earning Logic: Fixed +10 PTS for ordering
+            $user->increment('loyalty_points', 10);
             PointTransaction::create([
                 'user_id' => $user->id,
                 'amount' => 10,
@@ -279,7 +284,8 @@ class OrderController extends Controller
             abort(403);
         }
 
-        $pts = $user->points ?? 0;
+        // Use loyalty_points column
+        $pts = $user->loyalty_points ?? 0;
         $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
 
         return view('emails.order_receipt', compact('order', 'tier'));

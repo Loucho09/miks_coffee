@@ -14,14 +14,11 @@ class MenuController extends Controller
 {
     /**
      * Display a listing of the menu items.
-     * Includes Search and Pagination support for Admin.
      */
     public function index(Request $request)
     {
-        // 🟢 FIXED: Fetch all products with their relationships
         $query = Product::with(['category', 'sizes'])->latest();
 
-        // Admin Search Functionality
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
@@ -29,7 +26,6 @@ class MenuController extends Controller
             });
         }
 
-        // 🟢 FIXED: Pagination ensured for the UI
         $products = $query->paginate(10)->withQueryString();
 
         return view('admin.menu.index', compact('products'));
@@ -52,7 +48,6 @@ class MenuController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg|max:51200', 
         ]);
 
-        // Slug generation logic (Preserved)
         $slug = Str::slug($request->name);
         $originalSlug = $slug;
         $count = 1;
@@ -77,7 +72,6 @@ class MenuController extends Controller
 
         $product = Product::create($data);
 
-        // Handle Size Creation (Preserved)
         if ($request->has('has_sizes') && $request->filled('size_prices')) {
             foreach ($request->size_prices as $sizeLabel => $price) {
                 if ($price) {
@@ -142,7 +136,6 @@ class MenuController extends Controller
 
         $product->update($data);
 
-        // Handle Sizes Update (Preserved & Fixed Logic)
         if ($request->has('has_sizes') && $request->filled('size_prices')) {
             foreach ($request->size_prices as $sizeLabel => $price) {
                 $product->sizes()->updateOrCreate(
@@ -157,13 +150,42 @@ class MenuController extends Controller
         return redirect()->route('admin.menu.index')->with('success', 'Menu item updated successfully!');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $product = Product::findOrFail($id);
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }
         $product->delete();
-        return redirect()->route('admin.menu.index')->with('success', 'Item deleted successfully.');
+        
+        $page = $request->input('page', 1);
+
+        return redirect()->route('admin.menu.index', ['page' => $page])->with('success', 'Item deleted successfully.');
+    }
+
+    /**
+     * 🟢 Bulk Archive functionality
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        
+        if (empty($ids)) {
+            return back()->with('error', 'No items selected.');
+        }
+
+        $products = Product::whereIn('id', $ids)->get();
+
+        foreach ($products as $product) {
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $product->delete();
+        }
+
+        $page = $request->input('page', 1);
+
+        return redirect()->route('admin.menu.index', ['page' => $page])
+                         ->with('success', count($ids) . ' items archived successfully.');
     }
 }

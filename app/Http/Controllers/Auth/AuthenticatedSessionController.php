@@ -30,26 +30,27 @@ class AuthenticatedSessionController extends Controller
         /** @var \App\Models\User|null $user */
         $user = User::where('email', $request->email)->first();
 
-        // 🟢 THE SELF-HEALING LOGIC: Verify reality before blocking
+        // 🟢 STEP 1: SELF-HEALING LOGIC
+        // This checks if a "Ghost Session" exists before blocking the login.
         if ($user && $user->isAdmin() && !empty($user->last_session_id)) {
             
-            // NEW STEP: Check if that session ID actually exists in the sessions table
+            // Check if the old session ID actually exists in the database physical table
             $sessionStillExists = DB::table('sessions')
                 ->where('id', $user->last_session_id)
                 ->exists();
 
             if (!$sessionStillExists) {
-                // If NO → It's a ghost! Clear the ghost ID and allow login
+                // If the session record is missing, it's a ghost: clear it automatically
                 $user->update(['last_session_id' => null]);
             } else {
-                // If YES → It's real! Block login (truly logged in elsewhere)
+                // If it is TRULY alive on another device, block duplicate login
                 return back()->withErrors([
                     'email' => 'Access Denied: This admin account is already logged in on another device.',
                 ]);
             }
         }
 
-        // Proceed with standard authentication
+        // Standard Laravel authentication
         $request->authenticate();
         $request->session()->regenerate();
 
@@ -59,16 +60,23 @@ class AuthenticatedSessionController extends Controller
         if ($user->isAdmin()) {
             $sessionId = $request->session()->getId();
             
-            // Save the new session ID and activity timestamp
+            // Update activity tracking
             $user->update([
                 'last_seen_at' => now(),
                 'last_session_id' => $sessionId,
                 'is_online' => 1
             ]);
             
-            // Set activity timer for the 2-hour idle check
+            // 🟢 STEP 2: REMOVE 2H RESTRICTION
+            // We set a long cache duration (12 hours) instead of the old 7200 seconds.
+            Cache::put("admin_session_{$user->id}", $sessionId, 43200); 
+            
+            // 🔧 FIX: Set support status cache to match admin online status
+            Cache::put("support_online_status", true, 43200);
+            Cache::put("admin_online_{$user->id}", true, 43200);
+            
+            // Maintain activity timestamp for display purposes only
             session(['last_admin_activity' => time()]);
-            Cache::put("admin_session_{$user->id}", $sessionId, 7200);
             
             return redirect()->route('admin.dashboard');
         }
@@ -85,8 +93,15 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
 
         if ($user) {
-            // 🟢 Proper Cleanup: Clear the session ID on logout
+            // Cleanup tracking data on proper logout
             Cache::forget("admin_session_{$user->id}");
+            
+            // 🔧 FIX: Clear support status cache when admin logs out
+            if ($user->isAdmin()) {
+                Cache::forget("support_online_status");
+                Cache::forget("admin_online_{$user->id}");
+            }
+            
             $user->update([
                 'last_session_id' => null, 
                 'is_online' => 0

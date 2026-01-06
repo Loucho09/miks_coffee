@@ -48,18 +48,12 @@
                             
                             @php
                                 $subtotal = 0;
-                                $totalItems = 0;
-                                foreach(session('cart') as $details) {
-                                    $subtotal += $details['price'] * $details['quantity'];
-                                    $totalItems += $details['quantity'];
-                                }
+                                foreach(session('cart') as $details) { $subtotal += $details['price'] * $details['quantity']; }
                                 
-                                $bulkSavings = ($totalItems >= 6) ? ($subtotal * 0.10) : 0;
-                                $totalAfterBulk = $subtotal - $bulkSavings;
-
-                                $userPoints = Auth::user()->points;
+                                // 🟢 FIX: Use loyalty_points for balance and set earn rate to +10 PTS
+                                $userPoints = Auth::user()->loyalty_points ?? 0;
                                 $canRedeem = $userPoints >= 50; 
-                                $pointsToEarn = floor($totalAfterBulk / 100);
+                                $pointsToEarn = 10; 
                             @endphp
 
                             <div class="space-y-2 mb-6 text-stone-600 dark:text-stone-300">
@@ -67,18 +61,6 @@
                                     <span>Subtotal</span>
                                     <span>PHP {{ number_format($subtotal, 2) }}</span>
                                 </div>
-
-                                @if($bulkSavings > 0)
-                                    <div class="flex justify-between text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-900/10 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800/30">
-                                        <span>Bulk Discount (10%)</span>
-                                        <span>-PHP {{ number_format($bulkSavings, 2) }}</span>
-                                    </div>
-                                @else
-                                    <div class="text-[10px] bg-stone-50 dark:bg-stone-800/50 p-2 rounded-lg text-center font-bold text-stone-400 uppercase tracking-tight">
-                                        Add {{ 6 - $totalItems }} more items for 10% off
-                                    </div>
-                                @endif
-
                                 <div id="discount-row" class="justify-between text-green-600 font-bold" style="display: none;">
                                     <span>Loyalty Discount</span>
                                     <span>-PHP 50.00</span>
@@ -91,12 +73,9 @@
 
                             <form action="{{ route('checkout.store') }}" method="POST" id="checkout-form">
                                 @csrf
-                                
                                 <div class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl mb-6 border border-amber-100 dark:border-amber-800/30">
                                     <div class="flex items-center justify-between mb-2">
-                                        <span class="font-bold text-amber-800 dark:text-amber-500 uppercase text-xs tracking-wider">
-                                            Redeem Points
-                                        </span>
+                                        <span class="font-bold text-amber-800 dark:text-amber-500 uppercase text-xs tracking-wider">Redeem Points</span>
                                         <span class="text-xs font-bold bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 px-2 py-1 rounded-full">
                                             Balance: {{ $userPoints }}
                                         </span>
@@ -111,41 +90,27 @@
                                             </div>
                                         </label>
                                     @else
-                                        <p class="text-xs text-stone-500 dark:text-stone-400 italic">
-                                            Earn 50 points to unlock discount.
-                                        </p>
+                                        <p class="text-xs text-stone-500 dark:text-stone-400 italic">Earn 50 points to unlock discount.</p>
                                     @endif
                                 </div>
 
                                 <div class="border-t border-stone-100 dark:border-stone-800 pt-4 mb-6">
                                     <div class="flex justify-between items-end">
                                         <span class="font-bold text-stone-900 dark:text-white text-lg">Total to Pay</span>
-                                        <span id="final-total" class="font-extrabold text-2xl text-stone-900 dark:text-white" 
-                                              data-original="{{ $totalAfterBulk }}">
-                                            PHP {{ number_format($totalAfterBulk, 2) }}
+                                        <span id="final-total" class="font-extrabold text-2xl text-stone-900 dark:text-white" data-original="{{ $subtotal }}">
+                                            PHP {{ number_format($subtotal, 2) }}
                                         </span>
                                     </div>
                                 </div>
 
-                                <button type="submit" class="w-full bg-stone-900 dark:bg-white text-white dark:text-stone-900 font-bold py-4 rounded-xl hover:shadow-lg hover:scale-[1.02] transition transform duration-200 uppercase tracking-widest text-sm">
+                                <button type="submit" class="w-full bg-stone-900 dark:bg-white text-white dark:text-stone-900 font-bold py-4 rounded-xl shadow-lg uppercase tracking-widest text-sm">
                                     Place Order
                                 </button>
                             </form>
                         </div>
                     </div>
                 </div>
-            @else
-                <div class="max-w-xl mx-auto">
-                    <div class="bg-white dark:bg-stone-900 rounded-3xl shadow-sm border border-stone-100 dark:border-stone-800 p-12 text-center">
-                        <h3 class="text-2xl font-bold text-stone-900 dark:text-white mb-2">Your cart is empty.</h3>
-                        <p class="text-stone-500 dark:text-stone-400 mb-8">No items have been added to your order yet.</p>
-                        <a href="{{ route('home') }}" class="inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:scale-105 transition transform uppercase tracking-widest text-sm">
-                            Browse Menu
-                        </a>
-                    </div>
-                </div>
             @endif
-
         </div>
     </div>
 
@@ -157,7 +122,6 @@
             
             if (checkbox && totalElement) {
                 const originalTotal = parseFloat(totalElement.getAttribute('data-original'));
-                
                 checkbox.addEventListener('change', function() {
                     if (this.checked) {
                         let newTotal = Math.max(0, originalTotal - 50);

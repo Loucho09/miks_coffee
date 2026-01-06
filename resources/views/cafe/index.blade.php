@@ -1,17 +1,22 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <h2 class="font-bold text-xl md:text-3xl text-stone-800 dark:text-white leading-tight">
-                    Order Menu
-                </h2>
-                <p class="text-xs md:text-sm text-stone-500 dark:text-stone-400 mt-1 font-medium italic">Welcome back, {{ Auth::user()->name }}!</p>
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex w-12 h-12 bg-amber-600 rounded-2xl items-center justify-center shadow-lg shadow-amber-600/20">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+                <div>
+                    <h2 class="font-bold text-xl md:text-3xl text-stone-800 dark:text-white leading-tight uppercase tracking-tighter">
+                        Order Menu
+                    </h2>
+                    <p class="text-[10px] md:text-xs text-stone-500 dark:text-stone-400 mt-1 font-bold uppercase tracking-widest">Welcome, {{ Auth::user()->name }}!</p>
+                </div>
             </div>
             
             <form method="GET" action="{{ route('home') }}" class="relative w-full md:w-80">
                 <input type="text" name="search" value="{{ request('search') }}" 
                        placeholder="Search our flavors..." 
-                       class="w-full pl-11 pr-4 py-2.5 rounded-2xl border-none bg-stone-100 dark:bg-stone-800 shadow-inner focus:ring-2 focus:ring-amber-500 text-stone-900 dark:text-white placeholder-stone-500 transition-all text-sm">
+                       class="w-full pl-11 pr-4 py-2.5 rounded-2xl border-none bg-stone-100 dark:bg-stone-800 shadow-inner focus:ring-2 focus:ring-amber-500 text-stone-900 dark:text-white placeholder-stone-500 transition-all text-sm font-medium">
                 <svg class="w-4 h-4 absolute left-4 top-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
@@ -19,7 +24,7 @@
         </div>
     </x-slot>
 
-    <div class="py-6 md:py-12" x-data="{ 
+    <div class="py-6 md:py-12 bg-stone-50 dark:bg-[#080808] min-h-screen" x-data="{ 
         showModal: false, 
         selectedProduct: null, 
         selectedSize: null,
@@ -34,171 +39,126 @@
     }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div class="flex items-center gap-3 mb-10 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 md:justify-center md:flex-wrap sticky top-20 z-30 bg-stone-100/80 dark:bg-stone-950/80 backdrop-blur-md transition-colors">
-                <a href="{{ route('home') }}" 
-                   class="whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 {{ !request('category') ? 'bg-amber-600 text-white shadow-xl shadow-amber-600/20' : 'bg-white dark:bg-stone-900 text-stone-500 border border-stone-200 dark:border-stone-800 hover:border-amber-500' }}">
-                    All Items
-                </a>
-                @foreach($categories as $category)
-                    <a href="{{ route('home', ['category' => $category->id]) }}" 
-                       class="whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 {{ request('category') == $category->id ? 'bg-amber-600 text-white shadow-xl shadow-amber-600/20' : 'bg-white dark:bg-stone-900 text-stone-500 border border-stone-200 dark:border-stone-800 hover:border-amber-500' }}">
-                        {{ $category->name }}
+            <div class="sticky top-16 z-30 -mx-4 px-4 py-4 bg-white/80 dark:bg-[#080808]/90 backdrop-blur-xl border-b border-stone-200 dark:border-white/5 transition-colors">
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar flex-nowrap scroll-smooth md:justify-center">
+                    <a href="{{ route('home') }}" 
+                       class="whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 {{ !request('category') ? 'bg-amber-600 text-white shadow-xl shadow-amber-600/20 scale-105' : 'bg-stone-100 dark:bg-stone-900 text-stone-500 border border-transparent hover:border-amber-500' }}">
+                        All Items
                     </a>
-                @endforeach
+                    @foreach($categories as $category)
+                        <a href="{{ route('home', ['category' => $category->id]) }}" 
+                           class="whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 {{ request('category') == $category->id ? 'bg-amber-600 text-white shadow-xl shadow-amber-600/20 scale-105' : 'bg-stone-100 dark:bg-stone-900 text-stone-500 border border-transparent hover:border-amber-500' }}">
+                            {{ $category->name }}
+                        </a>
+                    @endforeach
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mt-10">
                 @foreach($products as $product)
-                    @php $isAltStyle = $loop->iteration % 2 === 0; @endphp
-
-                    <div class="group relative flex flex-col h-full rounded-[2.5rem] border transition-all duration-500 overflow-hidden shadow-sm hover:shadow-2xl
-                        {{ $isAltStyle ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-100 dark:bg-stone-900 dark:border-stone-800' }}">
+                    <div class="group relative flex flex-col h-full bg-[#111111] dark:bg-black rounded-[3rem] p-4 border border-white/5 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
                         
-                        <div class="absolute top-5 right-5 z-20">
-                            <div class="bg-white/95 dark:bg-stone-800/95 backdrop-blur-md px-4 py-1.5 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-700 transition-transform group-hover:scale-110">
-                                <span class="text-sm font-black text-stone-900 dark:text-amber-500">
-                                    ₱{{ number_format($product->sizes->count() > 0 ? $product->sizes->min('price') : $product->price, 0) }}
-                                </span>
-                            </div>
-                        </div>
-
-                        @if($product->stock_quantity <= 0)
-                            <div class="absolute inset-0 z-30 bg-stone-950/75 backdrop-blur-[1.5px] flex items-center justify-center p-6 text-center">
-                                <div class="border-2 border-amber-500/50 p-4 rounded-3xl transform -rotate-12">
-                                    <p class="text-white font-serif italic text-2xl leading-none">Sold Out</p>
-                                    <p class="text-amber-500 text-[8px] uppercase font-black tracking-widest mt-1">Visit us tomorrow</p>
-                                </div>
-                            </div>
-                        @endif
-
-                        <div class="relative h-64 md:h-72 overflow-hidden {{ $isAltStyle ? 'bg-stone-800' : 'bg-stone-100 dark:bg-stone-800' }}">
+                        <div class="relative aspect-square rounded-[2.5rem] bg-[#E1E6D8] dark:bg-[#1E2216] overflow-hidden flex items-center justify-center">
                             @if($product->image)
-                                <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 {{ $product->stock_quantity <= 0 ? 'grayscale opacity-40' : '' }}" alt="{{ $product->name }}">
+                                <img src="{{ asset('storage/' . $product->image) }}" 
+                                     class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 {{ $product->stock_quantity <= 0 ? 'grayscale opacity-40' : '' }}" 
+                                     alt="{{ $product->name }}">
                             @else
-                                <div class="w-full h-full flex items-center justify-center bg-stone-200 dark:bg-stone-800">
-                                    <span class="font-serif italic text-8xl text-stone-800 dark:text-stone-200 opacity-[0.05] uppercase select-none">{{ substr($product->name, 0, 1) }}</span>
-                                </div>
+                                <span class="font-serif italic text-8xl opacity-10 uppercase text-stone-400">{{ substr($product->name, 0, 1) }}</span>
                             @endif
 
-                            <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
-                                <svg class="relative block w-full h-8" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C58.42,102.3,121.2,104,180.11,96.27,240.37,88.41,281.39,69.09,321.39,56.44Z" 
-                                          class="{{ $isAltStyle ? 'fill-stone-900' : 'fill-white dark:fill-stone-900' }}"></path>
-                                </svg>
-                            </div>
-                            
-                            <div class="absolute bottom-4 left-6 bg-black/10 backdrop-blur-sm px-3 py-1 rounded-full border border-white/5">
-                                <span class="text-[7px] text-white font-black uppercase tracking-widest">+10 Loyalty Points</span>
-                            </div>
-                        </div>
-                        
-                        @if(!$isAltStyle)
-                            <div class="p-8 flex-1 flex flex-col">
-                                <div class="flex items-start justify-between mb-4">
-                                    <div class="flex-1 pr-4">
-                                        <h3 class="text-xl font-bold text-stone-900 dark:text-white tracking-tight group-hover:text-amber-500 transition-colors leading-tight">{{ $product->name }}</h3>
-                                        <span class="text-[9px] font-black text-amber-600 uppercase tracking-[0.3em] block mt-1.5 opacity-80">{{ $product->category->name ?? 'House Special' }}</span>
+                            @if($product->stock_quantity <= 0)
+                                <div class="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-6">
+                                    <div class="border-2 border-white/20 px-8 py-4 rounded-3xl transform -rotate-12">
+                                        <p class="text-white font-black text-xl uppercase italic">Sold Out</p>
                                     </div>
-                                    <button @click='openModal(@json($product->load("sizes")))' class="text-[9px] font-black uppercase tracking-widest text-stone-400 hover:text-amber-600 transition-colors pt-1.5">Order Now ↗</button>
                                 </div>
+                            @endif
+                        </div>
 
-                                <p class="text-stone-500 dark:text-stone-400 text-xs font-light leading-relaxed mb-6 line-clamp-2 italic">{{ $product->description }}</p>
-
-                                <div class="flex flex-wrap gap-2 mb-8 mt-auto">
-                                    <span class="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 rounded-full text-[9px] font-bold uppercase tracking-tighter">Premium</span>
-                                    <span class="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 rounded-full text-[9px] font-bold uppercase tracking-tighter">Ice Cubes</span>
-                                    <span class="px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 rounded-full text-[9px] font-bold uppercase tracking-tighter">Honey</span>
+                        <div class="mt-6 flex justify-between items-end gap-3 px-2 pb-2">
+                            <div class="flex-1 flex flex-col min-w-0">
+                                <h3 class="text-white font-bold text-lg leading-tight uppercase tracking-tighter break-words">
+                                    {{ $product->name }}
+                                </h3>
+                                
+                                <div class="flex flex-wrap gap-1 mt-3">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest bg-white/5 text-stone-400 border border-white/10">
+                                        {{ $product->category->name ?? 'Brew' }}
+                                    </span>
                                 </div>
+                            </div>
 
+                            <div class="flex flex-col items-end pl-4 min-w-[80px] border-l border-white/10 shrink-0">
+                                <span class="text-amber-500 font-black text-2xl md:text-3xl leading-none">
+                                    {{ number_format($product->sizes->count() > 0 ? $product->sizes->min('price') : $product->price, 0) }}₱
+                                </span>
                                 <button @click='openModal(@json($product->load("sizes")))' 
                                         :disabled="{{ $product->stock_quantity <= 0 ? 'true' : 'false' }}"
-                                        class="w-full py-4 bg-stone-900 dark:bg-stone-800 hover:bg-amber-600 hover:text-white text-white dark:text-amber-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95">
-                                    {{ $product->stock_quantity > 0 ? 'Select Options' : 'Currently Unavailable' }}
+                                        class="mt-2 flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-stone-400 hover:text-amber-500 transition-colors group/btn disabled:opacity-30 whitespace-nowrap">
+                                    <span>Order Now</span>
+                                    <svg class="w-3 h-3 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                 </button>
                             </div>
-                        @else
-                            <div class="flex flex-col flex-1">
-                                <div class="p-8 flex-1">
-                                    <h3 class="text-xl font-bold text-white tracking-tight group-hover:text-amber-500 transition-colors">{{ $product->name }}</h3>
-                                    <div class="flex flex-wrap gap-2 mt-3">
-                                        <span class="px-2 py-0.5 bg-white/5 text-stone-400 text-[8px] font-black uppercase rounded-md border border-white/10">Kiwi</span>
-                                        <span class="px-2 py-0.5 bg-white/5 text-stone-400 text-[8px] font-black uppercase rounded-md border border-white/10">Ice Cream</span>
-                                    </div>
-                                    <p class="text-stone-400 text-xs font-light leading-relaxed mt-6 line-clamp-2">{{ $product->description }}</p>
-                                </div>
+                        </div>
 
-                                <div class="flex border-t border-white/5 h-20">
-                                    <div class="w-1/2 flex flex-col justify-center px-8 border-r border-white/5">
-                                        <span class="text-[8px] font-black text-stone-500 uppercase tracking-widest mb-0.5">Price</span>
-                                        <span class="text-2xl font-black text-white leading-none">₱{{ number_format($product->price, 0) }}</span>
-                                    </div>
-                                    <button @click='openModal(@json($product->load("sizes")))' 
-                                            class="w-1/2 bg-amber-600 hover:bg-amber-500 transition-colors flex items-center justify-center gap-2">
-                                        <span class="text-[10px] font-black uppercase tracking-widest text-white">Order Now</span>
-                                        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                                    </button>
-                                </div>
-                            </div>
-                        @endif
+                        <button @click='openModal(@json($product->load("sizes")))' 
+                                :disabled="{{ $product->stock_quantity <= 0 ? 'true' : 'false' }}"
+                                class="mt-4 w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white rounded-2xl py-3.5 font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-amber-600/20 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                            Add to Cart
+                        </button>
                     </div>
                 @endforeach
             </div>
 
             @if($products->isEmpty())
                 <div class="flex flex-col items-center justify-center py-40 text-center">
-                    <div class="w-24 h-24 rounded-full bg-stone-100 dark:bg-stone-900 flex items-center justify-center mb-8">
+                    <div class="w-24 h-24 rounded-3xl bg-stone-100 dark:bg-stone-900 flex items-center justify-center mb-8 border border-stone-200 dark:border-stone-800">
                         <svg class="w-10 h-10 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
-                    <h3 class="text-3xl font-bold text-stone-400 mb-2">No flavor found</h3>
-                    <p class="text-stone-500 mb-8 font-light">Try searching for a different roast or meal category.</p>
-                    <a href="{{ route('home') }}" class="text-amber-600 font-black uppercase tracking-widest text-[10px] hover:underline px-8 py-3 border border-amber-600/20 rounded-full transition-all">Reset Filters</a>
+                    <h3 class="text-3xl font-black text-stone-400 uppercase tracking-tighter mb-2">No flavor found</h3>
+                    <p class="text-stone-500 dark:text-stone-600 mb-8 font-medium italic">Adjust your filters or search keywords.</p>
+                    <a href="{{ route('home') }}" 
+                       class="inline-block text-amber-600 font-black uppercase tracking-[0.2em] text-[10px] px-10 py-4 border-2 border-amber-600/20 rounded-full bg-transparent hover:bg-amber-600 hover:text-white hover:border-amber-600 transition-all duration-300 shadow-lg">
+                        Reset Filters
+                    </a>
                 </div>
             @endif
-        </div> 
+        </div>
 
         <div x-show="showModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak>
             <div class="absolute inset-0 bg-stone-950/90 backdrop-blur-md" @click="showModal = false"></div>
-            <div class="relative bg-white dark:bg-stone-900 w-full max-w-md rounded-[2.5rem] shadow-2xl border border-stone-100 dark:border-stone-800 p-8 md:p-12 overflow-hidden">
-                <div class="flex justify-between items-start mb-8">
-                    <div>
-                        <h3 class="text-2xl font-bold text-stone-900 dark:text-white leading-tight" x-text="selectedProduct?.name"></h3>
-                        <p class="text-[9px] font-black text-amber-600 uppercase tracking-widest mt-1">Configure your selection</p>
-                    </div>
-                    <button @click="showModal = false" class="text-stone-400 hover:text-stone-600 dark:hover:text-white transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-
+            <div class="relative bg-white dark:bg-stone-900 w-full max-w-md rounded-[3rem] shadow-2xl p-8 overflow-hidden">
                 <form method="POST" action="{{ route('cart.add') }}">
                     @csrf
                     <input type="hidden" name="product_id" :value="selectedProduct?.id">
                     <input type="hidden" name="size" :value="selectedSize?.size">
                     <input type="hidden" name="price" :value="selectedSize?.price">
+                    <div class="flex justify-between items-start mb-8">
+                        <div>
+                            <h3 class="text-2xl font-black text-stone-900 dark:text-white uppercase tracking-tight break-words" x-text="selectedProduct?.name"></h3>
+                            <p class="text-[10px] font-black text-amber-600 uppercase mt-1">Select your size</p>
+                        </div>
+                        <button @click="showModal = false" type="button" class="text-stone-400 hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
                     <div class="space-y-3 mb-10">
                         <template x-if="selectedProduct?.sizes && selectedProduct.sizes.length > 0">
                             <template x-for="sizeObj in selectedProduct?.sizes" :key="sizeObj.id">
-                                <label class="flex items-center justify-between p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300" :class="selectedSize?.id === sizeObj.id ? 'border-amber-500 bg-amber-500/5' : 'border-stone-100 dark:border-stone-800'">
+                                <label class="flex items-center justify-between p-5 rounded-2xl border-2 cursor-pointer transition-all" :class="selectedSize?.id === sizeObj.id ? 'border-amber-500 bg-amber-500/5' : 'border-stone-100 dark:border-stone-800'">
                                     <div class="flex items-center gap-4">
-                                        <input type="radio" name="size_id" :value="sizeObj.id" required @change="selectedSize = sizeObj" class="text-amber-600 focus:ring-amber-500 bg-transparent border-stone-300 dark:border-stone-600">
+                                        <input type="radio" name="size_id" :value="sizeObj.id" required @change="selectedSize = sizeObj" class="text-amber-600 focus:ring-amber-500 bg-transparent">
                                         <span class="font-bold text-stone-800 dark:text-stone-200" x-text="sizeObj.size"></span>
                                     </div>
                                     <span class="font-black text-amber-600" x-text="'₱' + parseFloat(sizeObj.price).toFixed(0)"></span>
                                 </label>
                             </template>
                         </template>
-                        <template x-if="!selectedProduct?.sizes || selectedProduct.sizes.length === 0">
-                            <label class="flex items-center justify-between p-5 rounded-2xl border-2 border-amber-500 bg-amber-500/5 cursor-default">
-                                <div class="flex items-center gap-4">
-                                    <input type="radio" checked disabled class="text-amber-600 border-amber-500 bg-transparent">
-                                    <span class="font-bold text-stone-800 dark:text-stone-200">Standard Portion</span>
-                                </div>
-                                <span class="font-black text-amber-600" x-text="'₱' + parseFloat(selectedProduct?.price).toFixed(0)"></span>
-                            </label>
-                        </template>
                     </div>
                     <div class="flex gap-4">
-                        <button type="button" @click="showModal = false" class="flex-1 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-stone-500 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 transition">Cancel</button>
-                        <button type="submit" :disabled="!selectedSize" class="flex-1 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white bg-amber-600 hover:bg-amber-700 disabled:opacity-50 transition shadow-lg shadow-amber-600/20 active:scale-95">Add to Order</button>
+                        <button type="button" @click="showModal = false" class="flex-1 py-4 text-stone-500 font-black uppercase text-[10px] bg-stone-100 dark:bg-stone-800 rounded-2xl">Cancel</button>
+                        <button type="submit" :disabled="!selectedSize" class="flex-1 py-4 bg-amber-600 text-white rounded-2xl font-black uppercase text-[10px] active:scale-95 transition-all">Confirm</button>
                     </div>
                 </form>
             </div>
@@ -209,5 +169,5 @@
 <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .group img[src*="favicon.png"] { mix-blend-mode: multiply; background-color: transparent !important; }
+    [x-cloak] { display: none !important; }
 </style>

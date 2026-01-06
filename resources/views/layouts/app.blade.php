@@ -31,12 +31,12 @@
                     200: '#DED7C5', // 10% - Subtle Beige Borders
                     
                     // NEUTRAL STEPS: Typography and Accents
-                    300: '#D1C8B1', //
-                    400: '#B8AD91', //
-                    500: '#8F8366', //
-                    600: '#736852', //
-                    700: '#574F3E', //
-                    800: '#3B352A', //
+                    300: '#D1C8B1',
+                    400: '#B8AD91',
+                    500: '#8F8366',
+                    600: '#736852',
+                    700: '#574F3E',
+                    800: '#3B352A',
                     
                     // DARK MODE: The "Connected" Charcoal-Beige
                     900: '#1A1816', // 30% - Secondary Dark BG (Warm Charcoal)
@@ -46,36 +46,36 @@
                 
                 // 🟢 ACCENT COLORS: 10% Branding
                 amber: {
-                    400: '#FBBF24', //
+                    400: '#FBBF24',
                     500: '#F59E0B', // Primary 10% Accent (Brand Orange)
-                    600: '#D97706', //
-                    700: '#B45309', //
-                    1000: '#F59E0B', //
+                    600: '#D97706',
+                    700: '#B45309',
+                    1000: '#F59E0B',
                 },
 
                 // 🟢 COFFEE SPECIFIC PALETTE
                 'coffee': {
-                    100: '#F5E6E0', //
-                    600: '#8D5F46', //
-                    800: '#4B2C20', //
-                    900: '#2C1810', //
+                    100: '#F5E6E0',
+                    600: '#8D5F46',
+                    800: '#4B2C20',
+                    900: '#2C1810',
                 },
 
                 // 🟢 LEGACY BRANDING: Compatibility
                 'brand': {
-                    orange: '#F59E0B', //
+                    orange: '#F59E0B',
                 },
 
                 'dashboard': {
-                    1000: '#FF0000', //
+                    1000: '#FF0000',
                 },
             },
             boxShadow: {
                 // 🟢 NEW FEATURE: Custom Depth Effects
                 // Soft shadow tuned for light beige backgrounds
-                'beige': '0 20px 40px -15px rgba(143, 131, 102, 0.2)', //
+                'beige': '0 20px 40px -15px rgba(143, 131, 102, 0.2)',
                 // Heavy, atmospheric shadow for dark theme depth
-                'connected': '0 25px 60px -15px rgba(0, 0, 0, 0.7)', //
+                'connected': '0 25px 60px -15px rgba(0, 0, 0, 0.7)',
             },
             letterSpacing: {
                 // For that premium high-end look on headers
@@ -125,8 +125,13 @@
                         <span class="text-[10px] font-black uppercase tracking-[0.3em] text-stone-500">Mik's Coffee Admin Panel</span>
                     </div>
                     <div class="flex items-center gap-3 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        <span>Management System Online</span>
+                        @php
+                            // 🔧 FIX: Check actual database status for admin
+                            $adminUser = Auth::user();
+                            $isActuallyOnline = $adminUser->is_online && $adminUser->last_seen_at && $adminUser->last_seen_at->diffInMinutes(now()) < 5;
+                        @endphp
+                        <span class="w-2 h-2 rounded-full {{ $isActuallyOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-400' }}"></span>
+                        <span>Management System {{ $isActuallyOnline ? 'Online' : 'Offline' }}</span>
                         <span class="mx-2 text-stone-200 dark:text-stone-800">|</span>
                         <span>© 2025</span>
                     </div>

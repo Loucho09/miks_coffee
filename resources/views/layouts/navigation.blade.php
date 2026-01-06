@@ -9,18 +9,21 @@
             })->exists();
     }
 
-    // 🟢 Dynamic Tier Calculation
-    $navPoints = Auth::user()->points ?? 0;
+    // 🟢 Dynamic Tier Calculation - UPDATED TO USE loyalty_points
+    $navPoints = Auth::user()->loyalty_points ?? 0;
     $navTier = 'Bronze';
     if($navPoints >= 500) $navTier = 'Gold';
     elseif($navPoints >= 200) $navTier = 'Silver';
 
-    // 🟢 NEW FEATURE: Admin Online Status Indicator
-    $isAdminOnline = \App\Models\User::where('email', 'jmloucho09@gmail.com')
-        ->whereNotNull('last_seen_at')
-        ->exists();
+    // 🔧 FIX: Admin Online Status with 5-minute threshold
+    $adminUser = \App\Models\User::where('email', 'jmloucho09@gmail.com')->first();
+    $isAdminOnline = false;
+    if ($adminUser && $adminUser->is_online && $adminUser->last_seen_at) {
+        $minutesSinceLastSeen = $adminUser->last_seen_at->diffInMinutes(now());
+        $isAdminOnline = $minutesSinceLastSeen < 5;
+    }
 
-    // 🟢 Unread Support Count logic: Detects if Admin has replied
+    // 🟢 Unread Support Count logic
     $unreadSupportCount = Auth::check() ? \App\Models\SupportTicket::where('user_id', Auth::id())->where('status', 'replied')->count() : 0;
 
     // 🟢 Pre-calculate pending tickets for admin badge
@@ -28,10 +31,8 @@
 @endphp
 
 <style>
-    /* 🟢 This prevents the "Refresh Flicker" issue */
     [x-cloak] { display: none !important; }
     
-    /* Custom scrollbar for the mobile drawer to maintain premium feel */
     .mobile-nav-scrollbar::-webkit-scrollbar { width: 4px; }
     .mobile-nav-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .mobile-nav-scrollbar::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
@@ -65,7 +66,6 @@
                             <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] transition-all flex items-center gap-2 relative">
                                 {{ __('Dashboard') }}
                                 
-                                {{-- 🟢 Pulse for Admin Replies OR Unclaimed Points --}}
                                 @if($hasUnclaimedPoints || $unreadSupportCount > 0)
                                     <span class="absolute -top-1 -right-2 flex h-2 w-2">
                                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $unreadSupportCount > 0 ? 'bg-amber-600' : 'bg-amber-500' }} opacity-75"></span>
@@ -87,7 +87,7 @@
 
                     <x-nav-link :href="route('support.index')" :active="request()->routeIs('support.*')" class="text-stone-500 dark:text-stone-400 hover:text-amber-600 font-black uppercase text-[10px] tracking-[0.2em] flex items-center gap-2">
                         {{ __('Support') }} 
-                        <span class="flex h-1.5 w-1.5 rounded-full {{ $isAdminOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse' : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' }}"></span>
+                        <span class="flex h-1.5 w-1.5 rounded-full {{ $isAdminOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse' : 'bg-gray-400 shadow-[0_0_4px_rgba(156,163,175,0.3)]' }}"></span>
                     </x-nav-link>
 
                     @auth
@@ -119,13 +119,13 @@
             <div class="flex items-center gap-2 sm:gap-4">
                 @auth
                     <div class="hidden lg:flex lg:items-center">
-                        <x-dropdown align="right" width="48">
+                        <x-dropdown align="right" width="64">
                             <x-slot name="trigger">
-                                <button class="inline-flex items-center px-4 py-2.5 border border-stone-200 dark:border-stone-800 text-[10px] font-black uppercase tracking-widest rounded-2xl text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 transition shadow-sm group whitespace-nowrap">
+                                <button class="inline-flex items-center px-4 py-2.5 border border-stone-200 dark:border-stone-800 text-[10px] font-black uppercase tracking-widest rounded-2xl text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 transition shadow-sm group">
                                     <div class="text-left">
                                         <div class="leading-none mb-1 group-hover:text-amber-600 transition-colors">{{ Auth::user()->name }}</div>
                                         <div class="text-[8px] text-amber-600 font-black tracking-tighter opacity-80 uppercase">
-                                            {{ Auth::user()->points ?? 0 }} PTS • {{ $navTier }}
+                                            {{ Auth::user()->loyalty_points ?? 0 }} PTS • {{ $navTier }}
                                         </div>
                                     </div>
                                     <svg class="ms-3 h-4 w-4 text-stone-400 group-hover:text-amber-600 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
@@ -146,7 +146,7 @@
 
                     <div class="flex items-center lg:hidden gap-3">
                         <div class="flex flex-col items-end leading-none shrink-0">
-                            <span class="text-[10px] font-black text-amber-600 uppercase">{{ Auth::user()->points ?? 0 }} PTS</span>
+                            <span class="text-[10px] font-black text-amber-600 uppercase">{{ Auth::user()->loyalty_points ?? 0 }} PTS</span>
                             <span class="text-[8px] font-bold text-stone-400 uppercase tracking-tighter">{{ $navTier }}</span>
                         </div>
                         
@@ -201,7 +201,7 @@
                 {{ __('Support') }}
                 <div class="flex items-center gap-2">
                     <span class="text-[8px] text-stone-400 font-black uppercase tracking-tighter">{{ $isAdminOnline ? 'ONLINE' : 'OFFLINE' }}</span>
-                    <span class="h-2 w-2 rounded-full {{ $isAdminOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                    <span class="h-2 w-2 rounded-full {{ $isAdminOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500' }}"></span>
                 </div>
             </x-responsive-nav-link>
             
@@ -227,7 +227,7 @@
                 <div class="flex items-center gap-3 px-4 py-2 mb-2 bg-stone-50 dark:bg-stone-900/50 rounded-2xl mx-1">
                     <div class="flex flex-col">
                         <span class="text-[10px] font-black text-stone-800 dark:text-stone-200 uppercase">{{ Auth::user()->name }}</span>
-                        <span class="text-[8px] font-bold text-amber-600 uppercase">{{ Auth::user()->points ?? 0 }} PTS • {{ $navTier }}</span>
+                        <span class="text-[8px] font-bold text-amber-600 uppercase">{{ Auth::user()->loyalty_points ?? 0 }} PTS • {{ $navTier }}</span>
                     </div>
                 </div>
 
