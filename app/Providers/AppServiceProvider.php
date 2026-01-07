@@ -8,7 +8,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Login;
 use App\Models\SupportTicket;
+use App\Models\LoginHistory;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -42,18 +45,26 @@ class AppServiceProvider extends ServiceProvider
         });
 
         /**
+         * SECURITY: Automatic Login Tracking
+         * Captures IP and Browser data upon successful login.
+         */
+        Event::listen(Login::class, function ($event) {
+            LoginHistory::create([
+                'user_id' => $event->user->id,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'login_at' => now(),
+            ]);
+        });
+
+        /**
          * ULTRA-SNAP SINGLETON:
          * We bind the unread count calculation to the view share once.
-         * This prevents 'SupportTicket' checks from firing on every sub-component.
          */
         View::composer(['layouts.*', 'dashboard', 'cafe.*', 'public_menu'], function ($view) {
             if (Auth::check()) {
                 $userId = Auth::id();
                 
-                /**
-                 * Uses 'array' driver for request-life persistence.
-                 * Database count is cached for 10 minutes to ensure 'Snap' speed.
-                 */
                 $unreadCount = Cache::remember("support_unread_{$userId}", 600, function () use ($userId) {
                     return SupportTicket::where('user_id', $userId)
                         ->where('status', 'replied')

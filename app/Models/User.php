@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\PointTransaction;
+use App\Models\LoginHistory;
 
 class User extends Authenticatable
 {
@@ -121,6 +122,15 @@ class User extends Authenticatable
         if ($pts >= 500) return 'Gold';
         if ($pts >= 200) return 'Silver';
         return 'Bronze';
+    }
+
+    /**
+     * RELATIONSHIP: Get Login History entries.
+     * Fixes Call to undefined method App\Models\User::loginHistory()
+     */
+    public function loginHistory(): HasMany 
+    { 
+        return $this->hasMany(LoginHistory::class); 
     }
 
     public function referrer(): BelongsTo { return $this->belongsTo(User::class, 'referred_by'); }
