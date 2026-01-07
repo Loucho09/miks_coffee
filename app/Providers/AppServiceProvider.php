@@ -26,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         /**
+         * REGISTER VIEW NAMESPACE
+         * This fixes the "No hint path defined for [cafe]" error.
+         */
+        View::addNamespace('cafe', resource_path('views/cafe'));
+
+        /**
          * PERFORMANCE: Silent Database Monitoring.
          * Prevents console output to ensure zero interference with the PHP process.
          */
