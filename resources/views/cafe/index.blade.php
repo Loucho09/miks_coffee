@@ -56,7 +56,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mt-10">
                 @foreach($products as $product)
-                    <div class="group relative flex flex-col h-full bg-[#111111] dark:bg-black rounded-[3rem] p-4 border border-white/5 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
+                    <div class="group relative flex flex-col h-full bg-[#E7DEBE] dark:bg-black rounded-[3rem] p-4 border border-white/5 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
                         
                         <div class="relative aspect-square rounded-[2.5rem] bg-[#E1E6D8] dark:bg-[#1E2216] overflow-hidden flex items-center justify-center">
                             @if($product->image)
@@ -83,7 +83,7 @@
                                 </h3>
                                 
                                 <div class="flex flex-wrap gap-1 mt-3">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest bg-white/5 text-stone-400 border border-white/10">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest bg-white/5 text-stone-700 border border-white/10">
                                         {{ $product->category->name ?? 'Brew' }}
                                     </span>
                                 </div>
@@ -95,7 +95,7 @@
                                 </span>
                                 <button @click='openModal(@json($product->load("sizes")))' 
                                         :disabled="{{ $product->stock_quantity <= 0 ? 'true' : 'false' }}"
-                                        class="mt-2 flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-stone-400 hover:text-amber-500 transition-colors group/btn disabled:opacity-30 whitespace-nowrap">
+                                        class="mt-2 flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-stone-700 hover:text-amber-500 transition-colors group/btn disabled:opacity-30 whitespace-nowrap">
                                     <span>Order Now</span>
                                     <svg class="w-3 h-3 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                 </button>

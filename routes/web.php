@@ -26,8 +26,8 @@ use App\Models\Order;
 use App\Models\User;
 
 /* |--------------------------------------------------------------------------
-   | 1. PUBLIC ROUTES
-   | -------------------------------------------------------------------------- */
+   | 1. PUBLIC ROUTES
+   | -------------------------------------------------------------------------- */
 
 Route::get('/', [HomeController::class, 'index'])->name('welcome');
 
@@ -52,8 +52,8 @@ Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/terms', 'legal.terms')->name('terms');
 
 /* |--------------------------------------------------------------------------
-   | 2. AUTHENTICATED ROUTES
-   | -------------------------------------------------------------------------- */
+   | 2. AUTHENTICATED ROUTES
+   | -------------------------------------------------------------------------- */
 Route::middleware(['auth', 'verified'])->group(function () {
 
     /* --- CUSTOMER ONLY FEATURES --- */
@@ -93,8 +93,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
         });
 
-        // 🟢 FIX: Updated to use CheckoutController instead of OrderController for point deduction logic
-        Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
+        // 🟢 FIXED: Using CheckoutController for transactional logic and point deduction
+        Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     });
 

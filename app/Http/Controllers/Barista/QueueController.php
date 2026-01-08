@@ -19,7 +19,7 @@ class QueueController extends Controller
             abort(403, 'Unauthorized. Admins/Baristas only.');
         }
 
-        $orders = Order::whereIn('status', ['pending', 'preparing'])
+        $orders = Order::whereIn('status', ['pending', 'preparing', 'ready'])
                         ->with(['items.product', 'user']) 
                         ->orderBy('id', 'asc')
                         ->get();
@@ -62,7 +62,7 @@ class QueueController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $orders = Order::whereIn('status', ['pending', 'preparing'])
+        $orders = Order::whereIn('status', ['pending', 'preparing', 'ready'])
                         ->with(['items.product', 'user']) 
                         ->orderBy('id', 'asc')
                         ->get();
@@ -89,7 +89,7 @@ class QueueController extends Controller
     }
 
     /**
-     * Update Order Status & Award Points
+     * Update Order Status
      */
     public function updateStatus(Request $request, $id)
     {
@@ -98,12 +98,7 @@ class QueueController extends Controller
         }
 
         $order = Order::with('user')->findOrFail($id);
-        $request->validate(['status' => 'required|in:pending,preparing,ready,served,cancelled']);
-
-        if ($request->status === 'ready' && $order->status !== 'ready' && $order->user) {
-            $pointsEarned = floor($order->total_price / 50); 
-            $order->user->increment('points', $pointsEarned);
-        }
+        $request->validate(['status' => 'required|in:pending,preparing,ready,served,completed,cancelled']);
 
         $order->status = $request->status;
         $order->save();

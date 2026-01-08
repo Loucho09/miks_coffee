@@ -22,11 +22,11 @@
             {{-- 🟢 NEW FEATURE: Admin Daily Snapshot --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
                 {{-- Today's Sales Card --}}
-                <div class="bg-stone-500 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+                <div class="bg-stone-300 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
                     <div class="relative z-10">
                         <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-80 mb-2">Today's Revenue</p>
                         <h4 class="text-3xl font-black mb-1">₱{{ number_format($todayRevenue, 2) }}</h4>
-                        <p class="text-[10px] font-bold {{ $revenueChange >= 0 ? 'text-emerald-300' : 'text-rose-300' }}">
+                        <p class="text-[10px] font-bold {{ $revenueChange >= 0 ? 'text-emerald-300' : 'text-rose-400' }}">
                             {{ $revenueChange >= 0 ? '↑' : '↓' }} {{ number_format(abs($revenueChange), 1) }}% vs Yesterday
                         </p>
                     </div>

@@ -8,6 +8,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PointTransaction;
 use App\Models\User;
+use App\Models\Product;
+use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
@@ -18,8 +20,8 @@ class CheckoutController extends Controller
         
         $cart = session('cart');
 
-        if (!$cart) {
-            return redirect()->back()->with('error', 'Your cart is empty.');
+        if (!$cart || count($cart) === 0) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
         $subtotal = 0;
@@ -28,52 +30,66 @@ class CheckoutController extends Controller
         }
 
         $discount = 0;
+        $pointsToRedeem = 50;
 
-        // 🟢 REDEMPTION LOGIC: Deduct 50 PTS from Database
-        if ($request->has('redeem_points') && $user->loyalty_points >= 50) {
-            $user->decrement('loyalty_points', 50);
-            $discount = 50;
+        return DB::transaction(function () use ($request, $user, $cart, $subtotal, $pointsToRedeem) {
+            $discount = 0;
+            $isRedeemed = false;
 
+            // 🟢 REDEMPTION LOGIC: Deduct 50 PTS from Database
+            if ($request->has('redeem_points') && $user->loyalty_points >= $pointsToRedeem) {
+                $user->decrement('loyalty_points', $pointsToRedeem);
+                $discount = 50;
+                $isRedeemed = true;
+
+                PointTransaction::create([
+                    'user_id' => $user->id,
+                    'amount' => -$pointsToRedeem,
+                    'description' => "Redeemed 50 points for discount",
+                ]);
+            }
+
+            // Create the Order
+            $order = Order::create([
+                'user_id' => $user->id,
+                'total_price' => max(0, $subtotal - $discount),
+                'status' => 'pending',
+                'order_number' => 'ORD-' . strtoupper(uniqid()),
+            ]);
+
+            // Save items to database and update stock
+            foreach ($cart as $id => $details) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $details['product_id'] ?? $id,
+                    'quantity' => $details['quantity'],
+                    'price' => $details['price'],
+                    'size' => $details['size'] ?? 'Standard',
+                ]);
+
+                // Reduce Stock
+                $product = Product::find($details['product_id'] ?? $id);
+                if ($product) {
+                    $product->decrement('stock_quantity', $details['quantity']);
+                }
+            }
+
+            // 🟢 EARNING LOGIC: Add +10 PTS for this order
+            $user->increment('loyalty_points', 10);
+            
             PointTransaction::create([
                 'user_id' => $user->id,
-                'amount' => -50,
-                'description' => "Redeemed 50 points for discount",
+                'amount' => 10,
+                'description' => "Earned from Order #{$order->id}",
             ]);
-        }
 
-        // Create the Order
-        $order = Order::create([
-            'user_id' => $user->id,
-            'total_price' => max(0, $subtotal - $discount),
-            'status' => 'pending',
-        ]);
+            // Update streak
+            $user->updateStreak();
 
-        // Save items to database
-        foreach ($cart as $id => $details) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $id,
-                'quantity' => $details['quantity'],
-                'price' => $details['price'],
-                'size' => $details['size'] ?? 'Standard',
-            ]);
-        }
+            // Clear cart session
+            session()->forget('cart');
 
-        // 🟢 EARNING LOGIC: Add +10 PTS for this order
-        $user->increment('loyalty_points', 10);
-        
-        PointTransaction::create([
-            'user_id' => $user->id,
-            'amount' => 10,
-            'description' => "Earned from Order #{$order->id}",
-        ]);
-
-        // Update streak if needed
-        $user->updateStreak();
-
-        // Clear cart session
-        session()->forget('cart');
-
-        return redirect()->route('dashboard')->with('success', 'Order placed successfully! 10 points earned.');
+            return redirect()->route('dashboard')->with('success', 'Order placed successfully! 10 points earned.');
+        });
     }
 }
