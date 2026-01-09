@@ -2,29 +2,29 @@
     <x-slot name="header">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div class="flex items-center gap-4">
-                <div class="hidden md:flex w-12 h-12 bg-amber-600 rounded-2xl items-center justify-center shadow-lg shadow-amber-600/20">
+                <div class="hidden md:flex w-12 h-12 bg-stone-900 dark:bg-amber-600 rounded-2xl items-center justify-center shadow-lg transition-colors duration-500">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                 </div>
                 <div>
-                    <h2 class="font-bold text-xl md:text-3xl text-stone-800 dark:text-white leading-tight uppercase tracking-tighter">
-                        Order Menu
+                    <h2 class="font-black text-xl md:text-3xl text-stone-900 dark:text-white leading-tight uppercase tracking-tighter italic transition-colors duration-500">
+                        {{ __('Order Menu') }}
                     </h2>
-                    <p class="text-[10px] md:text-xs text-stone-500 dark:text-stone-400 mt-1 font-bold uppercase tracking-widest">Welcome, {{ Auth::user()->name }}!</p>
+                    <p class="text-[8px] md:text-[10px] text-stone-500 dark:text-stone-400 mt-1 font-black uppercase tracking-[0.3em]">Authorized Session: {{ Auth::user()->name }}</p>
                 </div>
             </div>
             
-            <form method="GET" action="{{ route('home') }}" class="relative w-full md:w-80">
+            <form method="GET" action="{{ route('home') }}" class="relative w-full md:w-80 group">
                 <input type="text" name="search" value="{{ request('search') }}" 
                        placeholder="Search our flavors..." 
-                       class="w-full pl-11 pr-4 py-2.5 rounded-2xl border-none bg-stone-100 dark:bg-stone-800 shadow-inner focus:ring-2 focus:ring-amber-500 text-stone-900 dark:text-white placeholder-stone-500 transition-all text-sm font-medium">
-                <svg class="w-4 h-4 absolute left-4 top-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                       class="w-full pl-11 pr-4 py-2.5 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 text-stone-900 dark:text-white placeholder-stone-400 transition-all text-xs font-bold uppercase tracking-tight outline-none">
+                <svg class="w-4 h-4 absolute left-4 top-3 text-stone-400 group-focus-within:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
             </form>
         </div>
     </x-slot>
 
-    <div class="py-6 md:py-12 bg-stone-50 dark:bg-[#080808] min-h-screen" x-data="{ 
+    <div class="py-4 md:py-12 bg-stone-50 dark:bg-stone-950 min-h-screen transition-colors duration-500" x-data="{ 
         showModal: false, 
         selectedProduct: null, 
         selectedSize: null,
@@ -39,126 +39,134 @@
     }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div class="sticky top-16 z-30 -mx-4 px-4 py-4 bg-white/80 dark:bg-[#080808]/90 backdrop-blur-xl border-b border-stone-200 dark:border-white/5 transition-colors">
+            {{-- Compact Sticky Category Bar --}}
+            <div class="sticky top-16 md:top-20 z-30 -mx-4 px-4 py-3 bg-stone-50/80 dark:bg-stone-950/90 backdrop-blur-xl border-b border-stone-200 dark:border-stone-800 transition-all duration-500">
                 <div class="flex items-center gap-2 overflow-x-auto no-scrollbar flex-nowrap scroll-smooth md:justify-center">
                     <a href="{{ route('home') }}" 
-                       class="whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 {{ !request('category') ? 'bg-amber-600 text-white shadow-xl shadow-amber-600/20 scale-105' : 'bg-stone-100 dark:bg-stone-900 text-stone-500 border border-transparent hover:border-amber-500' }}">
-                        All Items
+                       class="whitespace-nowrap px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 {{ !request('category') ? 'bg-stone-900 dark:bg-amber-600 text-white shadow-lg' : 'bg-white dark:bg-stone-900 text-stone-400 border border-stone-200 dark:border-stone-800 hover:border-amber-500/50' }}">
+                        All Inventory
                     </a>
                     @foreach($categories as $category)
                         <a href="{{ route('home', ['category' => $category->id]) }}" 
-                           class="whitespace-nowrap px-6 py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 {{ request('category') == $category->id ? 'bg-amber-600 text-white shadow-xl shadow-amber-600/20 scale-105' : 'bg-stone-100 dark:bg-stone-900 text-stone-500 border border-transparent hover:border-amber-500' }}">
+                           class="whitespace-nowrap px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 {{ request('category') == $category->id ? 'bg-stone-900 dark:bg-amber-600 text-white shadow-lg' : 'bg-white dark:bg-stone-900 text-stone-400 border border-stone-200 dark:border-stone-800 hover:border-amber-500/50' }}">
                             {{ $category->name }}
                         </a>
                     @endforeach
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mt-10">
+            {{-- Compact Product Grid --}}
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mt-8">
                 @foreach($products as $product)
-                    <div class="group relative flex flex-col h-full bg-[#E7DEBE] dark:bg-black rounded-[3rem] p-4 border border-white/5 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
+                    <div class="group relative flex flex-col h-full bg-white dark:bg-stone-900 rounded-[2rem] p-3 md:p-4 border border-stone-200 dark:border-stone-800 shadow-sm transition-all duration-500 hover:shadow-2xl hover:border-amber-500/30">
                         
-                        <div class="relative aspect-square rounded-[2.5rem] bg-[#E1E6D8] dark:bg-[#1E2216] overflow-hidden flex items-center justify-center">
+                        {{-- Image Logic --}}
+                        <div class="relative aspect-square rounded-[1.5rem] md:rounded-[2rem] bg-stone-100 dark:bg-stone-950 overflow-hidden flex items-center justify-center border border-stone-50 dark:border-stone-800 transition-colors duration-500">
                             @if($product->image)
                                 <img src="{{ asset('storage/' . $product->image) }}" 
                                      class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 {{ $product->stock_quantity <= 0 ? 'grayscale opacity-40' : '' }}" 
                                      alt="{{ $product->name }}">
                             @else
-                                <span class="font-serif italic text-8xl opacity-10 uppercase text-stone-400">{{ substr($product->name, 0, 1) }}</span>
+                                <span class="font-serif italic text-6xl md:text-8xl opacity-5 uppercase text-stone-900 dark:text-white select-none transition-opacity group-hover:opacity-10">{{ substr($product->name, 0, 1) }}</span>
                             @endif
 
                             @if($product->stock_quantity <= 0)
-                                <div class="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-6">
-                                    <div class="border-2 border-white/20 px-8 py-4 rounded-3xl transform -rotate-12">
-                                        <p class="text-white font-black text-xl uppercase italic">Sold Out</p>
+                                <div class="absolute inset-0 bg-stone-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+                                    <div class="border border-white/20 px-4 py-2 rounded-xl transform -rotate-6">
+                                        <p class="text-white font-black text-[10px] md:text-xs uppercase italic tracking-widest">Depleted</p>
                                     </div>
                                 </div>
                             @endif
                         </div>
 
-                        <div class="mt-6 flex justify-between items-end gap-3 px-2 pb-2">
-                            <div class="flex-1 flex flex-col min-w-0">
-                                <h3 class="text-white font-bold text-lg leading-tight uppercase tracking-tighter break-words">
+                        {{-- Metadata Area --}}
+                        <div class="mt-4 flex flex-col flex-1 px-1">
+                            <div class="flex justify-between items-start gap-2 mb-2">
+                                <h3 class="text-stone-900 dark:text-white font-black text-xs md:text-lg leading-tight uppercase tracking-tight break-words truncate transition-colors duration-500">
                                     {{ $product->name }}
                                 </h3>
-                                
-                                <div class="flex flex-wrap gap-1 mt-3">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest bg-white/5 text-stone-700 border border-white/10">
-                                        {{ $product->category->name ?? 'Brew' }}
-                                    </span>
-                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="px-2 py-0.5 rounded-md text-[7px] font-black uppercase tracking-widest bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border border-stone-200 dark:border-stone-700 transition-colors">
+                                    {{ $product->category->name ?? 'Brew' }}
+                                </span>
                             </div>
 
-                            <div class="flex flex-col items-end pl-4 min-w-[80px] border-l border-white/10 shrink-0">
-                                <span class="text-amber-500 font-black text-2xl md:text-3xl leading-none">
-                                    {{ number_format($product->sizes->count() > 0 ? $product->sizes->min('price') : $product->price, 0) }}₱
-                                </span>
+                            <div class="mt-auto flex items-center justify-between pt-2 border-t border-stone-100 dark:border-stone-800">
+                                <div class="flex flex-col">
+                                    <span class="text-amber-600 dark:text-amber-500 font-black text-lg md:text-2xl leading-none transition-colors duration-500">
+                                        {{ number_format($product->sizes->count() > 0 ? $product->sizes->min('price') : $product->price, 0) }}₱
+                                    </span>
+                                    <span class="text-[7px] text-stone-400 font-bold uppercase tracking-widest">Base Yield</span>
+                                </div>
+                                
                                 <button @click='openModal(@json($product->load("sizes")))' 
                                         :disabled="{{ $product->stock_quantity <= 0 ? 'true' : 'false' }}"
-                                        class="mt-2 flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-stone-700 hover:text-amber-500 transition-colors group/btn disabled:opacity-30 whitespace-nowrap">
-                                    <span>Order Now</span>
-                                    <svg class="w-3 h-3 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                        class="w-10 h-10 md:w-12 md:h-12 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all disabled:opacity-20 disabled:grayscale">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
                                 </button>
                             </div>
                         </div>
-
-                        <button @click='openModal(@json($product->load("sizes")))' 
-                                :disabled="{{ $product->stock_quantity <= 0 ? 'true' : 'false' }}"
-                                class="mt-4 w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white rounded-2xl py-3.5 font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-amber-600/20 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
-                            Add to Cart
-                        </button>
                     </div>
                 @endforeach
             </div>
 
+            {{-- Null Case --}}
             @if($products->isEmpty())
-                <div class="flex flex-col items-center justify-center py-40 text-center">
-                    <div class="w-24 h-24 rounded-3xl bg-stone-100 dark:bg-stone-900 flex items-center justify-center mb-8 border border-stone-200 dark:border-stone-800">
-                        <svg class="w-10 h-10 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <div class="flex flex-col items-center justify-center py-32 text-center">
+                    <div class="w-20 h-20 rounded-3xl bg-stone-100 dark:bg-stone-900 flex items-center justify-center mb-6 border border-stone-200 dark:border-stone-800">
+                        <svg class="w-8 h-8 text-stone-300 dark:text-stone-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
-                    <h3 class="text-3xl font-black text-stone-400 uppercase tracking-tighter mb-2">No flavor found</h3>
-                    <p class="text-stone-500 dark:text-stone-600 mb-8 font-medium italic">Adjust your filters or search keywords.</p>
-                    <a href="{{ route('home') }}" 
-                       class="inline-block text-amber-600 font-black uppercase tracking-[0.2em] text-[10px] px-10 py-4 border-2 border-amber-600/20 rounded-full bg-transparent hover:bg-amber-600 hover:text-white hover:border-amber-600 transition-all duration-300 shadow-lg">
-                        Reset Filters
-                    </a>
+                    <h3 class="text-xl font-black text-stone-400 dark:text-stone-600 uppercase tracking-tighter">Manifest Empty</h3>
+                    <p class="text-stone-500 text-xs mt-2 italic">Adjust your search parameters or terminal filters.</p>
                 </div>
             @endif
         </div>
 
-        <div x-show="showModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center px-4" x-cloak>
-            <div class="absolute inset-0 bg-stone-950/90 backdrop-blur-md" @click="showModal = false"></div>
-            <div class="relative bg-white dark:bg-stone-900 w-full max-w-md rounded-[3rem] shadow-2xl p-8 overflow-hidden">
-                <form method="POST" action="{{ route('cart.add') }}">
+        {{-- Selection Modal --}}
+        <div x-show="showModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center px-4" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+            <div class="absolute inset-0 bg-stone-950/95 backdrop-blur-xl" @click="showModal = false"></div>
+            <div class="relative bg-white dark:bg-stone-900 w-full max-w-sm rounded-[3rem] shadow-2xl border border-stone-200 dark:border-stone-800 p-8 overflow-hidden transition-all duration-500">
+                <form method="POST" action="{{ route('cart.add') }}" class="relative z-10">
                     @csrf
                     <input type="hidden" name="product_id" :value="selectedProduct?.id">
                     <input type="hidden" name="size" :value="selectedSize?.size">
                     <input type="hidden" name="price" :value="selectedSize?.price">
+                    
                     <div class="flex justify-between items-start mb-8">
-                        <div>
-                            <h3 class="text-2xl font-black text-stone-900 dark:text-white uppercase tracking-tight break-words" x-text="selectedProduct?.name"></h3>
-                            <p class="text-[10px] font-black text-amber-600 uppercase mt-1">Select your size</p>
+                        <div class="min-w-0">
+                            <span class="text-amber-600 text-[8px] font-black uppercase tracking-[0.4em] block mb-2 italic leading-none">Configure Brew</span>
+                            <h3 class="text-2xl font-black text-stone-900 dark:text-white uppercase tracking-tighter italic break-words leading-none" x-text="selectedProduct?.name"></h3>
                         </div>
-                        <button @click="showModal = false" type="button" class="text-stone-400 hover:text-white transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <button @click="showModal = false" type="button" class="p-2 text-stone-400 hover:text-stone-900 dark:hover:text-white bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-xl transition-all active:scale-90">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
-                    <div class="space-y-3 mb-10">
+
+                    <div class="space-y-3 mb-10 max-h-60 overflow-y-auto no-scrollbar pr-1">
                         <template x-if="selectedProduct?.sizes && selectedProduct.sizes.length > 0">
                             <template x-for="sizeObj in selectedProduct?.sizes" :key="sizeObj.id">
-                                <label class="flex items-center justify-between p-5 rounded-2xl border-2 cursor-pointer transition-all" :class="selectedSize?.id === sizeObj.id ? 'border-amber-500 bg-amber-500/5' : 'border-stone-100 dark:border-stone-800'">
+                                <label class="flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300" 
+                                       :class="selectedSize?.id === sizeObj.id ? 'border-amber-600 bg-amber-500/5' : 'border-stone-100 dark:border-stone-800/50 bg-stone-50/50 dark:bg-stone-950/30 hover:border-amber-500/30'">
                                     <div class="flex items-center gap-4">
-                                        <input type="radio" name="size_id" :value="sizeObj.id" required @change="selectedSize = sizeObj" class="text-amber-600 focus:ring-amber-500 bg-transparent">
-                                        <span class="font-bold text-stone-800 dark:text-stone-200" x-text="sizeObj.size"></span>
+                                        <input type="radio" name="size_id" :value="sizeObj.id" required @change="selectedSize = sizeObj" class="w-5 h-5 text-amber-600 focus:ring-0 bg-transparent border-stone-300 dark:border-stone-700">
+                                        <span class="font-black text-[10px] uppercase tracking-widest text-stone-900 dark:text-white" x-text="sizeObj.size"></span>
                                     </div>
-                                    <span class="font-black text-amber-600" x-text="'₱' + parseFloat(sizeObj.price).toFixed(0)"></span>
+                                    <span class="font-black text-amber-600 dark:text-amber-500 italic" x-text="'₱' + parseFloat(sizeObj.price).toFixed(0)"></span>
                                 </label>
                             </template>
                         </template>
+                        <template x-if="!selectedProduct?.sizes || selectedProduct.sizes.length === 0">
+                            <div class="p-6 text-center bg-stone-50 dark:bg-stone-950 rounded-[2rem] border-2 border-stone-100 dark:border-stone-800 border-dashed">
+                                <p class="text-[10px] font-black text-stone-400 uppercase italic">Standard unit configuration</p>
+                            </div>
+                        </template>
                     </div>
-                    <div class="flex gap-4">
-                        <button type="button" @click="showModal = false" class="flex-1 py-4 text-stone-500 font-black uppercase text-[10px] bg-stone-100 dark:bg-stone-800 rounded-2xl">Cancel</button>
-                        <button type="submit" :disabled="!selectedSize" class="flex-1 py-4 bg-amber-600 text-white rounded-2xl font-black uppercase text-[10px] active:scale-95 transition-all">Confirm</button>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" @click="showModal = false" class="py-4 text-stone-400 font-black uppercase text-[9px] tracking-widest hover:text-stone-900 dark:hover:text-white transition-colors">Discard</button>
+                        <button type="submit" :disabled="!selectedSize" class="py-4 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-2xl font-black uppercase text-[9px] tracking-widest active:scale-95 transition-all shadow-xl disabled:opacity-20">Commit to Cart</button>
                     </div>
                 </form>
             </div>
