@@ -34,13 +34,11 @@ class CheckoutController extends Controller
 
         return DB::transaction(function () use ($request, $user, $cart, $subtotal, $pointsToRedeem) {
             $discount = 0;
-            $isRedeemed = false;
 
-            // 🟢 REDEMPTION LOGIC: Deduct 50 PTS from Database
+            // 🟢 REDEMPTION LOGIC
             if ($request->has('redeem_points') && $user->loyalty_points >= $pointsToRedeem) {
                 $user->decrement('loyalty_points', $pointsToRedeem);
                 $discount = 50;
-                $isRedeemed = true;
 
                 PointTransaction::create([
                     'user_id' => $user->id,
@@ -59,22 +57,28 @@ class CheckoutController extends Controller
 
             // Save items to database and update stock
             foreach ($cart as $id => $details) {
+                // 🟢 FIXED ALTERNATIVE: Extract integer ID from key or internal value
+                $rawId = isset($details['product_id']) ? $details['product_id'] : $id;
+                
+                // If rawId is "2_Standard", this converts it to integer 2
+                $productId = (int) (is_string($rawId) ? explode('_', $rawId)[0] : $rawId);
+
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $details['product_id'] ?? $id,
+                    'product_id' => $productId, // Now strictly a numeric integer
                     'quantity' => $details['quantity'],
                     'price' => $details['price'],
                     'size' => $details['size'] ?? 'Standard',
                 ]);
 
                 // Reduce Stock
-                $product = Product::find($details['product_id'] ?? $id);
+                $product = Product::find($productId);
                 if ($product) {
                     $product->decrement('stock_quantity', $details['quantity']);
                 }
             }
 
-            // 🟢 EARNING LOGIC: Add +10 PTS for this order
+            // 🟢 EARNING LOGIC
             $user->increment('loyalty_points', 10);
             
             PointTransaction::create([
@@ -83,10 +87,7 @@ class CheckoutController extends Controller
                 'description' => "Earned from Order #{$order->id}",
             ]);
 
-            // Update streak
             $user->updateStreak();
-
-            // Clear cart session
             session()->forget('cart');
 
             return redirect()->route('dashboard')->with('success', 'Order placed successfully! 10 points earned.');

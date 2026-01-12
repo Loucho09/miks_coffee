@@ -36,6 +36,7 @@ class CartController extends Controller
             $cart[$cartKey]['quantity']++;
         } else {
             $cart[$cartKey] = [
+                "product_id" => (int) $product->id, // 🟢 Force integer ID storage
                 "name" => $product->name,
                 "quantity" => 1,
                 "price" => $price, 

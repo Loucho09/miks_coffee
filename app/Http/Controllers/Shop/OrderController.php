@@ -44,13 +44,11 @@ class OrderController extends Controller
         if ($rewardKey && isset($rewards[$rewardKey])) {
             $reward = $rewards[$rewardKey];
 
-            // Use loyalty_points for check
             if (($user->loyalty_points ?? 0) < $reward['cost']) {
                 return back()->with('error', 'Insufficient points for this redemption.');
             }
 
             DB::transaction(function () use ($user, $reward) {
-                // Deduct from loyalty_points
                 $user->decrement('loyalty_points', $reward['cost']);
 
                 PointTransaction::create([
@@ -79,8 +77,8 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $cart = session()->get('cart');
-        if (!$cart) {
-            return redirect()->back()->with('error', 'Cart is empty!');
+        if (!$cart || count($cart) === 0) {
+            return redirect()->route('cart.index')->with('error', 'Cart is empty!');
         }
 
         /** @var User $user */
@@ -91,7 +89,6 @@ class OrderController extends Controller
         $pointsRedeemed = 0;
         $rewardType = null;
 
-        // Use loyalty_points column for logic
         if ($claimed) {
             if (($user->loyalty_points ?? 0) < $claimed['points']) {
                 session()->forget('claimed_reward');
@@ -149,6 +146,7 @@ class OrderController extends Controller
                 'notes' => ($bulkSavings > 0) 
                             ? ($rewardType ? "Reward: $rewardType | Bulk Savings: ₱".number_format($bulkSavings, 2) : "Bulk Savings: ₱".number_format($bulkSavings, 2)) 
                             : ($rewardType ? "Reward: $rewardType" : null),
+                'order_number' => 'ORD-' . strtoupper(uniqid()),
             ]);
 
             foreach ($cart as $key => $details) {
@@ -174,11 +172,10 @@ class OrderController extends Controller
                 }
             }
 
-            // 🟢 Referral System Logic: Check for first order
+            // 🟢 Referral System Logic
             if ($user->referred_by && $user->orders()->count() === 1) {
                 $referrer = $user->referrer;
                 if ($referrer) {
-                    // Reward Referrer (+50 PTS)
                     $referrer->increment('loyalty_points', 50);
                     PointTransaction::create([
                         'user_id' => $referrer->id,
@@ -187,7 +184,6 @@ class OrderController extends Controller
                         'order_id' => $order->id
                     ]);
 
-                    // Reward Customer (+50 PTS)
                     $user->increment('loyalty_points', 50);
                     PointTransaction::create([
                         'user_id' => $user->id,
@@ -198,7 +194,7 @@ class OrderController extends Controller
                 }
             }
 
-            // 🟢 Deduction Logic: Reduce loyalty_points if redeemed
+            // 🟢 Deduction Logic
             if ($pointsRedeemed > 0) {
                 $user->decrement('loyalty_points', $pointsRedeemed);
                 PointTransaction::create([
@@ -209,7 +205,7 @@ class OrderController extends Controller
                 ]);
             }
 
-            // 🟢 Earning Logic: Fixed +10 PTS for ordering
+            // 🟢 Earning Logic
             $user->increment('loyalty_points', 10);
             PointTransaction::create([
                 'user_id' => $user->id,
@@ -218,6 +214,8 @@ class OrderController extends Controller
                 'order_id' => $order->id
             ]);
 
+            $user->updateStreak();
+
             DB::commit();
             session()->forget(['cart', 'claimed_reward']); 
 
@@ -225,7 +223,7 @@ class OrderController extends Controller
                 Mail::to($user->email)->send(new OrderReceipt($order));
             } catch (\Exception $e) {}
 
-            return redirect()->route('dashboard')->with('success', 'Order established! Bulk discount applied if applicable.');
+            return redirect()->route('dashboard')->with('success', 'Order established! +10 Loyalty Points earned.');
             
         } catch (\Exception $e) {
             DB::rollBack();
@@ -246,9 +244,9 @@ class OrderController extends Controller
         $fileName = 'miks_coffee_sales_' . date('Y-m-d') . '.csv';
         
         $headers = [
-            "Content-type"        => "text/csv",
+            "Content-type"         => "text/csv",
             "Content-Disposition" => "attachment; filename=$fileName",
-            "Pragma"              => "no-cache",
+            "Pragma"               => "no-cache",
             "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
             "Expires"             => "0"
         ];
@@ -284,7 +282,6 @@ class OrderController extends Controller
             abort(403);
         }
 
-        // Use loyalty_points column
         $pts = $user->loyalty_points ?? 0;
         $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
 

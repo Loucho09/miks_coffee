@@ -93,7 +93,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
         });
 
-        // 🟢 FIXED: Using CheckoutController for transactional logic and point deduction
+        // 🟢 FIXED: Imported CheckoutController and linked the route to its store method
         Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     });

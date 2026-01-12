@@ -36,7 +36,7 @@
                 <div class="group relative p-8 rounded-[2.5rem] bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 transition-all duration-500 hover:border-rose-500/50 hover:shadow-[0_20px_40px_-15px_rgba(225,29,72,0.15)]">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-1">Depleted Stock</p>
+                            <p class="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-1">Out of Stock</p>
                             <p class="text-3xl font-black text-rose-600 tracking-tighter">{{ $outOfStockCount }} Items</p>
                         </div>
                         <div class="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20">
