@@ -1,59 +1,90 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ☕ Miks Coffee Shop
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Miks Coffee Shop** is a professional, full-stack E-commerce platform built with the **Laravel 12.x** framework. It features a robust role-based access control system, a dynamic loyalty program, and automated inventory management designed for a high-end cafe experience.
 
-## About Laravel
+## 🌟 Key Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 🛒 Customer Experience
+* **Dynamic Menu:** Browse products with real-time search and category filtering.
+* **Smart Cart:** Handles quantity-based bulk discounts (10% off for 6+ items).
+* **Loyalty Program:**
+    * **Points System:** Earn +10 points per order and redeem points for discounts.
+    * **Daily Streaks:** Automated streak tracking to reward frequent customers.
+* **Referral System:** Earn +50 bonus points when a referred friend places their first order.
+* **Support Tickets:** Integrated system for customers to send and track support requests.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### ☕ Barista Management (KDS)
+* **Live Queue:** A real-time Kitchen Display System to manage order fulfillment (Pending -> Preparing -> Ready -> Served).
+* **Redemption Terminal:** Seamlessly verify and fulfill loyalty reward voucher claims.
+* **Audio Notifications:** Instant sound alerts for new incoming orders.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 📊 Admin Suite
+* **Inventory Control:** Automated low-stock email alerts when items drop below 5 units.
+* **Customer Management:** View profiles, reset passwords, and track performance tiers (Gold, Silver, Bronze).
+* **Sales Analytics:** Export detailed CSV reports of sales performance and order history.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 🛠️ Tech Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+* **Backend:** Laravel 12.x & PHP 8.2+
+* **Frontend:** Blade, Tailwind CSS, Alpine.js, and Vite
+* **Environment:** Optimized for Windows using **Laragon** (WAMP)
+* **Database:** MySQL or SQLite
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🚀 Installation & Setup
 
-### Premium Partners
+This project is optimized for **Windows/Laragon** environments. Follow these steps in your PowerShell terminal:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1. **Clone the repository:**
+   ```powershell
+   git clone [https://github.com/Loucho/miks-coffee-shop.git](https://github.com/Loucho/miks-coffee-shop.git)
+   cd miks-coffee-shop
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+   Install Dependencies:
 
-## Code of Conduct
+PowerShell
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+composer install
+npm install
+Environment Setup:
 
-## Security Vulnerabilities
+PowerShell
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+cp .env.example .env
+php artisan key:generate
+Database Migration: Ensure your database is created in Laragon, then run:
 
-## License
+PowerShell
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+php artisan migrate --seed
+Compile Assets & Start:
+
+PowerShell
+
+npm run dev
+# Access via: [http://miks-coffee-shop.test](http://miks-coffee-shop.test)
+📂 Project Structure & Logic
+OrderController.php: Handles the transactional checkout process, including point calculations, referral logic, and stock updates.
+
+QueueController.php: Powers the Barista Kitchen Display System with live JSON updates.
+
+CheckRole.php: Custom middleware for secure Role-Based Access Control (RBAC).
+
+🧹 Maintenance Commands
+If you change routes or logic and don't see the updates, run:
+
+PowerShell
+
+php artisan optimize:clear
+👤 Author
+Loucho
+
+Role: Aspiring Full-Stack Developer & Technical Support Specialist
+
+Location: Cavite, Philippines
+
+Education: Computer Engineering Student
