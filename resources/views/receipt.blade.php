@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>Receipt #{{ $order->id }}</title>
     <style>
+
         body { font-family: 'Helvetica', sans-serif; font-size: 14px; color: #333; }
         .container { width: 100%; max-width: 600px; margin: 0 auto; }
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
