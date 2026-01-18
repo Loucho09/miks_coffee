@@ -80,7 +80,11 @@
                                 </div>
                             </div>
                             <span class="px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-[0.3em] shadow-sm"
-                                  :class="order.status === 'pending' ? 'bg-amber-500 text-stone-950 animate-pulse' : 'bg-blue-600 text-white'"
+                                  :class="{
+                                      'bg-amber-500 text-stone-950 animate-pulse': order.status === 'pending',
+                                      'bg-blue-600 text-white': order.status === 'preparing',
+                                      'bg-emerald-600 text-white': order.status === 'ready'
+                                  }"
                                   x-text="order.status"></span>
                         </div>
 
@@ -104,10 +108,15 @@
                         <div class="pt-6 border-t border-stone-50 dark:border-stone-800">
                             <form :action="'/barista/update-status/' + order.id" method="POST">
                                 @csrf
-                                <input type="hidden" name="status" :value="order.status === 'pending' ? 'preparing' : 'ready'">
+                                {{-- 🟢 Logic updated to handle Served/Completed state --}}
+                                <input type="hidden" name="status" :value="order.status === 'pending' ? 'preparing' : (order.status === 'preparing' ? 'ready' : 'served')">
                                 <button type="submit" class="w-full py-5 rounded-[2rem] font-black uppercase tracking-[0.3em] text-[10px] shadow-xl active:scale-95 transition-all"
-                                        :class="order.status === 'pending' ? 'bg-stone-900 dark:bg-stone-50 text-white dark:text-stone-950 hover:bg-amber-600' : 'bg-amber-600 text-white hover:bg-amber-700'">
-                                    <span x-text="order.status === 'pending' ? 'Start Roasting' : 'Mark as Ready'"></span>
+                                        :class="{
+                                            'bg-stone-900 dark:bg-stone-50 text-white dark:text-stone-950 hover:bg-amber-600': order.status === 'pending',
+                                            'bg-amber-600 text-white hover:bg-amber-700': order.status === 'preparing',
+                                            'bg-emerald-600 text-white hover:bg-emerald-700': order.status === 'ready'
+                                        }">
+                                    <span x-text="order.status === 'pending' ? 'Start Roasting' : (order.status === 'preparing' ? 'Mark as Ready' : 'Complete & Serve')"></span>
                                 </button>
                             </form>
                         </div>
@@ -115,7 +124,7 @@
                 </template>
             </div>
 
-            {{-- 2. Reward Redemption Terminal (Updated with Fulfill) --}}
+            {{-- 2. Reward Redemption Terminal --}}
             <div class="mt-24">
                 <div class="flex items-center gap-4 mb-10">
                     <div class="w-12 h-12 rounded-2xl bg-amber-600 flex items-center justify-center text-stone-950 shadow-lg">

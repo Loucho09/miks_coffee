@@ -1,4 +1,4 @@
-<div wire:poll.5s> {{-- Auto-refresh logic --}}
+<div wire:poll.5s> {{-- Dynamic refresh to catch new orders --}}
     @if (session()->has('success'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" 
              class="fixed top-24 right-6 z-50 p-4 bg-green-600 text-white rounded-2xl shadow-xl flex items-center gap-3 font-black uppercase text-[10px] tracking-widest">
@@ -9,7 +9,8 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @forelse($orders as $order)
-            <div wire:key="order-{{ $order->id }}-{{ $order->status }}" 
+            {{-- Adding the status and timestamp to the key forces Livewire to remove the card once the status is no longer active --}}
+            <div wire:key="order-card-{{ $order->id }}-{{ $order->status }}-{{ now()->timestamp }}" 
                  class="bg-white dark:bg-stone-900 rounded-[2.5rem] shadow-xl border border-stone-100 dark:border-stone-800 p-8 flex flex-col transition-all duration-300 hover:shadow-2xl">
                 
                 <div class="flex justify-between items-start mb-6">

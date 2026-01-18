@@ -10,8 +10,8 @@ class BaristaQueue extends Component
 {
     public function render()
     {
-        // Fetch only active orders. When status changes to 'ready', 
-        // they automatically disappear from this list.
+        // Re-executing the query within render ensures the list is fresh on every lifecycle.
+        // Orders with status 'ready' are automatically excluded.
         $orders = Order::whereIn('status', ['pending', 'preparing'])
             ->with(['items.product', 'user'])
             ->orderBy('created_at', 'asc')
@@ -35,7 +35,7 @@ class BaristaQueue extends Component
         }
 
         $order->status = $newStatus;
-        $order->save();
+        $order->save(); // Database persistence
 
         session()->flash('success', "Order #$orderId updated to $newStatus");
     }

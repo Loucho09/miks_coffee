@@ -11,8 +11,8 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
-        'customer_name',  // 🟢 THIS MUST BE HERE
-        'customer_email', // 🟢 THIS MUST BE HERE
+        'customer_name',
+        'customer_email',
         'total_price',
         'status',
         'payment_method',
