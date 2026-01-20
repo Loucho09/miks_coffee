@@ -17,6 +17,8 @@
                     <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
                    <div>
+
+                   <!-- email -->
     <label for="email" class="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-1.5">
         Email Address
     </label>
