@@ -44,3 +44,55 @@ This project is optimized for **Windows/Laragon** environments. Follow these ste
 ```powershell
 git clone [https://github.com/Loucho/miks-coffee-shop.git](https://github.com/Loucho/miks-coffee-shop.git)
 cd miks-coffee-shop
+
+2. Install Dependencies
+# Install PHP dependencies
+composer install
+
+# Install Frontend dependencies
+npm install
+
+3. Environment Setup
+# Create environment file
+cp .env.example .env
+
+# Generate application key
+php artisan key:generate
+
+4. Database Configuration
+ * Open Laragon and click "Start All".
+ * Create a new database named miks_coffee_shop in HeidiSQL.
+ * Update your .env file with your database credentials.
+ * Run migrations and seed data:
+<!-- end list -->
+php artisan migrate --seed
+
+5. Compile Assets & Start
+# Compile frontend assets
+npm run dev
+
+# The site is available at [http://miks-coffee-shop.test](http://miks-coffee-shop.test) (via Laragon)
+
+📂 Core Logic Highlights
+ * OrderController.php: Centralized logic for the transactional checkout process, including point calculations, referral bonuses, and stock updates.
+ * QueueController.php: Powers the Barista Kitchen Display System with live updates and status transitions.
+ * CheckRole.php: Custom middleware to ensure secure access between Customers, Baristas, and Admins.
+🧹 Maintenance Commands
+Use these commands to clear the cache during development if changes are not appearing:
+# Clear all caches (Route, View, Config, and App Cache)
+php artisan optimize:clear
+
+👤 Author
+Loucho
+ * Role: Aspiring Full-Stack Developer & Technical Support Specialist
+ * Location: Cavite, Philippines
+ * Education: Computer Engineering Student
+<!-- end list -->
+
+---
+
+### How to use this file
+1. Open your project folder at `C:\Users\Loucho\miks-coffee-shop`.
+2. Open the existing `README.md` file.
+3. Select all the old text and delete it.
+4. **Paste** the code block above into the file and save it.
