@@ -32,11 +32,12 @@ class OrderController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        // Predefined list to prevent client-side data tampering
         $rewards = [
-            'free_espresso' => ['name' => 'Signature Espresso', 'cost' => 50],
-            'pastry_treat'  => ['name' => 'Artisan Pastry', 'cost' => 80],
-            'premium_brew'  => ['name' => 'Large Premium Brew', 'cost' => 120],
-            'bag_beans'     => ['name' => 'House Blend (250g)', 'cost' => 500],
+            'free_espresso' => ['name' => 'Signature Espresso', 'cost' => 50, 'value' => 150, 'type' => 'free_item'],
+            'pastry_treat'  => ['name' => 'Artisan Pastry', 'cost' => 80, 'value' => 120, 'type' => 'free_item'],
+            'premium_brew'  => ['name' => 'Large Premium Brew', 'cost' => 120, 'value' => 180, 'type' => 'free_item'],
+            'bag_beans'     => ['name' => 'House Blend (250g)', 'cost' => 500, 'value' => 450, 'type' => 'free_item'],
         ];
 
         $rewardKey = $request->input('reward_id');
@@ -48,30 +49,19 @@ class OrderController extends Controller
                 return back()->with('error', 'Insufficient points for this redemption.');
             }
 
-            DB::transaction(function () use ($user, $reward) {
-                $user->decrement('loyalty_points', $reward['cost']);
+            // Put securely validated reward into session
+            session()->put('claimed_reward', [
+                'name'   => $reward['name'],
+                'points' => $reward['cost'],
+                'value'  => $reward['value'],
+                'type'   => $reward['type']
+            ]);
 
-                PointTransaction::create([
-                    'user_id' => $user->id,
-                    'amount' => -$reward['cost'],
-                    'description' => 'Redeemed: ' . $reward['name'],
-                ]);
-            });
-
-            return back()->with('success', 'Redemption authorized! Please present your terminal to the barista.');
+            return redirect()->route('cart.index')
+                ->with('success', $reward['name'] . ' applied! Place order to claim.');
         }
 
-        $reward = [
-            'name'   => $request->name,
-            'points' => $request->points,
-            'value'  => $request->value,
-            'type'   => $request->type
-        ];
-        
-        session()->put('claimed_reward', $reward);
-        
-        return redirect()->route('cart.index')
-            ->with('success', $request->name . ' applied! Place order to claim.');
+        return back()->with('error', 'Invalid reward selection.');
     }
 
     public function store(Request $request)
@@ -95,9 +85,9 @@ class OrderController extends Controller
                 return redirect()->route('cart.index')->with('error', 'Insufficient points.');
             }
             
-            $pointsRedeemed = $claimed['points'];
+            $pointsRedeemed = (int) $claimed['points'];
             $rewardType = $claimed['name'];
-            $discount = $claimed['value']; 
+            $discount = (float) $claimed['value']; 
         } elseif ($request->has('redeem_points') && ($user->loyalty_points ?? 0) >= 50) {
             $discount = 50;
             $pointsRedeemed = 50;
@@ -135,7 +125,7 @@ class OrderController extends Controller
 
             $order = Order::create([
                 'user_id' => $user->id,
-                'customer_name' => $request->customer_name ?? $user->name,
+                'customer_name' => strip_tags($request->customer_name ?? $user->name),
                 'customer_email' => $request->customer_email ?? $user->email,
                 'total_price' => $finalTotal,
                 'status' => 'pending',
@@ -172,7 +162,6 @@ class OrderController extends Controller
                 }
             }
 
-            // 🟢 Referral System Logic
             if ($user->referred_by && $user->orders()->count() === 1) {
                 $referrer = $user->referrer;
                 if ($referrer) {
@@ -194,7 +183,6 @@ class OrderController extends Controller
                 }
             }
 
-            // 🟢 Deduction Logic
             if ($pointsRedeemed > 0) {
                 $user->decrement('loyalty_points', $pointsRedeemed);
                 PointTransaction::create([
@@ -205,7 +193,6 @@ class OrderController extends Controller
                 ]);
             }
 
-            // 🟢 Earning Logic
             $user->increment('loyalty_points', 10);
             PointTransaction::create([
                 'user_id' => $user->id,
@@ -257,9 +244,16 @@ class OrderController extends Controller
 
             foreach ($orders as $order) {
                 $performance = ($order->total_price >= 500) ? 'HIGH VALUE' : 'Standard';
+                
+                // SECURITY FIX: Sanitize CSV values to prevent formula injection
+                $customerName = $order->user->name ?? 'Guest';
+                if (in_array(substr($customerName, 0, 1), ['=', '+', '-', '@'])) {
+                    $customerName = "'" . $customerName;
+                }
+
                 fputcsv($file, [
                     $order->id,
-                    $order->user->name ?? 'Guest',
+                    $customerName,
                     '₱' . number_format($order->total_price, 2),
                     $order->created_at->format('Y-m-d H:i'),
                     ucfirst($order->status),

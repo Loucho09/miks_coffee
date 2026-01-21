@@ -32,14 +32,17 @@ use App\Models\User;
 Route::get('/', [HomeController::class, 'index'])->name('welcome');
 
 Route::get('/menu', function (Request $request) {
+    // SECURITY FIX: Limit search string length
+    $searchTerm = substr($request->search, 0, 100);
+
     $query = Product::with(['category', 'sizes'])->where('is_active', true);
     if ($request->filled('search')) {
-        $query->where(function($q) use ($request) {
-            $q->where('name', 'like', '%' . $request->search . '%')
-              ->orWhere('description', 'like', '%' . $request->search . '%');
+        $query->where(function($q) use ($searchTerm) {
+            $q->where('name', 'like', '%' . $searchTerm . '%')
+              ->orWhere('description', 'like', '%' . $searchTerm . '%');
         });
     }
-    if ($request->filled('category')) $query->where('category_id', $request->category);
+    if ($request->filled('category')) $query->where('category_id', (int) $request->category);
     $products = $query->get();
     $categories = Category::all();
     return view('public_menu', compact('products', 'categories'));
@@ -68,9 +71,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         })->name('dashboard');
 
         Route::get('/home', function (Request $request) {
+            $searchTerm = substr($request->search, 0, 100);
             $query = Product::with(['category', 'sizes'])->where('is_active', true);
-            if ($request->filled('search')) $query->where('name', 'like', '%' . $request->search . '%');
-            if ($request->filled('category')) $query->where('category_id', $request->category);
+            if ($request->filled('search')) $query->where('name', 'like', '%' . $searchTerm . '%');
+            if ($request->filled('category')) $query->where('category_id', (int) $request->category);
             $products = $query->get();
             $categories = Category::all();
             return view('cafe.index', compact('products', 'categories'));
@@ -93,7 +97,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
         });
 
-        // 🟢 FIXED: Imported CheckoutController and linked the route to its store method
         Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     });

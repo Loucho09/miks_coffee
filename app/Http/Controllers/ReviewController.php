@@ -18,20 +18,24 @@ class ReviewController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'order_item_id' => 'required|exists:order_items,id',
+            'order_item_id' => 'required|integer|exists:order_items,id',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:500',
         ]);
 
-        $item = OrderItem::findOrFail($request->order_item_id);
+        /** @var User $user */
+        $user = Auth::user();
+
+        // SECURITY FIX: Ensure the item belongs to an order owned by the current user
+        $item = OrderItem::where('id', $request->order_item_id)
+            ->whereHas('order', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->firstOrFail();
 
         // 1. Prevent duplicate rewards for the same item
         if (Review::where('order_item_id', $item->id)->exists()) {
             return back()->with('error', 'You have already reviewed this item!');
         }
-
-        /** @var User $user */
-        $user = Auth::user();
 
         DB::beginTransaction();
         try {
