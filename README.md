@@ -2,6 +2,8 @@
 
 **Miks Coffee Shop** is a professional, full-stack E-commerce platform built with the **Laravel 12.x** framework. It features a robust role-based access control system, a dynamic loyalty program, and automated inventory management designed for a high-end cafe experience.
 
+
+
 ## 🌟 Key Features
 
 ### 🛒 Customer Experience
@@ -14,7 +16,7 @@
 * **Support Tickets:** Integrated system for customers to send and track support requests.
 
 ### ☕ Barista Management (KDS)
-* **Live Queue:** A real-time Kitchen Display System to manage order fulfillment (Pending -> Preparing -> Ready -> Served).
+* **Live Queue:** A real-time Kitchen Display System (KDS) to manage order fulfillment (Pending -> Preparing -> Ready -> Served).
 * **Redemption Terminal:** Seamlessly verify and fulfill loyalty reward voucher claims.
 * **Audio Notifications:** Instant sound alerts for new incoming orders.
 
@@ -30,7 +32,7 @@
 * **Backend:** Laravel 12.x & PHP 8.2+
 * **Frontend:** Blade, Tailwind CSS, Alpine.js, and Vite
 * **Environment:** Optimized for Windows using **Laragon** (WAMP)
-* **Database:** MySQL or SQLite
+* **Database:** MySQL (Local Development) or SQLite
 
 ---
 
@@ -38,53 +40,59 @@
 
 This project is optimized for **Windows/Laragon** environments. Follow these steps in your PowerShell terminal:
 
-1. **Clone the repository:**
-   ```powershell
-   git clone [https://github.com/Loucho/miks-coffee-shop.git](https://github.com/Loucho/miks-coffee-shop.git)
-   cd miks-coffee-shop
+### 1. Clone the repository
+```powershell
+git clone [https://github.com/Loucho/miks-coffee-shop.git](https://github.com/Loucho/miks-coffee-shop.git)
+cd miks-coffee-shop
 
-
-   Install Dependencies:
-
-PowerShell
-
+2. Install Dependencies
+# Install PHP dependencies
 composer install
+
+# Install Frontend dependencies
 npm install
-Environment Setup:
 
-PowerShell
-
+3. Environment Setup
+# Create environment file
 cp .env.example .env
+
+# Generate application key
 php artisan key:generate
-Database Migration: Ensure your database is created in Laragon, then run:
 
-PowerShell
-
+4. Database Configuration
+ * Open Laragon and click "Start All".
+ * Create a new database named miks_coffee_shop in HeidiSQL.
+ * Update your .env file with your database credentials.
+ * Run migrations and seed data:
+<!-- end list -->
 php artisan migrate --seed
-Compile Assets & Start:
 
-PowerShell
-
+5. Compile Assets & Start
+# Compile frontend assets
 npm run dev
-# Access via: [http://miks-coffee-shop.test](http://miks-coffee-shop.test)
-📂 Project Structure & Logic
-OrderController.php: Handles the transactional checkout process, including point calculations, referral logic, and stock updates.
 
-QueueController.php: Powers the Barista Kitchen Display System with live JSON updates.
+# The site is available at [http://miks-coffee-shop.test](http://miks-coffee-shop.test) (via Laragon)
 
-CheckRole.php: Custom middleware for secure Role-Based Access Control (RBAC).
-
+📂 Core Logic Highlights
+ * OrderController.php: Centralized logic for the transactional checkout process, including point calculations, referral bonuses, and stock updates.
+ * QueueController.php: Powers the Barista Kitchen Display System with live updates and status transitions.
+ * CheckRole.php: Custom middleware to ensure secure access between Customers, Baristas, and Admins.
 🧹 Maintenance Commands
-If you change routes or logic and don't see the updates, run:
-
-PowerShell
-
+Use these commands to clear the cache during development if changes are not appearing:
+# Clear all caches (Route, View, Config, and App Cache)
 php artisan optimize:clear
+
 👤 Author
 Loucho
+ * Role: Aspiring Full-Stack Developer & Technical Support Specialist
+ * Location: Cavite, Philippines
+ * Education: Computer Engineering Student
+<!-- end list -->
 
-Role: Aspiring Full-Stack Developer & Technical Support Specialist
+---
 
-Location: Cavite, Philippines
-
-Education: Computer Engineering Student
+### How to use this file
+1. Open your project folder at `C:\Users\Loucho\miks-coffee-shop`.
+2. Open the existing `README.md` file.
+3. Select all the old text and delete it.
+4. **Paste** the code block above into the file and save it.
