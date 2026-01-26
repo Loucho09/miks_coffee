@@ -33,7 +33,6 @@
 
     <style>
         :root {
-            /* Optimized fluid typography for compact mobile view */
             --fluid-32-64: clamp(1.5rem, 4vw + 0.5rem, 3.5rem);
             --fluid-18-32: clamp(1rem, 2vw + 0.5rem, 1.75rem);
         }
@@ -41,7 +40,6 @@
         .shadow-premium { box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.05); }
         .dark .shadow-premium { box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5); }
         .glass-card { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        /* Prevent layout shift on small devices */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -59,7 +57,6 @@
                 </div>
             @endif
 
-            {{-- Compact Welcome Header --}}
             <div class="mb-6 sm:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-8">
                 <div class="min-w-0">
                     <span class="text-amber-600 font-black uppercase tracking-[0.4em] text-[8px] sm:text-[10px] mb-1 sm:mb-4 block">Session active</span>
@@ -77,7 +74,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-start">
-                {{-- Left Sidebar Column --}}
                 <div class="lg:col-span-4 space-y-4 sm:space-y-8">
                     {{-- Loyalty Card --}}
                     <div class="relative overflow-hidden bg-stone-900 dark:bg-stone-900 rounded-3xl sm:rounded-[3rem] p-6 sm:p-10 text-white shadow-premium border border-stone-800 transition-all">
@@ -97,7 +93,6 @@
                         </div>
                     </div>
 
-                    {{-- Streak Milestones --}}
                     <div class="bg-white dark:bg-stone-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 border border-stone-200 dark:border-stone-800 shadow-premium">
                         <div class="flex justify-between items-center mb-4 sm:mb-8">
                             <h4 class="text-stone-900 dark:text-white font-black text-[8px] sm:text-[10px] uppercase tracking-[0.4em] italic leading-none">Sequence</h4>
@@ -128,16 +123,15 @@
                         </div>
                     @endif
 
-                    {{-- Referral --}}
                     <div class="bg-white dark:bg-stone-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 border border-stone-200 dark:border-stone-800 shadow-premium">
-    <h4 class="text-amber-600 font-black text-[8px] sm:text-[10px] uppercase tracking-[0.4em] mb-4 italic leading-none">Peer induction protocol</h4>
-    <p class="text-stone-500 dark:text-stone-400 text-[10px] mb-8 leading-relaxed font-bold italic uppercase">Induct new members. A dual <span class="text-stone-900 dark:text-white underline">50 PTS yield</span> is authorized upon their first order commit.</p>
-    <div class="relative flex items-center gap-2">
-        <input type="text" readonly id="refLink" value="{{ route('register', ['ref' => $user->referral_code]) }}" 
-            class="w-full bg-stone-50 dark:bg-stone-950 border-stone-100 dark:border-stone-800 text-stone-400 rounded-xl py-3 pl-4 pr-16 text-[8px] font-black uppercase transition-all shadow-inner">
-        <button onclick="copyReferralLink()" class="absolute right-1.5 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-black px-3 py-1.5 rounded-lg text-[7px] uppercase tracking-widest shadow-md">Copy</button>
-    </div>
-</div>
+                        <h4 class="text-amber-600 font-black text-[8px] sm:text-[10px] uppercase tracking-[0.4em] mb-4 italic leading-none">Peer induction protocol</h4>
+                        <p class="text-stone-500 dark:text-stone-400 text-[10px] mb-8 leading-relaxed font-bold italic uppercase">Induct new members. A dual <span class="text-stone-900 dark:text-white underline">50 PTS yield</span> is authorized upon their first order commit.</p>
+                        <div class="relative flex items-center gap-2">
+                            <input type="text" readonly id="refLink" value="{{ route('register', ['ref' => $user->referral_code]) }}" 
+                                class="w-full bg-stone-50 dark:bg-stone-950 border-stone-100 dark:border-stone-800 text-stone-400 rounded-xl py-3 pl-4 pr-16 text-[8px] font-black uppercase transition-all shadow-inner">
+                            <button onclick="copyReferralLink()" class="absolute right-1.5 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-black px-3 py-1.5 rounded-lg text-[7px] uppercase tracking-widest shadow-md">Copy</button>
+                        </div>
+                    </div>
 
                     <div class="bg-stone-900 rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-stone-800 shadow-premium transition-all">
                         <span class="text-[8px] sm:text-[10px] font-black text-amber-600 uppercase tracking-[0.4em] block mb-4 italic">System core</span>
@@ -156,7 +150,6 @@
                     </div>
                 </div>
 
-                {{-- Right Main Column --}}
                 <div class="lg:col-span-8 space-y-6 sm:space-y-12">
                     <div class="flex items-center justify-between px-1">
                         <h3 class="font-black text-stone-900 dark:text-white uppercase tracking-tighter italic transition-colors" style="font-size: var(--fluid-18-32)">Live manifest</h3>
@@ -229,7 +222,6 @@
                         @endforelse
                     </div>
 
-                    {{-- Compact Points Table --}}
                     <div class="mt-12 sm:mt-24">
                         <div class="flex items-center justify-between px-1 mb-6 sm:mb-10">
                             <h3 class="font-black text-stone-900 dark:text-white uppercase tracking-tighter italic leading-none transition-colors" style="font-size: var(--fluid-18-32)">Activity Feed</h3>
@@ -266,7 +258,7 @@
                         </div>
                     </div>
 
-                    {{-- Concierge History --}}
+                    {{-- Concierge Threads Section --}}
                     <div class="mt-16 sm:mt-28 space-y-8 sm:space-y-16 pb-12 sm:pb-24">
                         <div class="flex items-center justify-between px-1">
                             <h3 class="font-black text-stone-900 dark:text-white uppercase tracking-tighter italic leading-none transition-colors" style="font-size: var(--fluid-18-32)">Concierge threads</h3>
@@ -277,13 +269,14 @@
                                     <div class="bg-white dark:bg-stone-900 rounded-[2rem] sm:rounded-[3.5rem] p-6 sm:p-14 border border-stone-200 dark:border-stone-800 shadow-premium transition-all">
                                         <div class="flex flex-wrap items-center gap-3 sm:gap-5 mb-6 sm:mb-10">
                                             <span class="px-3 py-1.5 bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg text-[7px] sm:text-[10px] font-black uppercase text-stone-500 tracking-widest transition-colors shadow-inner">ID #{{ $ticket->id }}</span>
-                                            <div class="px-3 py-1.5 rounded-lg text-[7px] sm:text-[10px] font-black uppercase tracking-[0.2em] italic {{ $ticket->status == 'pending' ? 'bg-amber-500/10 text-amber-600 animate-pulse' : ($ticket->status == 'replied' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-stone-100 dark:bg-stone-950 text-stone-500') }} shadow-sm">{{ $ticket->status }}</div>
+                                            <div class="px-3 py-1.5 rounded-lg text-[7px] sm:text-[10px] font-black uppercase tracking-[0.2em] italic {{ $ticket->status == 'pending' ? 'bg-amber-500/10 text-amber-600 animate-pulse' : ($ticket->status == 'replied' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-stone-100 dark:bg-stone-950 text-stone-500') }} shadow-sm">{{ strtoupper($ticket->status) }}</div>
                                         </div>
                                         <h4 class="text-lg sm:text-3xl font-black text-stone-900 dark:text-white uppercase italic mb-4 transition-colors leading-tight tracking-tighter">{{ $ticket->subject }}</h4>
                                         <div class="p-6 sm:p-10 bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-[1.5rem] sm:rounded-[3rem] relative mb-6 sm:mb-12 transition-colors shadow-inner">
                                             <p class="text-xs sm:text-base text-stone-600 dark:text-stone-400 italic leading-relaxed font-medium">"{{ $ticket->message }}"</p>
                                         </div>
 
+                                        {{-- 🟢 FEATURE: Correct Admin Reply Rendering --}}
                                         @if($ticket->replies && $ticket->replies->count() > 0)
                                             <div class="space-y-6 sm:space-y-12 border-t border-stone-100 dark:border-stone-800 pt-6 sm:pt-14 transition-colors">
                                                 @foreach($ticket->replies as $reply)
@@ -308,14 +301,14 @@
                                 @empty
                                     <div class="py-16 text-center opacity-30 italic font-black uppercase text-stone-500 tracking-[0.4em] text-[8px] sm:text-[11px]">System log void</div>
                                 @endforelse
-                            @endif
-                        </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Optimized Review Modal --}}
+        {{-- Review Modal --}}
         <div x-show="reviewModal" class="fixed inset-0 z-[100] overflow-y-auto flex items-center justify-center p-2 sm:p-4 bg-stone-950/95 backdrop-blur-2xl" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
             <div class="bg-white dark:bg-stone-900 w-full max-w-xl rounded-[2.5rem] sm:rounded-[4.5rem] border border-stone-200 dark:border-stone-800 shadow-connected overflow-hidden relative transition-all duration-500" @click.away="reviewModal = false">
                 <div class="absolute top-0 right-0 p-6 sm:p-10">

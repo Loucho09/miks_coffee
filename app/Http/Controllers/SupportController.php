@@ -11,6 +11,14 @@ use App\Models\SupportReply;
 class SupportController extends Controller
 {
     public function index() {
+        // 🟢 Logic: When a customer visits the support/dashboard, mark their 'replied' tickets as 'resolved' (or seen)
+        // This makes the notification dot disappear.
+        if (Auth::check()) {
+            SupportTicket::where('user_id', Auth::id())
+                ->where('status', 'replied')
+                ->update(['status' => 'resolved']);
+        }
+
         return view('support.index');
     }
 
@@ -76,6 +84,7 @@ class SupportController extends Controller
             'message' => $request->message,
         ]);
 
+        // 🟢 Logic: Status is changed to 'replied' so the Notification Dot appears for the user
         $ticket->update(['status' => 'replied']);
 
         $customerEmail = $ticket->user ? $ticket->user->email : $ticket->guest_email;

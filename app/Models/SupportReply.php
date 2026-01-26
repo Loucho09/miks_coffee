@@ -8,18 +8,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SupportReply extends Model
 {
     protected $fillable = [
-        'support_ticket_id', 'user_id', 'message'
+        'support_ticket_id', 
+        'user_id', 
+        'message'
     ];
 
+    /**
+     * Relationship: The ticket this reply belongs to.
+     */
     public function ticket(): BelongsTo
     {
         return $this->belongsTo(SupportTicket::class, 'support_ticket_id');
     }
 
+    /**
+     * Relationship: The admin who wrote the reply.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-
-    
 }

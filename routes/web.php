@@ -32,7 +32,6 @@ use App\Models\User;
 Route::get('/', [HomeController::class, 'index'])->name('welcome');
 
 Route::get('/menu', function (Request $request) {
-    // SECURITY FIX: Limit search string length
     $searchTerm = substr($request->search, 0, 100);
 
     $query = Product::with(['category', 'sizes'])->where('is_active', true);
@@ -66,7 +65,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             $user = Auth::user();
             $user->updateStreak(); 
             $recentOrders = Order::where('user_id', $user->id)->with(['items.product', 'items.review', 'items.order'])->latest()->take(5)->get();
-            $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)->with(['replies.user'])->latest()->take(5)->get();
+            
+            // Implementation: Fetch tickets with eager loaded replies and admin users
+            $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)
+                ->with(['replies.user'])
+                ->latest()
+                ->take(5)
+                ->get();
+                
             return view('dashboard', compact('recentOrders', 'supportTickets'));
         })->name('dashboard');
 

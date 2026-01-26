@@ -14,6 +14,7 @@ class SupportTicket extends Model
 
     public function replies(): HasMany
     {
+        // Links to the new SupportReply model
         return $this->hasMany(SupportReply::class);
     }
 
