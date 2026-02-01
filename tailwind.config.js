@@ -10,6 +10,7 @@ export default {
         './resources/views/**/*.blade.php',
     ],
     
+
     // Enable Dark Mode (Class-based or Media-based)
     darkMode: 'class',
 

@@ -4,7 +4,7 @@
     <title>Order Receipt</title>
 </head>
 <body style="font-family: Arial, sans-serif; padding: 20px;">
-    <h1>Thank you for your order! ☕</h1>
+    <h1>Thank you for your order! </h1>
     <p>Hi {{ $order->customer_name }},</p>
     <p>Your order <strong>#{{ $order->id }}</strong> has been received and is being prepared.</p>
 

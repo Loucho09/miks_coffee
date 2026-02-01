@@ -8,7 +8,7 @@
         .receipt { max-width: 400px; margin: auto; background: white; padding: 30px; border-radius: 20px; border: 1px solid #e7e5e4; }
         .brand { text-align: center; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px dashed #f5f2ea; padding-bottom: 20px; }
         .tier-badge { display: block; text-align: center; margin: 15px 0; padding: 6px; background: #f5f2ea; color: #b45309; font-size: 10px; font-weight: 900; border-radius: 99px; text-transform: uppercase; }
-        /* 🟢 CSS FIX: Replaced invalid #amber-600 with Hex code #d97706 */
+        /* CSS FIX: Replaced invalid #amber-600 with Hex code #d97706 */
         .milestone-alert { text-align: center; font-size: 10px; color: #d97706; font-weight: 800; margin-bottom: 15px; text-transform: uppercase; }
         .item-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px; }
         .total { border-top: 2px solid #1c1917; margin-top: 20px; padding-top: 15px; font-weight: 900; font-size: 18px; display: flex; justify-content: space-between; }

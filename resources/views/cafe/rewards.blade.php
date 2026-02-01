@@ -22,6 +22,9 @@
         ];
     @endphp
 
+
+
+    
     <div class="py-12 bg-stone-50 dark:bg-stone-950 min-h-screen transition-colors duration-500" 
          x-data="{ 
             currentProgress: 0, 

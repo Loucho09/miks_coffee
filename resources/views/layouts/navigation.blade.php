@@ -1,5 +1,5 @@
 @php
-    // 🟢 Logic: Check if the customer has points waiting to be claimed
+    // Logic: Check if the customer has points waiting to be claimed
     $hasUnclaimedPoints = false;
     if(Auth::check() && Auth::user()->usertype !== 'admin') {
         $hasUnclaimedPoints = \App\Models\Order::where('user_id', Auth::id())
@@ -9,13 +9,13 @@
             })->exists();
     }
 
-    // 🟢 Dynamic Tier Calculation - UPDATED TO USE loyalty_points
+    // Dynamic Tier Calculation - UPDATED TO USE loyalty_points
     $navPoints = Auth::user()->loyalty_points ?? 0;
     $navTier = 'Bronze';
     if($navPoints >= 500) $navTier = 'Gold';
     elseif($navPoints >= 200) $navTier = 'Silver';
 
-    // 🔧 FIX: Admin Online Status with 5-minute threshold
+    // FIX: Admin Online Status with 5-minute threshold
     $adminUser = \App\Models\User::where('email', 'jmloucho09@gmail.com')->first();
     $isAdminOnline = false;
     if ($adminUser && $adminUser->is_online && $adminUser->last_seen_at) {
@@ -23,10 +23,10 @@
         $isAdminOnline = $minutesSinceLastSeen < 5;
     }
 
-    // 🟢 Unread Support Count logic
+    // Unread Support Count logic
     $unreadSupportCount = Auth::check() ? \App\Models\SupportTicket::where('user_id', Auth::id())->where('status', 'replied')->count() : 0;
 
-    // 🟢 Pre-calculate pending tickets for admin badge
+    // Pre-calculate pending tickets for admin badge
     $pendingTickets = (Auth::check() && Auth::user()->usertype === 'admin') ? \App\Models\SupportTicket::where('status', 'pending')->count() : 0;
 @endphp
 
