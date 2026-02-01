@@ -22,9 +22,9 @@
             {{-- 🟢 NEW FEATURE: Admin Daily Snapshot --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
                 {{-- Today's Sales Card --}}
-                <div class="bg-stone-900 dark:bg-amber-600 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group transition-all duration-500 hover:shadow-amber-600/20">
+                <div class="bg-stone-400 dark:bg-amber-600 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group transition-all duration-500 hover:shadow-amber-600/20">
                     <div class="relative z-10">
-                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 dark:text-amber-900/60 mb-2">Today's Revenue</p>
+                        <p class="text-[10px] font-black uppercase tracking-[0.3em] text-stone-900 dark:text-stone-900 dark:text-amber-900/60 mb-2">Today's Revenue</p>
                         <h4 class="text-3xl font-black mb-1">₱{{ number_format($todayRevenue, 2) }}</h4>
                         <p class="text-[10px] font-bold {{ $revenueChange >= 0 ? 'text-emerald-400 dark:text-amber-100' : 'text-rose-400 dark:text-stone-900' }}">
                             {{ $revenueChange >= 0 ? '↑' : '↓' }} {{ number_format(abs($revenueChange), 1) }}% vs Yesterday

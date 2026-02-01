@@ -50,9 +50,9 @@
                     <h4 class="text-4xl font-black text-stone-900 dark:text-white relative z-10" x-text="tickets.filter(t => t.status === 'pending').length"></h4>
                 </div>
 
-                <div class="bg-stone-900 p-8 rounded-[2.5rem] shadow-2xl border border-stone-800 relative overflow-hidden group">
-                    <p class="text-[10px] font-black text-stone-500 uppercase tracking-[0.3em] mb-2 relative z-10">Global Total</p>
-                    <h4 class="text-4xl font-black text-white relative z-10">{{ $tickets->total() }}</h4>
+                <div class="bg-stone-400 dark:bg-stone-800 p-8 rounded-[2.5rem] shadow-2xl border border-stone-800 relative overflow-hidden group">
+                    <p class="text-[10px] font-black text-stone-900 dark:text-stone-400 uppercase tracking-[0.3em] mb-2 relative z-10">Global Total</p>
+                    <h4 class="text-4xl font-black dark:text-white relative z-10">{{ $tickets->total() }}</h4>
                 </div>
             </div>
 

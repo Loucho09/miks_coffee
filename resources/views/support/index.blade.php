@@ -9,7 +9,7 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                     </span>
-                    <span class="text-[9px] font-black text-stone-50 dark:text-stone-400 uppercase tracking-[0.2em] italic">Terminal Active</span>
+                    <span class="text-[9px] font-black text-stone-600 dark:text-stone-400 uppercase tracking-[0.2em] italic">Terminal Active</span>
                 </div>
                 <h2 class="text-4xl sm:text-6xl font-black text-stone-900 dark:text-white tracking-tighter uppercase italic leading-none mb-4">
                     How can we <br class="xs:hidden"> assist?

@@ -35,7 +35,7 @@
         
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div class="bg-stone-900 rounded-[3rem] p-8 md:p-16 text-center text-white mb-12 shadow-2xl relative overflow-hidden border border-stone-800">
+            <div class="bg-stone-100 dark:bg-stone-900 rounded-[3rem] p-8 md:p-16 text-center text-white mb-12 shadow-2xl relative overflow-hidden border border-stone-800">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[100px] -mr-32 -mt-32"></div>
                 <div class="mb-10 inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-amber-500/10 border border-amber-500/20">
                     <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span>
@@ -47,7 +47,7 @@
                 <div class="max-w-xl mx-auto mt-12">
                     <div class="flex justify-between text-[9px] font-black text-stone-500 mb-5 uppercase tracking-[0.3em] px-2">
                         <span>Current: {{ $points }}</span>
-                        <span class="text-stone-300">Goal: {{ $target }} PTS</span>
+                        <span class="text-stone-500">Goal: {{ $target }} PTS</span>
                     </div>
                     <div class="w-full bg-stone-950 rounded-full h-3 overflow-hidden border border-stone-800 p-0.5 shadow-inner">
                         <div class="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full transition-all duration-[2.5s] ease-out shadow-[0_0_15px_rgba(217,119,6,0.5)]" 

@@ -200,7 +200,7 @@
                                         <div class="px-2">
                                             <p class="text-stone-500 dark:text-stone-400 text-sm mb-8 line-clamp-2 italic">"{{ $product->description }}"</p>
                                             <a href="{{ Auth::check() ? route('cart.add', $product->id) : route('login') }}" 
-                                               class="flex items-center justify-center w-full py-5 bg-stone-900 dark:bg-amber-600 text-white dark:text-stone-950 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-amber-600 dark:hover:bg-amber-500 transition-all shadow-lg active:scale-95">Grab Deal</a>
+                                               class="flex items-center justify-center w-full py-5 bg-stone-500 dark:bg-amber-600 text-white dark:text-stone-950 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-amber-600 dark:hover:bg-amber-500 transition-all shadow-lg active:scale-95">Grab Deal</a>
                                         </div>
                                     </div>
                                 </div>
@@ -228,14 +228,14 @@
                         </div>
                     </div>
                     <div class="w-full lg:w-1/2">
-                        <div class="bg-stone-900 rounded-[3rem] p-10 text-white shadow-connected border border-stone-800">
-                            <div class="flex items-center justify-between mb-12 text-white"><h3 class="font-black text-xl uppercase tracking-tighter italic">Public Standings</h3><span class="px-4 py-1.5 bg-amber-600 text-stone-950 rounded-full text-[8px] font-black uppercase tracking-widest animate-pulse">Live Feed</span></div>
+                        <div class="bg-stone-50 dark:bg-stone-900 dark:bg-stone-900 rounded-[3rem] p-10 text-white shadow-connected border border-stone-800">
+                            <div class="flex items-center justify-between mb-12 text-white"><h3 class="text-stone-900 dark:text-white text-xl uppercase tracking-tighter italic">Public Standings</h3><span class="px-4 py-1.5 bg-amber-600 text-stone-950 rounded-full text-[8px] font-black uppercase tracking-widest animate-pulse">Live Feed</span></div>
                             <div class="space-y-6">
                                 @forelse($topStreaks as $index => $leader)
                                     <div class="flex items-center justify-between p-5 rounded-2xl bg-stone-950/50 border border-stone-800">
                                         <div class="flex items-center gap-5">
                                             <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black italic text-sm {{ $index == 0 ? 'bg-amber-600 text-stone-950' : 'bg-stone-800 text-stone-400' }}">{{ $index + 1 }}</div>
-                                            <div class="text-left text-white"><p class="font-bold text-sm uppercase tracking-tight">{{ $leader->name }}</p><p class="text-[9px] font-black text-stone-500 uppercase tracking-widest">{{ $leader->loyalty_tier ?? 'Bronze' }} Member</p></div>
+                                            <div class="text-left text-white"><p class="font-bold text-sm uppercase tracking-tight">{{ $leader->name }}</p><p class="text-[9px] font-black text-stone-900 dark:text-stone-400 uppercase tracking-widest">{{ $leader->loyalty_tier ?? 'Bronze' }} Member</p></div>
                                         </div>
                                         <div class="text-right text-white"><p class="text-2xl font-black italic text-amber-500 leading-none">{{ $leader->streak_count }}</p><p class="text-[8px] font-black text-stone-500 uppercase tracking-widest">Days</p></div>
                                     </div>

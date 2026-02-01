@@ -76,7 +76,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-start">
                 <div class="lg:col-span-4 space-y-4 sm:space-y-8">
                     {{-- Loyalty Card --}}
-                    <div class="relative overflow-hidden bg-stone-900 dark:bg-stone-900 rounded-3xl sm:rounded-[3rem] p-6 sm:p-10 text-white shadow-premium border border-stone-800 transition-all">
+                    <div class="relative overflow-hidden bg-stone-100 dark:bg-stone-900 rounded-3xl sm:rounded-[3rem] p-6 sm:p-10 text-white shadow-premium border border-stone-800 transition-all">
                         <div class="relative z-10">
                             <div class="flex justify-between items-start mb-6 sm:mb-12">
                                 <span class="px-3 py-1 bg-amber-600/10 border border-amber-500/20 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-amber-500 italic">{{ $dashTier }} tier</span>
@@ -84,8 +84,8 @@
                             </div>
                             <p class="text-[8px] sm:text-[10px] uppercase tracking-[0.4em] text-stone-500 font-black mb-2 sm:mb-4 leading-none">Net loyalty assets</p>
                             <div class="flex items-baseline gap-2 sm:gap-3 mb-6 sm:mb-8">
-                                <span class="text-5xl sm:text-7xl font-black text-white tracking-tighter leading-none">{{ $dashPoints }}</span>
-                                <span class="text-stone-500 font-black text-sm sm:text-xl tracking-widest uppercase italic">PTS</span>
+                                <span class="text-5xl sm:text-7xl font-black dark:text-stone-400 tracking-tighter leading-none">{{ $dashPoints }}</span>
+                                <span class="text-stone-900 dark:text-white font-black text-sm sm:text-xl tracking-widest uppercase italic">PTS</span>
                             </div>
                             <div class="w-full bg-stone-800 rounded-full h-2 sm:h-3 overflow-hidden shadow-inner border border-white/5">
                                 <div class="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(217,119,6,0.3)]" :style="'width: ' + {{ $perc }} + '%'"></div>
@@ -133,7 +133,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-stone-900 rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-stone-800 shadow-premium transition-all">
+                    <div class="bg-stone-400 dark:bg-stone-900 rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-stone-800 shadow-premium transition-all">
                         <span class="text-[8px] sm:text-[10px] font-black text-amber-600 uppercase tracking-[0.4em] block mb-4 italic">System core</span>
                         <h4 class="text-lg sm:text-2xl font-black text-white uppercase italic tracking-tighter mb-6 leading-tight">Data Management</h4>
                         <div class="flex flex-col gap-3">
