@@ -39,7 +39,7 @@ class ExportController extends Controller
             $file = fopen('php://output', 'w');
             
             // CSV Headers
-            fputcsv($file, ['Order ID', 'Customer', 'Amount (₱)', 'Status', 'Date', 'Order Type']);
+            fputcsv($file, ['Order ID', 'Customer', 'Amount (₱) ', 'Status', 'Date', 'Order Type']);
 
             foreach ($orders as $order) {
                 // 🟢 NEW FEATURE: Auto-Categorization based on item count

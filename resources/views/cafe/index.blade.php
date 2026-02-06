@@ -96,7 +96,7 @@
                             <div class="mt-auto flex items-center justify-between pt-2 border-t border-stone-100 dark:border-stone-800">
                                 <div class="flex flex-col">
                                     <span class="text-amber-600 dark:text-amber-500 font-black text-sm sm:text-2xl leading-none transition-colors duration-500">
-                                        {{ number_format($product->sizes->count() > 0 ? $product->sizes->min('price') : $product->price, 0) }}₱
+                                        ₱{{ number_format($product->sizes->count() > 0 ? $product->sizes->min('price') : $product->price, 0) }}
                                     </span>
                                     <span class="text-[6px] sm:text-[7px] text-stone-400 font-bold uppercase tracking-widest mt-0.5">Asset Val.</span>
                                 </div>
