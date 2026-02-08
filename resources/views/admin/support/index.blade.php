@@ -60,7 +60,7 @@
             <div class="flex items-center gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
                 <a href="{{ route('admin.support.admin_index') }}" 
                    class="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition {{ !request('status') ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/20' : 'bg-white dark:bg-stone-900 text-stone-500 border border-stone-200 dark:border-stone-800' }}">
-                     All Tickets
+                       All Tickets
                 </a>
                 <a href="{{ route('admin.support.admin_index', ['status' => 'pending']) }}" 
                    class="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition {{ request('status') === 'pending' ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/20' : 'bg-white dark:bg-stone-900 text-stone-500 border border-stone-200 dark:border-stone-800' }}">
