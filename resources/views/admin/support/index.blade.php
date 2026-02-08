@@ -55,7 +55,7 @@
                     <h4 class="text-4xl font-black dark:text-white relative z-10">{{ $tickets->total() }}</h4>
                 </div>
             </div>
-
+ 
             {{-- Filter Tabs --}}
             <div class="flex items-center gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
                 <a href="{{ route('admin.support.admin_index') }}" 

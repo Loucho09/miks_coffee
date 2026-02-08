@@ -34,7 +34,7 @@
                         <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
                     </div>
                 </div>
-
+   
                 {{-- Loyalty Issued Card --}}
                 <div class="bg-white dark:bg-stone-900 p-6 sm:p-8 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-sm transition-all duration-500 flex flex-col justify-center">
                     <p class="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-2">Points Issued Today</p>
