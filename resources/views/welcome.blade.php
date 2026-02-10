@@ -343,7 +343,7 @@
         </div>
     </div>
 </footer>
-
+ 
         <script>
             var themeToggleBtn = document.getElementById('theme-toggle');
             var darkIcon = document.getElementById('theme-toggle-dark-icon');
