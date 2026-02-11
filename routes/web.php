@@ -18,6 +18,9 @@ use App\Http\Controllers\SupportController;
 use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 
 // Models
 use App\Models\Product;
@@ -56,112 +59,119 @@ Route::view('/terms', 'legal.terms')->name('terms');
 /* |--------------------------------------------------------------------------
    | 2. AUTHENTICATED ROUTES
    | -------------------------------------------------------------------------- */
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
-    /* --- CUSTOMER ONLY FEATURES --- */
-    Route::middleware(['role:customer'])->group(function () {
-        Route::get('/dashboard', function () {
-            /** @var User $user */
-            $user = Auth::user();
-            $user->updateStreak(); 
-            $recentOrders = Order::where('user_id', $user->id)->with(['items.product', 'items.review', 'items.order'])->latest()->take(5)->get();
-            
-            // Implementation: Fetch tickets with eager loaded replies and admin users
-            $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)
-                ->with(['replies.user'])
-                ->latest()
-                ->take(5)
-                ->get();
+    /* --- EMAIL CODE VERIFICATION ROUTES --- */
+    Route::get('/verify-code', [EmailVerificationController::class, 'show'])->name('verification.code.view');
+    Route::post('/verify-code', [EmailVerificationController::class, 'verify'])->name('verification.code.verify');
+
+    /* --- PROTECTED BY VERIFICATION --- */
+    Route::middleware(['verified'])->group(function () {
+
+        /* --- CUSTOMER ONLY FEATURES --- */
+        Route::middleware(['role:customer'])->group(function () {
+            Route::get('/dashboard', function () {
+                /** @var User $user */
+                $user = Auth::user();
+                $user->updateStreak(); 
+                $recentOrders = Order::where('user_id', $user->id)->with(['items.product', 'items.review', 'items.order'])->latest()->take(5)->get();
                 
-            return view('dashboard', compact('recentOrders', 'supportTickets'));
-        })->name('dashboard');
+                $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)
+                    ->with(['replies.user'])
+                    ->latest()
+                    ->take(5)
+                    ->get();
+                    
+                return view('dashboard', compact('recentOrders', 'supportTickets'));
+            })->name('dashboard');
 
-        Route::get('/home', function (Request $request) {
-            $searchTerm = substr($request->search, 0, 100);
-            $query = Product::with(['category', 'sizes'])->where('is_active', true);
-            if ($request->filled('search')) $query->where('name', 'like', '%' . $searchTerm . '%');
-            if ($request->filled('category')) $query->where('category_id', (int) $request->category);
-            $products = $query->get();
-            $categories = Category::all();
-            return view('cafe.index', compact('products', 'categories'));
-        })->name('home');
+            Route::get('/home', function (Request $request) {
+                $searchTerm = substr($request->search, 0, 100);
+                $query = Product::with(['category', 'sizes'])->where('is_active', true);
+                if ($request->filled('search')) $query->where('name', 'like', '%' . $searchTerm . '%');
+                if ($request->filled('category')) $query->where('category_id', (int) $request->category);
+                $products = $query->get();
+                $categories = Category::all();
+                return view('cafe.index', compact('products', 'categories'));
+            })->name('home');
 
-        Route::get('/rewards', function () {
+            Route::get('/rewards', function () {
+                /** @var User $user */
+                $user = Auth::user();
+                $points = $user->loyalty_points ?? 0; 
+                $goal = ($points >= 200) ? 500 : (($points >= 100) ? 200 : 100);
+                return view('cafe.rewards', compact('user', 'points', 'goal'));
+            })->name('rewards.index');
+
+            Route::post('/claim-reward', [OrderController::class, 'claimReward'])->name('rewards.claim');
+            Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+
+            Route::controller(CartController::class)->group(function () {
+                Route::get('/cart', 'index')->name('cart.index');
+                Route::post('/add-to-cart', 'add')->name('cart.add'); 
+                Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
+            });
+
+            Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+            Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        });
+
+        /* --- COMMON AUTH ROUTES --- */
+        Route::get('/orders/{id}/receipt', function ($id) {
+            $order = Order::with(['items.product', 'user'])->findOrFail($id);
             /** @var User $user */
             $user = Auth::user();
-            $points = $user->loyalty_points ?? 0; 
-            $goal = ($points >= 200) ? 500 : (($points >= 100) ? 200 : 100);
-            return view('cafe.rewards', compact('user', 'points', 'goal'));
-        })->name('rewards.index');
+            if ($order->user_id !== Auth::id() && !$user->isAdmin()) abort(403); 
+            
+            $pts = $order->user->loyalty_points ?? 0;
+            $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
+            return view('emails.order_receipt', compact('order', 'tier'));
+        })->name('orders.receipt');
 
-        Route::post('/claim-reward', [OrderController::class, 'claimReward'])->name('rewards.claim');
-        Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        Route::get('/profile/data-report', [ProfileController::class, 'showDataReport'])->name('profile.data_report');
+        Route::post('/profile/export', [ProfileController::class, 'exportData'])->name('profile.export');
+        Route::get('/settings-privacy', [ProfileController::class, 'settings'])->name('profile.settings');
 
-        Route::controller(CartController::class)->group(function () {
-            Route::get('/cart', 'index')->name('cart.index');
-            Route::post('/add-to-cart', 'add')->name('cart.add'); 
-            Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
+        /* --- BARISTA ONLY FEATURES --- */
+        Route::middleware(['role:barista'])->prefix('barista')->name('barista.')->group(function () {
+            Route::get('/queue', [QueueController::class, 'index'])->name('queue');
+            Route::post('/update-status/{id}', [QueueController::class, 'updateStatus'])->name('update_status');
+            Route::get('/active-orders', [QueueController::class, 'getActiveOrders'])->name('active_orders');
+            Route::get('/active-redemptions', [QueueController::class, 'getActiveRedemptions'])->name('active_redemptions');
+            Route::post('/redemption/{id}/fulfill', [QueueController::class, 'fulfillRedemption'])->name('redemption.fulfill');
         });
 
-        Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    });
+        /* --- ADMIN ONLY FEATURES --- */
+        Route::middleware(['admin', 'admin.single_session'])->prefix('admin')->name('admin.')->group(function () {
+            Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+            Route::get('/orders/export', ExportController::class)->name('orders.export');
+            Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
+            
+            Route::controller(CustomerController::class)->prefix('customers')->name('customers.')->group(function () {
+                Route::get('/', 'index')->name('index');           
+                Route::get('/{id}', 'show')->name('show');         
+                Route::put('/{id}/password', 'resetPassword')->name('reset_password');
+            });
 
-    /* --- COMMON AUTH ROUTES --- */
-    Route::get('/orders/{id}/receipt', function ($id) {
-        $order = Order::with(['items.product', 'user'])->findOrFail($id);
-        /** @var User $user */
-        $user = Auth::user();
-        if ($order->user_id !== Auth::id() && !$user->isAdmin()) abort(403); 
-        
-        $pts = $order->user->loyalty_points ?? 0;
-        $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
-        return view('emails.order_receipt', compact('order', 'tier'));
-    })->name('orders.receipt');
+            Route::controller(SupportController::class)->prefix('support-requests')->name('support.')->group(function () {
+                Route::get('/', 'adminIndex')->name('admin_index');
+                Route::post('/{id}/resolve', 'resolve')->name('resolve');
+                Route::post('/{ticket}/reply', 'reply')->name('reply');
+                Route::get('/active-tickets', 'getActiveTickets')->name('active_tickets');
+            });
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/profile/data-report', [ProfileController::class, 'showDataReport'])->name('profile.data_report');
-    Route::post('/profile/export', [ProfileController::class, 'exportData'])->name('profile.export');
-    Route::get('/settings-privacy', [ProfileController::class, 'settings'])->name('profile.settings');
-
-    /* --- BARISTA ONLY FEATURES --- */
-    Route::middleware(['role:barista'])->prefix('barista')->name('barista.')->group(function () {
-        Route::get('/queue', [QueueController::class, 'index'])->name('queue');
-        Route::post('/update-status/{id}', [QueueController::class, 'updateStatus'])->name('update_status');
-        Route::get('/active-orders', [QueueController::class, 'getActiveOrders'])->name('active_orders');
-        Route::get('/active-redemptions', [QueueController::class, 'getActiveRedemptions'])->name('active_redemptions');
-        Route::post('/redemption/{id}/fulfill', [QueueController::class, 'fulfillRedemption'])->name('redemption.fulfill');
-    });
-
-    /* --- ADMIN ONLY FEATURES --- */
-    Route::middleware(['admin', 'admin.single_session'])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::get('/orders/export', ExportController::class)->name('orders.export');
-        Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
-        
-        Route::controller(CustomerController::class)->prefix('customers')->name('customers.')->group(function () {
-            Route::get('/', 'index')->name('index');           
-            Route::get('/{id}', 'show')->name('show');         
-            Route::put('/{id}/password', 'resetPassword')->name('reset_password');
-        });
-
-        Route::controller(SupportController::class)->prefix('support-requests')->name('support.')->group(function () {
-            Route::get('/', 'adminIndex')->name('admin_index');
-            Route::post('/{id}/resolve', 'resolve')->name('resolve');
-            Route::post('/{ticket}/reply', 'reply')->name('reply');
-            Route::get('/active-tickets', 'getActiveTickets')->name('active_tickets');
-        });
-
-        Route::controller(MenuController::class)->prefix('menu')->name('menu.')->group(function () {
-            Route::get('/', 'index')->name('index'); 
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::delete('/bulk-destroy', 'bulkDestroy')->name('bulk-destroy');
-            Route::delete('/{id}', 'destroy')->name('destroy');
+            Route::controller(MenuController::class)->prefix('menu')->name('menu.')->group(function () {
+                Route::get('/', 'index')->name('index'); 
+                Route::get('/create', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
+                Route::get('/{id}/edit', 'edit')->name('edit');
+                Route::put('/{id}', 'update')->name('update');
+                Route::delete('/bulk-destroy', 'bulkDestroy')->name('bulk-destroy');
+                Route::delete('/{id}', 'destroy')->name('destroy');
+            });
         });
     });
 });

@@ -9,46 +9,61 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
     public function create(): View
     {
         return view('auth.register');
     }
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'terms' => ['required', 'accepted'],
         ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'customer',     // Set role to customer for middleware compatibility
-            'usertype' => 'customer', // Fixed: Match the 'customer' role used in web.php
-        ]);
+        $existingUser = User::where('email', $request->email)->first();
 
-        event(new Registered($user));
+        if ($existingUser && $existingUser->email_verified_at) {
+            $request->validate([
+                'email' => ['unique:'.User::class],
+            ]);
+        }
+
+        $code = rand(100000, 999999);
+
+        if ($existingUser) {
+            $existingUser->update([
+                'name' => $request->name,
+                'password' => Hash::make($request->password),
+                'verification_code' => $code,
+            ]);
+            $user = $existingUser;
+        } else {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => 'customer',
+                'usertype' => 'customer',
+                'verification_code' => $code,
+            ]);
+        }
+
+        Mail::send('emails.verify-code', ['user' => $user, 'code' => $code], function ($message) use ($user) {
+            $message->to($user->email)
+                ->subject('Verify Your Mik\'s Coffee Account');
+        });
 
         Auth::login($user);
 
-        // Redirect to customer dashboard
-        return redirect()->to('/dashboard');
+        return redirect()->route('verification.code.view');
     }
 }

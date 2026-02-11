@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,7 +13,7 @@ use Carbon\Carbon;
 use App\Models\PointTransaction;
 use App\Models\LoginHistory;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
@@ -21,6 +22,7 @@ class User extends Authenticatable
         'loyalty_points', 'streak_count', 'last_visit_at', 
         'last_seen_at', 'referral_code', 'referred_by', 
         'last_session_id', 'is_online',
+        'verification_code', 
     ];
 
     protected $hidden = [
@@ -38,7 +40,6 @@ class User extends Authenticatable
         ];
     }
 
-    // 🟢 ACCESOR FIX: Forces 'points' in UI to read from 'loyalty_points' column
     public function getPointsAttribute()
     {
         return $this->loyalty_points ?? 0;
@@ -47,6 +48,15 @@ class User extends Authenticatable
     protected static function booted()
     {
         static::creating(function ($user) {
+            /**
+             * Cleanup Ghost Accounts:
+             * Automatically deletes unverified accounts older than 24 hours 
+             * whenever a new registration attempt is made.
+             */
+            self::whereNull('email_verified_at')
+                ->where('created_at', '<', now()->subDay())
+                ->delete();
+
             if (empty($user->referral_code)) {
                 $user->referral_code = 'MIKS-' . strtoupper(Str::random(6));
             }
@@ -124,10 +134,6 @@ class User extends Authenticatable
         return 'Bronze';
     }
 
-    /**
-     * RELATIONSHIP: Get Login History entries.
-     * Fixes Call to undefined method App\Models\User::loginHistory()
-     */
     public function loginHistory(): HasMany 
     { 
         return $this->hasMany(LoginHistory::class); 
