@@ -283,7 +283,7 @@
                     Crafting extraordinary coffee experiences in the heart of Trece Martires. Every bean tells a story of quality and passion.
                 </p>
             </div>    
-  
+   
             <div class="md:col-span-2 text-center md:text-left">
                 <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-500 tracking-[0.4em] uppercase mb-8">Discover</h3>
                 <ul class="space-y-4">
