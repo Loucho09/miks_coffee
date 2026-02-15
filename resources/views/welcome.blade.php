@@ -274,7 +274,7 @@
                     <div class="relative w-12 h-12 rounded-2xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center overflow-hidden transition-all duration-500 group-hover:border-amber-500 group-hover:shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)]">
                         <img src="{{ asset('favicon.png') }}" alt="Logo" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
                     </div>
-                    <div class="flex flex-col"> 
+                    <div class="flex flex-col">  
                         <span class="font-serif italic text-xl text-stone-900 dark:text-white leading-none">Mik's</span>
                         <span class="font-black text-[10px] uppercase tracking-[0.3em] text-amber-600">Premium Brew</span>
                     </div>
