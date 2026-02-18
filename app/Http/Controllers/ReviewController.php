@@ -49,7 +49,8 @@ class ReviewController extends Controller
             ]);
 
             // 3. Award 2 points to the loyalty_points column
-            $user->increment('loyalty_points', 2);
+            $user->loyalty_points += 2;
+            $user->save();
 
             // 4. Log the transaction in the ledger
             PointTransaction::create([

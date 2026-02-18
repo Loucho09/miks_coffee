@@ -190,7 +190,8 @@ class OrderController extends Controller
                     'size' => $details['size'] ?? 'Regular',
                 ]);
 
-                $product->decrement('stock_quantity', $details['quantity']);
+                $product->stock_quantity -= $details['quantity'];
+                $product->save();
 
                 if ($product->stock_quantity < 5) {
                     try {
@@ -204,7 +205,8 @@ class OrderController extends Controller
             if ($user->referred_by && $user->orders()->count() === 1) {
                 $referrer = $user->referrer;
                 if ($referrer) {
-                    $referrer->increment('loyalty_points', 50);
+                    $referrer->loyalty_points += 50;
+                    $referrer->save();
                     PointTransaction::create([
                         'user_id' => $referrer->id,
                         'amount' => 50,
@@ -212,7 +214,8 @@ class OrderController extends Controller
                         'order_id' => $order->id
                     ]);
 
-                    $user->increment('loyalty_points', 50);
+                    $user->loyalty_points += 50;
+                    $user->save();
                     PointTransaction::create([
                         'user_id' => $user->id,
                         'amount' => 50,
@@ -223,7 +226,8 @@ class OrderController extends Controller
             }
 
             if ($pointsRedeemed > 0) {
-                $user->decrement('loyalty_points', $pointsRedeemed);
+                $user->loyalty_points -= $pointsRedeemed;
+                $user->save();
                 PointTransaction::create([
                     'user_id' => $user->id,
                     'amount' => -$pointsRedeemed,
@@ -232,7 +236,8 @@ class OrderController extends Controller
                 ]);
             }
 
-            $user->increment('loyalty_points', 10);
+            $user->loyalty_points += 10;
+            $user->save();
             PointTransaction::create([
                 'user_id' => $user->id,
                 'amount' => 10,

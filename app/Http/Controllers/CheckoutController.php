@@ -40,7 +40,8 @@ class CheckoutController extends Controller
             $discount = 0;
 
             if ($request->has('redeem_points') && $user->loyalty_points >= $pointsToRedeem) {
-                $user->decrement('loyalty_points', $pointsToRedeem);
+                $user->loyalty_points -= $pointsToRedeem;
+                $user->save();
                 $discount = 50;
 
                 PointTransaction::create([
@@ -72,11 +73,13 @@ class CheckoutController extends Controller
 
                 $product = Product::find($productId);
                 if ($product) {
-                    $product->decrement('stock_quantity', $details['quantity']);
+                    $product->stock_quantity -= $details['quantity'];
+                    $product->save();
                 }
             }
 
-            $user->increment('loyalty_points', 10);
+            $user->loyalty_points += 10;
+            $user->save();
             PointTransaction::create([
                 'user_id' => $user->id,
                 'amount' => 10,
