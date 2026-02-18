@@ -263,7 +263,7 @@
                 </div>
                 <div class="w-full md:w-1/2 h-96 bg-stone-200 dark:bg-stone-800 rounded-[3rem] overflow-hidden border-4 border-stone-200 dark:border-stone-800 shadow-connected relative"><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14700.4997719728!2d120.85845597612617!3d14.28626677775182!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd81001f3e2407%3A0x7548c28cd57121cc!2sMik%E2%80%99s%20coffee%20shop!5e1!3m2!1sen!2sus!4v1770974579948!5m2!1sen!2sus" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
             </div>
-        </section>  
+        </section>    
 
          <footer class="bg-stone-200 dark:bg-stone-950 border-t border-stone-200 dark:border-stone-900 pt-24 pb-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
