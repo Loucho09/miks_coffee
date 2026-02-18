@@ -96,15 +96,42 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        $error = null;
         $cart = session()->get('cart');
+
         if (!$cart || count($cart) === 0) {
-            return redirect()->route('cart.index')->with('error', 'Cart is empty!');
+            $error = 'Cart is empty!';
         }
 
         /** @var User $user */
-        $user = Auth::user(); 
+        $user = Auth::user();
         $claimed = session()->get('claimed_reward');
-        
+
+        $discount = 0;
+        $pointsRedeemed = 0;
+        $rewardType = null;
+
+        if (is_null($error)) {
+            $orderData = $this->calculateDiscountAndPoints($user, $claimed, $request);
+
+            if (!is_null($orderData['error'])) {
+                $error = $orderData['error'];
+            } else {
+                $discount = $orderData['discount'];
+                $pointsRedeemed = $orderData['pointsRedeemed'];
+                $rewardType = $orderData['rewardType'];
+            }
+        }
+
+        if ($error) {
+            return redirect()->route('cart.index')->with('error', $error);
+        }
+
+        // ... remaining order processing logic ...
+    }
+
+    private function calculateDiscountAndPoints(User $user, $claimed, Request $request): array
+    {
         $discount = 0;
         $pointsRedeemed = 0;
         $rewardType = null;
@@ -112,14 +139,20 @@ class OrderController extends Controller
         if ($claimed) {
             if (($user->loyalty_points ?? 0) < $claimed['points']) {
                 session()->forget('claimed_reward');
-                return redirect()->route('cart.index')->with('error', 'Insufficient points.');
+                return ['error' => 'Insufficient points.', 'discount' => 0, 'pointsRedeemed' => 0, 'rewardType' => null];
             }
-            
+
             $pointsRedeemed = (int) $claimed['points'];
             $rewardType = $claimed['name'];
-            $discount = (float) $claimed['value']; 
+            $discount = (float) $claimed['value'];
         } elseif ($request->has('redeem_points') && ($user->loyalty_points ?? 0) >= 50) {
             $discount = 50;
+            $pointsRedeemed = 50;
+            $rewardType = 'points';
+        }
+
+        return ['error' => null, 'discount' => $discount, 'pointsRedeemed' => $pointsRedeemed, 'rewardType' => $rewardType];
+    }
             $pointsRedeemed = 50;
             $rewardType = 'Standard Discount';
         }
