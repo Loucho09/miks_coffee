@@ -17,7 +17,8 @@ class ReviewObserver
 
         if ($user) {
             // 1. Increment standardized 'points' column
-            $user->increment('points', 2);
+            $user->points += 2;
+            $user->save();
 
             // 2. Log transaction for the Rewards History page
             PointTransaction::create([

@@ -80,7 +80,7 @@ class AuthenticatedSessionController extends Controller
             $user->update(['last_session_id' => null, 'is_online' => 0]);
         }
 
-        Auth::guard('web')->logout();
+        Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/');
