@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Artisan;
 
 // Controllers
 use App\Http\Controllers\ProfileController;
@@ -100,7 +101,7 @@ Route::middleware(['auth'])->group(function () {
                 $user = Auth::user();
                 $points = $user->loyalty_points ?? 0; 
                 $goal = ($points >= 200) ? 500 : (($points >= 100) ? 200 : 100);
-                return view('cafe.rewards', compact('user', 'points', 'goal'));
+                return view('cafe.rewards', compact($user, 'points', 'goal'));
             })->name('rewards.index');
 
             Route::post('/claim-reward', [OrderController::class, 'claimReward'])->name('rewards.claim');
@@ -114,6 +115,9 @@ Route::middleware(['auth'])->group(function () {
 
             Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
             Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+            
+            /* 🟢 NEW FEATURE: Reorder Route */
+            Route::post('/orders/{id}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
         });
 
         /* --- COMMON AUTH ROUTES --- */
@@ -174,6 +178,13 @@ Route::middleware(['auth'])->group(function () {
             });
         });
     });
+});
+
+/* --- OPTIMIZATION WORKAROUND FOR SHARED HOSTING --- */
+Route::get('/workaround-optimize', function() {
+    Artisan::call('optimize:clear');
+    Artisan::call('optimize');
+    return 'The InfinityFree server has successfully optimized Miks Coffee!';
 });
 
 require __DIR__.'/auth.php';

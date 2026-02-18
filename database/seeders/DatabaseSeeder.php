@@ -13,13 +13,26 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Setup Admin
-        $this->call(AdminUserSeeder::class);
+        // 1. Setup Admin from .env
+        // This pulls ADMIN_EMAIL, ADMIN_NAME, and ADMIN_PASSWORD directly into the DB
+        User::updateOrCreate(
+            ['email' => env('ADMIN_EMAIL', 'jmloucho09@gmail.com')],
+            [
+                'name' => env('ADMIN_NAME', 'Admin User'),
+                'password' => Hash::make(env('ADMIN_PASSWORD', 'YourExtremelySecurePassword123!')),
+                'usertype' => 'admin',
+                'role' => 'admin',
+                'email_verified_at' => now(), // Automatically verify the admin account
+            ]
+        );
+
+        // Optional: Keep your existing AdminUserSeeder if it handles other logic
+        // $this->call(AdminUserSeeder::class);
 
         // 2. Setup Test Customer
         User::updateOrCreate(
             ['email' => 'customer@example.com'],
-            ['name' => 'Test Customer', 'password' => Hash::make('password'), 'role' => 'user', 'points' => 50]
+            ['name' => 'Test Customer', 'password' => Hash::make('password'), 'role' => 'customer', 'usertype' => 'customer', 'points' => 50]
         );
 
         // 3. Menu Data (Organized by Categories)
@@ -54,7 +67,6 @@ class DatabaseSeeder extends Seeder
                 ['name' => 'Overload Fries', 'price' => 79, 'desc' => 'Fries, cheese sauce and beef.'],
                 ['name' => 'Penne Carbonara', 'price' => 149, 'desc' => 'Pasta served with garlic bread.'],
             ],
-            // 🟢 ADDED: Fruit Tea's Category
             'Fruit Tea\'s' => [
                 ['name' => 'Blueberry Fruit Tea', 'price' => 89, 'desc' => 'Refreshing tea infused with sweet blueberry flavor.'],
                 ['name' => 'Green Apple Fruit Tea', 'price' => 89, 'desc' => 'Crisp and tart green apple flavored tea.'],
@@ -63,7 +75,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         // 4. Sync to DB
-      foreach ($menu as $categoryName => $products) {
+        foreach ($menu as $categoryName => $products) {
             $category = Category::updateOrCreate(['name' => $categoryName], ['slug' => Str::slug($categoryName)]);
 
             foreach ($products as $item) {
@@ -79,13 +91,12 @@ class DatabaseSeeder extends Seeder
                     ]
                 );
 
-                // 🟢 ONLY add sizes to Coffee and Fruit Tea categories
+                // ONLY add sizes to Coffee and Fruit Tea categories
                 if ($categoryName === 'Coffee Based' || $categoryName === 'Fruit Tea\'s') {
                     $product->sizes()->updateOrCreate(['size' => '12oz'], ['price' => 39.00]);
                     $product->sizes()->updateOrCreate(['size' => '16oz'], ['price' => 49.00]);
+                }
             }
-        }
-            
         }
     }
 }

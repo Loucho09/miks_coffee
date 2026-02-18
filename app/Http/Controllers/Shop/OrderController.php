@@ -27,12 +27,43 @@ class OrderController extends Controller
         return view('cafe::orders', compact('orders'));
     }
 
+    /**
+     * 🟢 NEW FEATURE: AI-Powered "Reorder My Usual" shortcut.
+     */
+    public function reorder($id)
+    {
+        $order = Order::with('items')->where('user_id', Auth::id())->findOrFail($id);
+        $cart = session()->get('cart', []);
+
+        foreach ($order->items as $item) {
+            $product = $item->product;
+            if (!$product || !$product->is_active || $product->stock_quantity <= 0) continue;
+
+            $cartKey = $item->product_id . '_' . $item->size;
+
+            if (isset($cart[$cartKey])) {
+                $cart[$cartKey]['quantity'] += $item->quantity;
+            } else {
+                $cart[$cartKey] = [
+                    "product_id" => (int) $item->product_id,
+                    "name" => $item->product->name,
+                    "quantity" => $item->quantity,
+                    "price" => $item->price,
+                    "size" => $item->size,
+                    "image" => $item->product->image
+                ];
+            }
+        }
+
+        session()->put('cart', $cart);
+        return redirect()->route('cart.index')->with('success', 'Previous order added to cart!');
+    }
+
     public function claimReward(Request $request)
     {
         /** @var User $user */
         $user = Auth::user();
 
-        // Predefined list to prevent client-side data tampering
         $rewards = [
             'free_espresso' => ['name' => 'Signature Espresso', 'cost' => 50, 'value' => 150, 'type' => 'free_item'],
             'pastry_treat'  => ['name' => 'Artisan Pastry', 'cost' => 80, 'value' => 120, 'type' => 'free_item'],
@@ -49,7 +80,6 @@ class OrderController extends Controller
                 return back()->with('error', 'Insufficient points for this redemption.');
             }
 
-            // Put securely validated reward into session
             session()->put('claimed_reward', [
                 'name'   => $reward['name'],
                 'points' => $reward['cost'],
@@ -244,8 +274,6 @@ class OrderController extends Controller
 
             foreach ($orders as $order) {
                 $performance = ($order->total_price >= 500) ? 'HIGH VALUE' : 'Standard';
-                
-                // SECURITY FIX: Sanitize CSV values to prevent formula injection
                 $customerName = $order->user->name ?? 'Guest';
                 if (in_array(substr($customerName, 0, 1), ['=', '+', '-', '@'])) {
                     $customerName = "'" . $customerName;

@@ -29,6 +29,9 @@
         $streakCount = $user->streak_count ?? 0;
         $nextMilestone = (floor($streakCount / 3) + 1) * 3;
         $streakProgress = (($streakCount % 3) / 3) * 100;
+
+        /* 🟢 NEW FEATURE LOGIC: Identify Last Order for Reorder Shortcut */
+        $lastOrder = isset($recentOrders) ? $recentOrders->first() : null;
     @endphp
 
     <style>
@@ -72,6 +75,28 @@
                     </div>
                 </div>
             </div>
+
+            {{-- 🟢 NEW FEATURE: Reorder My Usual Shortcut --}}
+            @if($lastOrder)
+                <div class="mb-8 sm:mb-12 p-6 sm:p-10 bg-white dark:bg-stone-900 rounded-[2.5rem] sm:rounded-[3.5rem] border border-amber-500/30 shadow-premium flex flex-col sm:flex-row justify-between items-center gap-6 group hover:border-amber-500 transition-all duration-500">
+                    <div class="flex items-center gap-6">
+                        <div class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[2rem] bg-amber-600/10 flex items-center justify-center text-amber-600 border border-amber-500/20 shadow-inner">
+                            <svg class="w-8 h-8 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <span class="text-amber-600 font-black uppercase tracking-[0.4em] text-[8px] sm:text-[10px] mb-1 block leading-none italic">Efficiency protocol</span>
+                            <h3 class="text-xl sm:text-3xl font-black text-stone-900 dark:text-white uppercase italic tracking-tighter leading-none">Reorder My Usual</h3>
+                            <p class="text-[8px] sm:text-[10px] text-stone-400 font-bold uppercase tracking-widest mt-2">Restore Order Unit #{{ $lastOrder->id }} instantly</p>
+                        </div>
+                    </div>
+                    <form action="{{ route('orders.reorder', $lastOrder->id) }}" method="POST" class="w-full sm:w-auto">
+                        @csrf
+                        <button type="submit" class="w-full sm:w-auto px-10 py-5 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-2xl sm:rounded-[2rem] font-black uppercase text-[9px] sm:text-[11px] tracking-widest shadow-2xl active:scale-95 hover:bg-amber-600 dark:hover:bg-amber-500 transition-all">
+                            Initialize Restore
+                        </button>
+                    </form>
+                </div>
+            @endif
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-start">
                 <div class="lg:col-span-4 space-y-4 sm:space-y-8">
@@ -332,7 +357,7 @@
                                 @foreach(range(1, 5) as $rating)
                                     <label class="cursor-pointer group">
                                         <input type="radio" name="rating" value="{{ $rating }}" class="hidden peer" required>
-                                        <div class="w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-[1.75rem] border-2 border-stone-100 dark:border-stone-800 flex items-center justify-center peer-checked:bg-stone-900 dark:peer-checked:bg-amber-600 peer-checked:border-stone-900 dark:peer-checked:border-amber-600 peer-checked:text-white dark:peer-checked:text-stone-950 text-stone-300 dark:text-stone-700 font-black transition-all group-hover:border-amber-500 shadow-sm text-sm sm:text-3xl italic">{{ $rating }}</div>
+                                        <div class="w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-[1.75rem] border-2 border-stone-100 dark:border-stone-800 flex items-center justify-center peer-checked:bg-stone-900 dark:peer-checked:bg-amber-600 peer-checked:border-stone-900 dark:peer-checked:bg-amber-600 peer-checked:text-white dark:peer-checked:text-stone-950 text-stone-300 dark:text-stone-700 font-black transition-all group-hover:border-amber-500 shadow-sm text-sm sm:text-3xl italic">{{ $rating }}</div>
                                     </label>
                                 @endforeach
                             </div>

@@ -173,7 +173,7 @@
                                 currentIndex: {{ $stack * 1 }}, 
                                 count: {{ $featuredProducts->count() }},
                                 next() { this.currentIndex = (this.currentIndex + 1) % this.count },
-                                auto() { setInterval(() => this.next(), {{ 3000 + ($stack * 200) }}); }
+                                auto() { setInterval(() => this.next(), {{ 1500 + ($stack * 200) }}); }
                              }" x-init="auto()">
                             @foreach($featuredProducts as $index => $product)
                                 <div x-show="currentIndex === {{ $index }}" x-cloak

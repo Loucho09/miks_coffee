@@ -48,23 +48,12 @@ class User extends Authenticatable implements MustVerifyEmail
     protected static function booted()
     {
         static::creating(function ($user) {
-            /**
-             * Cleanup Ghost Accounts:
-             * Automatically deletes unverified accounts older than 24 hours 
-             * whenever a new registration attempt is made.
-             */
             self::whereNull('email_verified_at')
                 ->where('created_at', '<', now()->subDay())
                 ->delete();
 
             if (empty($user->referral_code)) {
                 $user->referral_code = 'MIKS-' . strtoupper(Str::random(6));
-            }
-            if (session()->has('referrer_code')) {
-                $referrer = self::where('referral_code', session('referrer_code'))->first();
-                if ($referrer) {
-                    $user->referred_by = $referrer->id;
-                }
             }
         });
 
@@ -134,11 +123,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return 'Bronze';
     }
 
-    public function loginHistory(): HasMany 
-    { 
-        return $this->hasMany(LoginHistory::class); 
-    }
-
+    public function loginHistory(): HasMany { return $this->hasMany(LoginHistory::class); }
     public function referrer(): BelongsTo { return $this->belongsTo(User::class, 'referred_by'); }
     public function referrals(): HasMany { return $this->hasMany(User::class, 'referred_by'); }
     public function orders(): HasMany { return $this->hasMany(Order::class); }
