@@ -14,10 +14,15 @@ class CartController extends Controller
         $total = 0;
 
         foreach($cart as $details) {
-            $total += $details['price'] * $details['quantity'];
+            $itemPrice = (float) $details['price'];
+            if (isset($details['customizations']) && is_array($details['customizations'])) {
+                foreach ($details['customizations'] as $addonPrice) {
+                    $itemPrice += (float) $addonPrice;
+                }
+            }
+            $total += $itemPrice * $details['quantity'];
         }
 
-        // 🟢 NEW FEATURE: AI-Powered "Frequently Bought Together"
         $cartProductIds = collect($cart)->pluck('product_id')->toArray();
         $recommendations = Product::whereHas('category', function($q) {
                 $q->where('name', 'like', '%Pastry%')
@@ -38,9 +43,17 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
 
         $size = $request->size ?: 'Regular';
-        $price = $request->price ?: $product->price;
+        
+        $isHH = $product->is_happy_hour_active;
+        $basePrice = $isHH ? $product->happy_hour_price : ($request->price ?: $product->price);
 
-        $cartKey = $product->id . '_' . $size;
+        $customizations = [];
+        if ($request->filled('customizations')) {
+            $customizations = json_decode($request->customizations, true) ?: [];
+        }
+
+        $customizationHash = md5(json_encode($customizations));
+        $cartKey = $product->id . '_' . $size . '_' . $customizationHash;
 
         if(isset($cart[$cartKey])) {
             $cart[$cartKey]['quantity']++;
@@ -49,9 +62,11 @@ class CartController extends Controller
                 "product_id" => (int) $product->id,
                 "name" => $product->name,
                 "quantity" => 1,
-                "price" => $price, 
+                "price" => (float) $basePrice, 
                 "size" => $size,
-                "image" => $product->image
+                "image" => $product->image,
+                "is_happy_hour" => $isHH,
+                "customizations" => $customizations 
             ];
         }
 

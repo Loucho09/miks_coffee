@@ -126,8 +126,13 @@ class OrderController extends Controller
 
         $subtotal = 0;
         $bulkSavings = 0;
+
+        // 🟢 HAPPY HOUR LOGIC: recalculate subtotal based on current time
         foreach ($cart as $details) {
-            $linePrice = $details['price'] * $details['quantity'];
+            $product = Product::find($details['product_id']);
+            $currentUnitPrice = $product ? $product->happy_hour_price : $details['price'];
+            
+            $linePrice = $currentUnitPrice * $details['quantity'];
             if ($details['quantity'] >= 6) {
                 $lineDiscount = $linePrice * 0.10;
                 $bulkSavings += $lineDiscount;
@@ -171,16 +176,20 @@ class OrderController extends Controller
 
             foreach ($cart as $key => $details) {
                 $realProductId = $details['product_id'] ?? intval($key);
+                $product = Product::find($realProductId);
+                
+                // 🟢 NEW: Capture live Happy Hour price at the moment of order commit
+                $appliedPrice = $product ? $product->happy_hour_price : $details['price'];
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $realProductId,
                     'product_name' => $details['name'] ?? null,
                     'quantity' => $details['quantity'],
-                    'price' => $details['price'],
+                    'price' => $appliedPrice,
                     'size' => $details['size'] ?? 'Regular',
                 ]);
 
-                $product = Product::find($realProductId);
                 $product->decrement('stock_quantity', $details['quantity']);
 
                 if ($product->stock_quantity < 5) {
