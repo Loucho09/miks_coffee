@@ -10,6 +10,8 @@ use App\Models\PointTransaction;
 use App\Models\User;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderReceipt;
 
 class CheckoutController extends Controller
 {
@@ -23,7 +25,6 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Operational Fault: Cart Empty.');
         }
 
-        // Calculate Subtotal including all categorized add-ons
         $subtotal = 0;
         foreach ($cart as $details) {
             $itemTotal = (float) $details['price'];
@@ -38,7 +39,6 @@ class CheckoutController extends Controller
         return DB::transaction(function () use ($request, $user, $cart, $subtotal) {
             $discount = 0;
 
-            // Handle Loyalty Point Redemption
             if ($request->has('redeem_points') && $user->loyalty_points >= 50) {
                 $user->loyalty_points -= 50;
                 $user->save();
@@ -51,7 +51,6 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            // Initialize Order Manifest Record
             $order = Order::create([
                 'user_id' => $user->id,
                 'total_price' => max(0, $subtotal - $discount),
@@ -59,9 +58,7 @@ class CheckoutController extends Controller
                 'order_number' => 'ORD-' . strtoupper(uniqid()),
             ]);
 
-            // Process Manifest Units
             foreach ($cart as $id => $details) {
-                // Ensure numeric product identification
                 $rawId = isset($details['product_id']) ? $details['product_id'] : $id;
                 $productId = (int) (is_string($rawId) ? explode('_', str_replace('itm_', '', $rawId))[0] : $rawId);
 
@@ -75,29 +72,38 @@ class CheckoutController extends Controller
                     'customizations' => $details['customizations'] ?? null,
                 ]);
 
-                // Reduce Inventory Stock
                 $product = Product::find($productId);
                 if ($product) {
-                    $product->stock_quantity -= $details['quantity'];
-                    $product->save();
+                    $product->decrement('stock_quantity', $details['quantity']);
                 }
             }
 
-            // Reward Earning Logic
-            $user->loyalty_points += 10;
-            $user->save();
-
+            $user->increment('loyalty_points', 10);
             PointTransaction::create([
                 'user_id' => $user->id,
                 'amount' => 10,
                 'description' => "Earned from Order #{$order->id}",
             ]);
 
-            // Finalize Session State
+            // 🟢 DISPATCH DIGITAL RECEIPT
+            try {
+                Mail::to($user->email)->send(new OrderReceipt($order));
+            } catch (\Exception $e) {
+                // Silently log email failure to prevent checkout crash
+                \Log::error('Receipt Email Failed: ' . $e->getMessage());
+            }
+
             $user->updateStreak();
             session()->forget('cart');
 
-            return redirect()->route('dashboard')->with('success', 'Transaction Sequence Finalized.');
+            // Redirect to receipt manifest
+            return redirect()->route('checkout.receipt', $order->id)->with('success', 'Order Sequence Finalized.');
         });
+    }
+
+    public function receipt($id)
+    {
+        $order = Order::with('items.product')->where('user_id', Auth::id())->findOrFail($id);
+        return view('cafe.receipt', compact('order'));
     }
 }

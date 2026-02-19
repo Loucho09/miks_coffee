@@ -101,7 +101,6 @@ Route::middleware(['auth'])->group(function () {
                 $user = Auth::user();
                 $points = $user->loyalty_points ?? 0; 
                 $goal = ($points >= 200) ? 500 : (($points >= 100) ? 200 : 100);
-                // FIXED: compact now uses string 'user' instead of the $user object
                 return view('cafe.rewards', compact('user', 'points', 'goal'));
             })->name('rewards.index');
 
@@ -115,9 +114,12 @@ Route::middleware(['auth'])->group(function () {
             });
 
             Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+            
+            // Post-Checkout Digital Receipt Route
+            Route::get('/checkout/receipt/{id}', [CheckoutController::class, 'receipt'])->name('checkout.receipt');
+            
             Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
             
-            /* 🟢 NEW FEATURE: Reorder Route */
             Route::post('/orders/{id}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
         });
 

@@ -2,81 +2,87 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Receipt #{{ $order->id }}</title>
+    <title>Receipt #{{ $order->order_number }}</title>
     <style>
-        body { font-family: sans-serif; font-size: 14px; color: #333; background: #f9f9f9; padding: 20px; }
-        .container { background: #fff; max-width: 600px; margin: 0 auto; padding: 30px; border-radius: 8px; border: 1px solid #ddd; }
-        .header { text-align: center; border-bottom: 2px solid #f59e0b; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { color: #8D5F46; margin: 0; }
+        body { font-family: sans-serif; font-size: 14px; color: #1c1917; background: #f9f9f9; padding: 20px; }
+        .container { background: #fff; max-width: 600px; margin: 0 auto; padding: 30px; border-radius: 12px; border: 1px solid #e7e5e4; }
+        .header { text-align: center; border-bottom: 3px solid #d97706; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { color: #1c1917; margin: 0; text-transform: uppercase; font-style: italic; }
         .info { margin-bottom: 20px; line-height: 1.6; }
         .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .table th { text-align: left; background: #eee; padding: 10px; }
-        .table td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: top; }
-        
-        .points-box { background: #d1fae5; color: #065f46; padding: 15px; text-align: center; font-weight: bold; border-radius: 5px; margin-top: 20px; }
-        .redeemed-text { color: #dc2626; font-weight: bold; }
-        .total-text { font-size: 18px; font-weight: bold; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; text-align: right; }
-        .size-tag { font-size: 11px; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; color: #555; font-weight: bold; margin-left: 5px; }
+        .table th { text-align: left; background: #f5f5f4; padding: 12px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; }
+        .table td { padding: 12px; border-bottom: 1px solid #f5f5f4; vertical-align: top; }
+        .promo-tag { color: #d97706; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-top: 4px; }
+        .addon-item { font-size: 11px; color: #78716c; font-style: italic; }
+        .points-box { background: #fef3c7; color: #92400e; padding: 15px; text-align: center; font-weight: bold; border-radius: 8px; margin-top: 20px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em; }
+        .total-text { font-size: 20px; font-weight: 900; margin-top: 10px; text-align: right; color: #1c1917; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>☕ Miks Coffee Shop</h1>
-            <p>Thank you for your order!</p>
+            <h1>MIKS COFFEE</h1>
+            <p style="text-transform: uppercase; font-weight: 800; font-size: 10px; color: #78716c;">Official Order Manifest</p>
         </div>
 
         <div class="info">
-            <strong>Order ID:</strong> #{{ $order->id }}<br>
-            <strong>Date:</strong> {{ $order->created_at->format('F d, Y h:i A') }}<br>
-            <strong>Customer:</strong> {{ $order->customer_name ?? 'Guest' }}
+            <strong>ID:</strong> {{ $order->order_number }}<br>
+            <strong>Timestamp:</strong> {{ $order->created_at->format('F d, Y h:i A') }}<br>
+            <strong>Operator:</strong> {{ Auth::user()->name }}
         </div>
 
         <table class="table">
             <thead>
                 <tr>
-                    <th>Item</th>
+                    <th>Item Specification</th>
                     <th>Qty</th>
-                    <th>Price</th>
+                    <th>Subtotal</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($order->items as $item)
                 <tr>
                     <td>
-                        {{ $item->product_name ?? $item->product->name }}
+                        <span style="font-weight: 800; text-transform: uppercase;">{{ $item->product_name }}</span>
+                        @if($item->size)<span style="font-size: 10px; color: #78716c;"> [{{ $item->size }}]</span>@endif
                         
-                        @if(!empty($item->size) && $item->size !== 'Regular')
-                            <span class="size-tag">{{ $item->size }}</span>
+                        {{-- 🟢 Golden Hour Check --}}
+                        @php
+                            $isGoldenHour = false;
+                            if($item->product) {
+                                $isGoldenHour = $item->product->is_happy_hour_active && (float)$item->price <= (float)$item->product->happy_hour_price;
+                            }
+                        @endphp
+                        
+                        @if($isGoldenHour)
+                            <span class="promo-tag">✦ Golden Hour Promo Applied</span>
+                        @endif
+
+                        @if($item->customizations)
+                            @foreach($item->customizations as $label => $price)
+                                <div class="addon-item">+ {{ $label }}</div>
+                            @endforeach
                         @endif
                     </td>
-                    <td>{{ $item->quantity }}</td>
-                    <td>₱{{ number_format($item->price, 2) }}</td>
+                    <td style="font-weight: 800;">{{ $item->quantity }}</td>
+                    <td style="font-weight: 800; text-align: right;">₱{{ number_format($item->price * $item->quantity, 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
 
         <div style="text-align: right;">
-            @if($order->points_redeemed > 0)
-                <p class="redeemed-text">
-                    Points Redeemed: -{{ $order->points_redeemed }} pts
-                </p>
-            @endif
-
             <div class="total-text">
-                Total Paid: ₱{{ number_format($order->total_price, 2) }}
+                NET TOTAL: ₱{{ number_format($order->total_price, 2) }}
             </div>
         </div>
 
-        @if($order->points_earned > 0)
-            <div class="points-box">
-                🎉 You earned +{{ $order->points_earned }} Points!
-            </div>
-        @endif
+        <div class="points-box">
+            Loyalty Assets updated: +10 Points Acquired
+        </div>
         
-        <p style="text-align: center; color: #888; font-size: 12px; margin-top: 30px;">
-            This is an automated receipt.
+        <p style="text-align: center; color: #a8a29e; font-size: 10px; margin-top: 30px; text-transform: uppercase; font-weight: 800;">
+            Transaction Finalized at Trece Martires City
         </p>
     </div>
 </body>

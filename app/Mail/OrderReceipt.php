@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -18,19 +17,18 @@ class OrderReceipt extends Mailable
 
     public function __construct(Order $order)
     {
-        $this->order = $order;
+        $this->order = $order->load('items.product');
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Confirmation - #' . $this->order->id,
+            subject: 'Order Confirmation - #' . $this->order->order_number,
         );
     }
 
     public function content(): Content
     {
-        // This must match the name of the file in resources/views/emails/
         return new Content(
             view: 'emails.receipt', 
         );
