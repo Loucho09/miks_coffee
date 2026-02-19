@@ -101,8 +101,7 @@ Route::middleware(['auth'])->group(function () {
                 $user = Auth::user();
                 $points = $user->loyalty_points ?? 0; 
                 $goal = ($points >= 200) ? 500 : (($points >= 100) ? 200 : 100);
-                // FIXED: compact now uses string 'user' instead of the $user object
-                return view('cafe.rewards', compact('user', 'points', 'goal'));
+                return view('cafe.rewards', compact($user, 'points', 'goal'));
             })->name('rewards.index');
 
             Route::post('/claim-reward', [OrderController::class, 'claimReward'])->name('rewards.claim');
