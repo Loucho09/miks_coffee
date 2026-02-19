@@ -24,39 +24,63 @@ class OrderController extends Controller
             ->where('user_id', Auth::id())
             ->latest()
             ->get();
-        return view('cafe::orders', compact('orders'));
+        return view('cafe.orders', compact('orders'));
     }
 
     /**
-     * 🟢 NEW FEATURE: AI-Powered "Reorder My Usual" shortcut.
+     * 🟢 REORDER PROTOCOL (FIXED)
+     * Restores a previous manifest while recalculating prices based on current Happy Hour status.
      */
     public function reorder($id)
     {
-        $order = Order::with('items')->where('user_id', Auth::id())->findOrFail($id);
+        $order = Order::with('items.product.sizes')->where('user_id', Auth::id())->findOrFail($id);
         $cart = session()->get('cart', []);
 
         foreach ($order->items as $item) {
             $product = $item->product;
             if (!$product || !$product->is_active || $product->stock_quantity <= 0) continue;
 
-            $cartKey = $item->product_id . '_' . $item->size;
+            // 🟢 REAL-TIME VALUATION: Ignore old order price and check current Happy Hour status
+            $isHHActiveNow = $product->is_happy_hour_active;
+            $currentBasePrice = 0;
+
+            if ($product->sizes->count() > 0) {
+                // Determine the original size-specific price from current product configuration
+                $sizeObj = $product->sizes->where('size', $item->size)->first();
+                $originalBasePrice = $sizeObj ? (float)$sizeObj->price : (float)$product->price;
+                
+                // Recalculate based on current promo eligibility
+                $currentBasePrice = $isHHActiveNow 
+                    ? ($originalBasePrice * (1 - ($product->happy_hour_discount / 100))) 
+                    : $originalBasePrice;
+            } else {
+                // Fallback for standard items without size variants
+                $currentBasePrice = $isHHActiveNow ? $product->happy_hour_price : $product->price;
+            }
+
+            // Generate unique manifest key to preserve customization variants (Feature 3)
+            $customizations = $item->customizations ?? [];
+            $customizationHash = md5(json_encode($customizations));
+            $cartKey = "itm_" . $item->product_id . "_" . str_replace([' ', "'"], ['_', ''], $item->size) . "_" . $customizationHash;
 
             if (isset($cart[$cartKey])) {
                 $cart[$cartKey]['quantity'] += $item->quantity;
             } else {
                 $cart[$cartKey] = [
                     "product_id" => (int) $item->product_id,
-                    "name" => $item->product->name,
+                    "name" => $product->name,
                     "quantity" => $item->quantity,
-                    "price" => $item->price,
+                    "price" => (float) $currentBasePrice, // Set the fresh calculated price
                     "size" => $item->size,
-                    "image" => $item->product->image
+                    "image" => $product->image,
+                    "is_happy_hour" => $isHHActiveNow,
+                    "customizations" => $customizations
                 ];
             }
         }
 
         session()->put('cart', $cart);
-        return redirect()->route('cart.index')->with('success', 'Previous order added to cart!');
+        return redirect()->route('cart.index')->with('success', 'Manifest restored with current market valuation.');
     }
 
     public function claimReward(Request $request)
@@ -127,10 +151,20 @@ class OrderController extends Controller
         $subtotal = 0;
         $bulkSavings = 0;
 
-        // 🟢 HAPPY HOUR LOGIC: recalculate subtotal based on current time
         foreach ($cart as $details) {
             $product = Product::find($details['product_id']);
-            $currentUnitPrice = $product ? $product->happy_hour_price : $details['price'];
+            $currentUnitPrice = (float) $details['price'];
+            
+            // Re-verify Happy Hour pricing server-side at moment of transaction
+            if ($product && $product->is_happy_hour_active) {
+                $currentUnitPrice = (float) $product->happy_hour_price;
+            }
+
+            if (isset($details['customizations']) && is_array($details['customizations'])) {
+                foreach ($details['customizations'] as $addonPrice) {
+                    $currentUnitPrice += (float) $addonPrice;
+                }
+            }
             
             $linePrice = $currentUnitPrice * $details['quantity'];
             if ($details['quantity'] >= 6) {
@@ -178,8 +212,10 @@ class OrderController extends Controller
                 $realProductId = $details['product_id'] ?? intval($key);
                 $product = Product::find($realProductId);
                 
-                // 🟢 NEW: Capture live Happy Hour price at the moment of order commit
-                $appliedPrice = $product ? $product->happy_hour_price : $details['price'];
+                $appliedPrice = (float) $details['price'];
+                if ($product && $product->is_happy_hour_active) {
+                    $appliedPrice = (float) $product->happy_hour_price;
+                }
 
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -187,33 +223,19 @@ class OrderController extends Controller
                     'product_name' => $details['name'] ?? null,
                     'quantity' => $details['quantity'],
                     'price' => $appliedPrice,
-                    'size' => $details['size'] ?? 'Regular',
+                    'size' => $details['size'] ?? 'Standard',
+                    'customizations' => $details['customizations'] ?? null,
                 ]);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-                $product->stock_quantity -= $details['quantity'];
-                $product->save();
-=======
-=======
->>>>>>> parent of 54976f8 (Dynamic Happy Hour & Revenue Engine)
-=======
->>>>>>> parent of 54976f8 (Dynamic Happy Hour & Revenue Engine)
-                $product = Product::find($realProductId);
-                $product->decrement('stock_quantity', $details['quantity']);
->>>>>>> parent of 54976f8 (Dynamic Happy Hour & Revenue Engine)
-=======
-                $product->stock_quantity -= $details['quantity'];
-                $product->save();
->>>>>>> parent of 080ec9b (Merge branch 'main' of https://github.com/Loucho09/miks_coffee)
+                if ($product) {
+                    $product->decrement('stock_quantity', $details['quantity']);
 
-                if ($product->stock_quantity < 5) {
-                    try {
-                        Mail::to('admin@mikscoffee.com')->send(new LowStockAlert($product));
-                    } catch (\Exception $e) {
-                        Log::error("Low Stock Mail Failed: " . $e->getMessage());
+                    if ($product->stock_quantity < 5) {
+                        try {
+                            Mail::to('admin@mikscoffee.com')->send(new LowStockAlert($product));
+                        } catch (\Exception $e) {
+                            Log::error("Low Stock Mail Failed: " . $e->getMessage());
+                        }
                     }
                 }
             }
@@ -221,8 +243,7 @@ class OrderController extends Controller
             if ($user->referred_by && $user->orders()->count() === 1) {
                 $referrer = $user->referrer;
                 if ($referrer) {
-                    $referrer->loyalty_points += 50;
-                    $referrer->save();
+                    $referrer->increment('loyalty_points', 50);
                     PointTransaction::create([
                         'user_id' => $referrer->id,
                         'amount' => 50,
@@ -230,8 +251,7 @@ class OrderController extends Controller
                         'order_id' => $order->id
                     ]);
 
-                    $user->loyalty_points += 50;
-                    $user->save();
+                    $user->increment('loyalty_points', 50);
                     PointTransaction::create([
                         'user_id' => $user->id,
                         'amount' => 50,
@@ -242,8 +262,7 @@ class OrderController extends Controller
             }
 
             if ($pointsRedeemed > 0) {
-                $user->loyalty_points -= $pointsRedeemed;
-                $user->save();
+                $user->decrement('loyalty_points', $pointsRedeemed);
                 PointTransaction::create([
                     'user_id' => $user->id,
                     'amount' => -$pointsRedeemed,
@@ -252,8 +271,7 @@ class OrderController extends Controller
                 ]);
             }
 
-            $user->loyalty_points += 10;
-            $user->save();
+            $user->increment('loyalty_points', 10);
             PointTransaction::create([
                 'user_id' => $user->id,
                 'amount' => 10,
@@ -268,12 +286,15 @@ class OrderController extends Controller
 
             try {
                 Mail::to($user->email)->send(new OrderReceipt($order));
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+                Log::error("Receipt Mail Failed: " . $e->getMessage());
+            }
 
-            return redirect()->route('dashboard')->with('success', 'Order established! +10 Loyalty Points earned.');
+            return redirect()->route('checkout.receipt', $order->id)->with('success', 'Order established! +10 Loyalty Points earned.');
             
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error("Checkout Transaction Failed: " . $e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

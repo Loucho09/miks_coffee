@@ -132,13 +132,37 @@
                                 </button>
                             </x-slot>
                             <x-slot name="content">
-                                <div class="px-4 py-2 text-[10px] font-black text-stone-400 uppercase tracking-widest border-b border-stone-100 dark:border-stone-800 mb-1">Account</div>
-                                <x-dropdown-link :href="Auth::user()->usertype !== 'admin' ? route('dashboard') : route('admin.dashboard')">{{ __('Portal') }}</x-dropdown-link>
-                                <x-dropdown-link :href="route('profile.edit')">{{ __('Settings') }}</x-dropdown-link>
-                                <div class="border-t border-stone-100 dark:border-stone-800 my-1"></div>
+                                {{-- Improved Dropdown UI/UX --}}
+                                <div class="px-4 py-3 text-[10px] font-black text-stone-400 uppercase tracking-[0.25em] border-b border-stone-100 dark:border-stone-800/50 mb-1 italic">
+                                    {{ __('Account Access') }}
+                                </div>
+                                
+                                <x-dropdown-link :href="Auth::user()->usertype !== 'admin' ? route('dashboard') : route('admin.dashboard')" class="flex items-center gap-3 py-2.5 group/link">
+                                    <div class="w-8 h-8 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center group-hover/link:bg-amber-600/10 transition-colors">
+                                        <svg class="w-4 h-4 text-stone-400 group-hover/link:text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                                    </div>
+                                    <span class="text-[10px] font-black uppercase tracking-widest">{{ __('Dashboard') }}</span>
+                                </x-dropdown-link>
+
+                                <x-dropdown-link :href="route('profile.edit')" class="flex items-center gap-3 py-2.5 group/link">
+                                    <div class="w-8 h-8 rounded-lg bg-stone-100 dark:bg-stone-800 flex items-center justify-center group-hover/link:bg-amber-600/10 transition-colors">
+                                        <svg class="w-4 h-4 text-stone-400 group-hover/link:text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    </div>
+                                    <span class="text-[10px] font-black uppercase tracking-widest">{{ __('Settings') }}</span>
+                                </x-dropdown-link>
+
+                                <div class="border-t border-stone-100 dark:border-stone-800/50 my-1"></div>
+
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();" class="text-rose-600 font-bold">{{ __('Sign Out') }}</x-dropdown-link>
+                                    <x-dropdown-link :href="route('logout')" 
+                                        onclick="event.preventDefault(); this.closest('form').submit();" 
+                                        class="flex items-center gap-3 py-3 group/link hover:bg-rose-50 dark:hover:bg-rose-950/20">
+                                        <div class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/30 flex items-center justify-center group-hover/link:bg-rose-600 transition-colors">
+                                            <svg class="w-4 h-4 text-rose-600 group-hover/link:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                        </div>
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-rose-600">{{ __('Sign Out') }}</span>
+                                    </x-dropdown-link>
                                 </form>
                             </x-slot>
                         </x-dropdown>
