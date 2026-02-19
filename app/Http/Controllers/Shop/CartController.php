@@ -14,15 +14,10 @@ class CartController extends Controller
         $total = 0;
 
         foreach($cart as $details) {
-            $itemPrice = (float) $details['price'];
-            if (isset($details['customizations']) && is_array($details['customizations'])) {
-                foreach ($details['customizations'] as $addonPrice) {
-                    $itemPrice += (float) $addonPrice;
-                }
-            }
-            $total += $itemPrice * $details['quantity'];
+            $total += $details['price'] * $details['quantity'];
         }
 
+        // 🟢 NEW FEATURE: AI-Powered "Frequently Bought Together"
         $cartProductIds = collect($cart)->pluck('product_id')->toArray();
         $recommendations = Product::whereHas('category', function($q) {
                 $q->where('name', 'like', '%Pastry%')
@@ -43,17 +38,9 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
 
         $size = $request->size ?: 'Regular';
-        
-        $isHH = $product->is_happy_hour_active;
-        $basePrice = $isHH ? $product->happy_hour_price : ($request->price ?: $product->price);
+        $price = $request->price ?: $product->price;
 
-        $customizations = [];
-        if ($request->filled('customizations')) {
-            $customizations = json_decode($request->customizations, true) ?: [];
-        }
-
-        $customizationHash = md5(json_encode($customizations));
-        $cartKey = $product->id . '_' . $size . '_' . $customizationHash;
+        $cartKey = $product->id . '_' . $size;
 
         if(isset($cart[$cartKey])) {
             $cart[$cartKey]['quantity']++;
@@ -62,11 +49,9 @@ class CartController extends Controller
                 "product_id" => (int) $product->id,
                 "name" => $product->name,
                 "quantity" => 1,
-                "price" => (float) $basePrice, 
+                "price" => $price, 
                 "size" => $size,
-                "image" => $product->image,
-                "is_happy_hour" => $isHH,
-                "customizations" => $customizations 
+                "image" => $product->image
             ];
         }
 

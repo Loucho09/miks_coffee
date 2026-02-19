@@ -20,6 +20,7 @@ class HomeController extends Controller
             ->take(3)
             ->get();
 
+        // 🟢 NEW FEATURE: AI-Powered "Trending Now" (Top 3 in last 24h)
         $trendingProducts = Product::where('is_active', 1)
             ->withCount(['orderItems' => function($query) {
                 $query->where('created_at', '>=', now()->subDay());
@@ -28,11 +29,6 @@ class HomeController extends Controller
             ->take(3)
             ->get();
 
-        // 🟢 NEW FEATURE: Check if any active Happy Hour exists
-        $isHappyHour = Product::where('is_active', 1)
-            ->get()
-            ->some(fn($p) => $p->is_happy_hour_active);
-
-        return view('welcome', compact('topStreaks', 'featuredProducts', 'trendingProducts', 'isHappyHour'));
+        return view('welcome', compact('topStreaks', 'featuredProducts', 'trendingProducts'));
     }
 }

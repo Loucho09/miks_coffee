@@ -1,52 +1,26 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col gap-4">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div class="flex items-center gap-3 sm:gap-4">
-                    <div class="hidden md:flex w-12 h-12 bg-stone-900 dark:bg-amber-600 rounded-2xl items-center justify-center shadow-lg transition-colors duration-500">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                    </div>
-                    <div>
-                        <h2 class="font-black text-lg sm:text-3xl text-stone-900 dark:text-white leading-tight uppercase tracking-tighter italic transition-colors duration-500">
-                            {{ __('Full Menu') }}
-                        </h2>
-                        <p class="text-[7px] sm:text-[10px] text-stone-500 dark:text-stone-400 mt-0.5 font-black uppercase tracking-[0.3em]">Welcome: {{ Auth::user()->name }}</p>
-                    </div>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="flex items-center gap-3 sm:gap-4">
+                <div class="hidden md:flex w-12 h-12 bg-stone-900 dark:bg-amber-600 rounded-2xl items-center justify-center shadow-lg transition-colors duration-500">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                 </div>
-                
-                <form method="GET" action="{{ route('home') }}" class="relative w-full md:w-80 group">
-                    <input type="text" name="search" value="{{ request('search') }}" 
-                           placeholder="Filter inventory..." 
-                           class="w-full pl-10 pr-4 py-2 rounded-xl sm:rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 text-stone-900 dark:text-white placeholder-stone-400 transition-all text-[10px] sm:text-xs font-bold uppercase tracking-tight outline-none">
-                    <svg class="w-3.5 h-3.5 absolute left-3.5 top-2.5 sm:top-3 text-stone-400 group-focus-within:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </form>
-            </div>
-
-            <div class="w-full overflow-hidden pt-2">
-                <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-nowrap scroll-smooth touch-pan-x">
-                    {{-- FEATURE: Reset Action --}}
-                    @if(request()->filled('category') || request()->filled('search'))
-                        <a href="{{ route('home') }}" 
-                           class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-widest bg-red-600 text-white shadow-lg hover:bg-red-700 transition-all duration-300">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            Clear
-                        </a>
-                    @endif
-
-                    <a href="{{ route('home') }}" 
-                       class="shrink-0 whitespace-nowrap px-4 py-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-widest transition-all duration-300 {{ !request('category') ? 'bg-stone-900 dark:bg-amber-600 text-white shadow-lg' : 'bg-white dark:bg-stone-900 text-stone-400 border border-stone-200 dark:border-stone-800 hover:border-amber-500/50' }}">
-                        Full Menu
-                    </a>
-                    @foreach($categories as $category)
-                        <a href="{{ route('home', ['category' => $category->id]) }}" 
-                           class="shrink-0 whitespace-nowrap px-4 py-2 rounded-lg sm:rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-widest transition-all duration-300 {{ request('category') == $category->id ? 'bg-stone-900 dark:bg-amber-600 text-white shadow-lg' : 'bg-white dark:bg-stone-900 text-stone-400 border border-stone-200 dark:border-stone-800 hover:border-amber-500/50' }}">
-                            {{ $category->name }}
-                        </a>
-                    @endforeach
+                <div>
+                    <h2 class="font-black text-lg sm:text-3xl text-stone-900 dark:text-white leading-tight uppercase tracking-tighter italic transition-colors duration-500">
+                        {{ __('Order Manifest') }}
+                    </h2>
+                    <p class="text-[7px] sm:text-[10px] text-stone-500 dark:text-stone-400 mt-0.5 font-black uppercase tracking-[0.3em]">Operator: {{ Auth::user()->name }}</p>
                 </div>
             </div>
+            
+            <form method="GET" action="{{ route('home') }}" class="relative w-full md:w-80 group">
+                <input type="text" name="search" value="{{ request('search') }}" 
+                       placeholder="Filter inventory..." 
+                       class="w-full pl-10 pr-4 py-2 rounded-xl sm:rounded-2xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 text-stone-900 dark:text-white placeholder-stone-400 transition-all text-[10px] sm:text-xs font-bold uppercase tracking-tight outline-none">
+                <svg class="w-3.5 h-3.5 absolute left-3.5 top-2.5 sm:top-3 text-stone-400 group-focus-within:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </form>
         </div>
     </x-slot>
 
@@ -58,17 +32,35 @@
             if(product.stock_quantity <= 0) return;
             this.selectedProduct = product;
             if (!product.sizes || product.sizes.length === 0) {
-                this.selectedSize = { id: 'standard', size: 'Standard', price: product.is_happy_hour_active ? product.happy_hour_price : product.price };
+                this.selectedSize = { id: 'standard', size: 'Standard', price: product.price };
             } else { this.selectedSize = null; }
             this.showModal = true;
         }
     }">
         <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
             
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-8 mt-6 sm:mt-0">
+            {{-- Compact Sticky Category Bar --}}
+            <div class="sticky top-16 md:top-20 z-30 -mx-2 px-2 py-2 bg-stone-50/80 dark:bg-stone-950/90 backdrop-blur-xl border-b border-stone-200 dark:border-stone-800 transition-all duration-500">
+                <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-nowrap scroll-smooth md:justify-center">
+                    <a href="{{ route('home') }}" 
+                       class="whitespace-nowrap px-4 py-1.5 rounded-lg sm:rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-widest transition-all duration-300 {{ !request('category') ? 'bg-stone-900 dark:bg-amber-600 text-white shadow-lg' : 'bg-white dark:bg-stone-900 text-stone-400 border border-stone-200 dark:border-stone-800 hover:border-amber-500/50' }}">
+                        Full Stack
+                    </a>
+                    @foreach($categories as $category)
+                        <a href="{{ route('home', ['category' => $category->id]) }}" 
+                           class="whitespace-nowrap px-4 py-1.5 rounded-lg sm:rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-widest transition-all duration-300 {{ request('category') == $category->id ? 'bg-stone-900 dark:bg-amber-600 text-white shadow-lg' : 'bg-white dark:bg-stone-900 text-stone-400 border border-stone-200 dark:border-stone-800 hover:border-amber-500/50' }}">
+                            {{ $category->name }}
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Optimized 2-Column Mobile Grid --}}
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-8 mt-6 sm:mt-10">
                 @foreach($products as $product)
                     <div class="group relative flex flex-col h-full bg-white dark:bg-stone-900 rounded-[1.5rem] sm:rounded-[2rem] p-2.5 sm:p-4 border border-stone-200 dark:border-stone-800 shadow-sm transition-all duration-500 hover:shadow-xl hover:border-amber-500/30">
                         
+                        {{-- Component Visuals --}}
                         <div class="relative aspect-square rounded-xl sm:rounded-[2rem] bg-stone-100 dark:bg-stone-950 overflow-hidden flex items-center justify-center border border-stone-50 dark:border-stone-800 transition-colors duration-500">
                             @if($product->image)
                                 <img src="{{ asset('storage/' . $product->image) }}" 
@@ -76,15 +68,6 @@
                                      alt="{{ $product->name }}">
                             @else
                                 <span class="font-serif italic text-4xl sm:text-8xl opacity-5 uppercase text-stone-900 dark:text-white select-none transition-opacity group-hover:opacity-10">{{ substr($product->name, 0, 1) }}</span>
-                            @endif
-
-                            @if($product->is_happy_hour_active)
-                                <div class="absolute top-2 left-2 sm:top-4 sm:left-4 z-10">
-                                    <div class="bg-amber-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl shadow-lg border border-amber-500/30 flex items-center gap-1 sm:gap-1.5 animate-pulse">
-                                        <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path></svg>
-                                        <span class="font-black text-[6px] sm:text-[8px] uppercase tracking-widest leading-none">Happy Hour</span>
-                                    </div>
-                                </div>
                             @endif
 
                             @if($product->stock_quantity <= 0)
@@ -96,6 +79,7 @@
                             @endif
                         </div>
 
+                        {{-- Metadata Area --}}
                         <div class="mt-3 sm:mt-4 flex flex-col flex-1 px-1">
                             <div class="flex justify-between items-start gap-2 mb-1.5">
                                 <h3 class="text-stone-900 dark:text-white font-black text-[10px] sm:text-lg leading-tight uppercase tracking-tight break-words line-clamp-2 transition-colors duration-500">
@@ -111,14 +95,9 @@
 
                             <div class="mt-auto flex items-center justify-between pt-2 border-t border-stone-100 dark:border-stone-800">
                                 <div class="flex flex-col">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="text-amber-600 dark:text-amber-500 font-black text-sm sm:text-2xl leading-none transition-colors duration-500">
-                                            ₱{{ number_format($product->is_happy_hour_active ? $product->happy_hour_price : ($product->sizes->count() > 0 ? $product->sizes->min('price') : $product->price), 0) }}
-                                        </span>
-                                        @if($product->is_happy_hour_active)
-                                            <span class="text-[7px] sm:text-[10px] text-stone-400 line-through font-bold opacity-60">₱{{ number_format($product->price, 0) }}</span>
-                                        @endif
-                                    </div>
+                                    <span class="text-amber-600 dark:text-amber-500 font-black text-sm sm:text-2xl leading-none transition-colors duration-500">
+                                        ₱{{ number_format($product->sizes->count() > 0 ? $product->sizes->min('price') : $product->price, 0) }}
+                                    </span>
                                     <span class="text-[6px] sm:text-[7px] text-stone-400 font-bold uppercase tracking-widest mt-0.5">Asset Val.</span>
                                 </div>
                                 
@@ -133,6 +112,7 @@
                 @endforeach
             </div>
 
+            {{-- Null Case --}}
             @if($products->isEmpty())
                 <div class="flex flex-col items-center justify-center py-24 text-center">
                     <div class="w-16 h-16 rounded-2xl bg-stone-100 dark:bg-stone-900 flex items-center justify-center mb-4 border border-stone-200 dark:border-stone-800">
@@ -167,32 +147,26 @@
                     <div class="space-y-2 mb-8 max-h-60 overflow-y-auto no-scrollbar pr-1">
                         <template x-if="selectedProduct?.sizes && selectedProduct.sizes.length > 0">
                             <template x-for="sizeObj in selectedProduct?.sizes" :key="sizeObj.id">
-                                <label class="flex items-center justify-between p-3.5 sm:p-4 rounded-xl border-2 cursor-pointer transition-all" 
-                                       :class="selectedSize?.id === sizeObj.id ? 'border-amber-600 bg-amber-500/5' : 'border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-950'">
+                                <label class="flex items-center justify-between p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border-2 cursor-pointer transition-all duration-300" 
+                                       :class="selectedSize?.id === sizeObj.id ? 'border-amber-600 bg-amber-500/5' : 'border-stone-100 dark:border-stone-800/50 bg-stone-50/50 dark:bg-stone-950/30 hover:border-amber-500/30'">
                                     <div class="flex items-center gap-3">
-                                        <input type="radio" name="size_id" :value="sizeObj.id" required @change="selectedSize = { id: sizeObj.id, size: sizeObj.size, price: selectedProduct.is_happy_hour_active ? (sizeObj.price * (1 - (selectedProduct.happy_hour_discount / 100))) : sizeObj.price }" class="w-4 h-4 text-amber-600 focus:ring-0 bg-transparent border-stone-300 dark:border-stone-700">
+                                        <input type="radio" name="size_id" :value="sizeObj.id" required @change="selectedSize = sizeObj" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-600 focus:ring-0 bg-transparent border-stone-300 dark:border-stone-700">
                                         <span class="font-black text-[9px] sm:text-[10px] uppercase tracking-widest text-stone-900 dark:text-white" x-text="sizeObj.size"></span>
                                     </div>
-                                    <div class="flex flex-col items-end">
-                                        <span class="font-black text-sm text-amber-600 italic" x-text="'₱' + parseFloat(selectedProduct.is_happy_hour_active ? (sizeObj.price * (1 - (selectedProduct.happy_hour_discount / 100))) : sizeObj.price).toFixed(0)"></span>
-                                        <template x-if="selectedProduct.is_happy_hour_active"><span class="text-[7px] text-stone-400 line-through font-bold opacity-50" x-text="'₱' + parseFloat(sizeObj.price).toFixed(0)"></span></template>
-                                    </div>
+                                    <span class="font-black text-sm sm:text-base text-amber-600 dark:text-amber-500 italic" x-text="'₱' + parseFloat(sizeObj.price).toFixed(0)"></span>
                                 </label>
                             </template>
                         </template>
                         <template x-if="!selectedProduct?.sizes || selectedProduct.sizes.length === 0">
                             <div class="p-4 sm:p-6 text-center bg-stone-50 dark:bg-stone-950 rounded-2xl sm:rounded-[2rem] border-2 border-stone-100 dark:border-stone-800 border-dashed">
                                 <p class="text-[8px] sm:text-[10px] font-black text-stone-400 uppercase italic">Standard configuration active</p>
-                                <template x-if="selectedProduct?.is_happy_hour_active">
-                                    <p class="text-[7px] text-amber-600 font-black uppercase tracking-widest mt-1">Happy Hour Discount Applied</p>
-                                </template>
                             </div>
                         </template>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 sm:gap-3">
-                        <button type="button" @click="showModal = false" class="py-3.5 sm:py-4 text-stone-400 font-black uppercase text-[8px] sm:text-[9px] tracking-widest">Discard</button>
-                        <button type="submit" :disabled="!selectedSize" class="py-3.5 sm:py-4 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-xl sm:rounded-2xl font-black uppercase text-[8px] sm:text-[9px] tracking-widest active:scale-95 shadow-xl disabled:opacity-20">Commit order</button>
+                        <button type="button" @click="showModal = false" class="py-3.5 sm:py-4 text-stone-400 font-black uppercase text-[8px] sm:text-[9px] tracking-widest hover:text-stone-900 dark:hover:text-white transition-colors">Discard</button>
+                        <button type="submit" :disabled="!selectedSize" class="py-3.5 sm:py-4 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-xl sm:rounded-2xl font-black uppercase text-[8px] sm:text-[9px] tracking-widest active:scale-95 transition-all shadow-xl disabled:opacity-20">Commit order</button>
                     </div>
                 </form>
             </div>
@@ -200,6 +174,8 @@
     </div>
 </x-app-layout>
 
+
+<!-- css -->
 <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

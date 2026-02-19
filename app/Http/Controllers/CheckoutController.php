@@ -17,6 +17,7 @@ class CheckoutController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
+        
         $cart = session('cart');
 
         if (!$cart || count($cart) === 0) {
@@ -25,20 +26,16 @@ class CheckoutController extends Controller
 
         $subtotal = 0;
         foreach ($cart as $details) {
-            $itemTotal = (float) $details['price'];
-            if (isset($details['customizations']) && is_array($details['customizations'])) {
-                foreach ($details['customizations'] as $addonPrice) {
-                    $itemTotal += (float) $addonPrice;
-                }
-            }
-            $subtotal += $itemTotal * $details['quantity'];
+            $subtotal += $details['price'] * $details['quantity'];
         }
 
+        $discount = 0;
         $pointsToRedeem = 50;
 
         return DB::transaction(function () use ($request, $user, $cart, $subtotal, $pointsToRedeem) {
             $discount = 0;
 
+            // 🟢 REDEMPTION LOGIC
             if ($request->has('redeem_points') && $user->loyalty_points >= $pointsToRedeem) {
                 $user->loyalty_points -= $pointsToRedeem;
                 $user->save();
@@ -51,6 +48,7 @@ class CheckoutController extends Controller
                 ]);
             }
 
+            // Create the Order
             $order = Order::create([
                 'user_id' => $user->id,
                 'total_price' => max(0, $subtotal - $discount),
@@ -58,19 +56,23 @@ class CheckoutController extends Controller
                 'order_number' => 'ORD-' . strtoupper(uniqid()),
             ]);
 
+            // Save items to database and update stock
             foreach ($cart as $id => $details) {
+                // 🟢 FIXED ALTERNATIVE: Extract integer ID from key or internal value
                 $rawId = isset($details['product_id']) ? $details['product_id'] : $id;
+                
+                // If rawId is "2_Standard", this converts it to integer 2
                 $productId = (int) (is_string($rawId) ? explode('_', $rawId)[0] : $rawId);
 
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $productId,
+                    'product_id' => $productId, // Now strictly a numeric integer
                     'quantity' => $details['quantity'],
-                    'price' => $details['price'], 
+                    'price' => $details['price'],
                     'size' => $details['size'] ?? 'Standard',
-                    'customizations' => $details['customizations'] ?? null,
                 ]);
 
+                // Reduce Stock
                 $product = Product::find($productId);
                 if ($product) {
                     $product->stock_quantity -= $details['quantity'];
@@ -78,8 +80,14 @@ class CheckoutController extends Controller
                 }
             }
 
+<<<<<<< HEAD
             $user->loyalty_points += 10;
             $user->save();
+=======
+            // 🟢 EARNING LOGIC
+            $user->increment('loyalty_points', 10);
+            
+>>>>>>> parent of 54976f8 (Dynamic Happy Hour & Revenue Engine)
             PointTransaction::create([
                 'user_id' => $user->id,
                 'amount' => 10,

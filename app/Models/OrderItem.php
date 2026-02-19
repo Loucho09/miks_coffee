@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth; // 🟢 Alternative: Use the Auth facade
 
 class OrderItem extends Model
 {
@@ -18,14 +18,6 @@ class OrderItem extends Model
         'quantity',
         'price',
         'size', 
-        'customizations', // 🟢 NEW: Stores JSON add-ons
-    ];
-
-    /**
-     * 🟢 NEW FEATURE: Automatically cast JSON customizations to a PHP array.
-     */
-    protected $casts = [
-        'customizations' => 'array',
     ];
 
     public function product(): BelongsTo
@@ -38,6 +30,11 @@ class OrderItem extends Model
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * 🟢 ALTERNATIVE FIX: Link item to its review.
+     * We use a type-hinted variable to satisfy the Intelephense extension
+     * and prevent the "Undefined method id" error.
+     */
     public function review(): HasOne
     {
         return $this->hasOne(Review::class, 'product_id', 'product_id')
@@ -46,23 +43,17 @@ class OrderItem extends Model
                             $query->where('user_id', $this->order->user_id);
                         } else {
                             /** @var int|null $currentUserId */
-                            $currentUserId = Auth::id();
+                            $currentUserId = Auth::id(); // Use Facade for better IDE support
                             $query->where('user_id', $currentUserId);
                         }
                     });
     }
 
     /**
-     * 🟢 UPDATED: Calculate Line Total including customizations.
+     * 🟢 NEW FEATURE: Line Total Calculation
      */
     public function getLineTotalAttribute(): float
     {
-        $unitPrice = (float) $this->price;
-        if ($this->customizations) {
-            foreach ($this->customizations as $cost) {
-                $unitPrice += (float) $cost;
-            }
-        }
-        return (float) ($unitPrice * $this->quantity);
+        return (float) ($this->price * $this->quantity);
     }
 }
