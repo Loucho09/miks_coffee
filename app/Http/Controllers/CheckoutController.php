@@ -81,8 +81,14 @@ class CheckoutController extends Controller
             }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             $user->loyalty_points += 10;
             $user->save();
+=======
+            // 🟢 EARNING LOGIC
+            $user->increment('loyalty_points', 10);
+            
+>>>>>>> parent of 54976f8 (Dynamic Happy Hour & Revenue Engine)
 =======
             // 🟢 EARNING LOGIC
             $user->increment('loyalty_points', 10);

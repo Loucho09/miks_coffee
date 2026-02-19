@@ -214,9 +214,12 @@ class OrderController extends Controller
                 ]);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                 $product->stock_quantity -= $details['quantity'];
                 $product->save();
 =======
+=======
+>>>>>>> parent of 54976f8 (Dynamic Happy Hour & Revenue Engine)
                 $product = Product::find($realProductId);
                 $product->decrement('stock_quantity', $details['quantity']);
 >>>>>>> parent of 54976f8 (Dynamic Happy Hour & Revenue Engine)
