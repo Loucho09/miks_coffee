@@ -96,42 +96,15 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
-        $error = null;
         $cart = session()->get('cart');
-
         if (!$cart || count($cart) === 0) {
-            $error = 'Cart is empty!';
+            return redirect()->route('cart.index')->with('error', 'Cart is empty!');
         }
 
         /** @var User $user */
-        $user = Auth::user();
+        $user = Auth::user(); 
         $claimed = session()->get('claimed_reward');
-
-        $discount = 0;
-        $pointsRedeemed = 0;
-        $rewardType = null;
-
-        if (is_null($error)) {
-            $orderData = $this->calculateDiscountAndPoints($user, $claimed, $request);
-
-            if (!is_null($orderData['error'])) {
-                $error = $orderData['error'];
-            } else {
-                $discount = $orderData['discount'];
-                $pointsRedeemed = $orderData['pointsRedeemed'];
-                $rewardType = $orderData['rewardType'];
-            }
-        }
-
-        if ($error) {
-            return redirect()->route('cart.index')->with('error', $error);
-        }
-
-        // ... remaining order processing logic ...
-    }
-
-    private function calculateDiscountAndPoints(User $user, $claimed, Request $request): array
-    {
+        
         $discount = 0;
         $pointsRedeemed = 0;
         $rewardType = null;
@@ -139,28 +112,27 @@ class OrderController extends Controller
         if ($claimed) {
             if (($user->loyalty_points ?? 0) < $claimed['points']) {
                 session()->forget('claimed_reward');
-                return ['error' => 'Insufficient points.', 'discount' => 0, 'pointsRedeemed' => 0, 'rewardType' => null];
+                return redirect()->route('cart.index')->with('error', 'Insufficient points.');
             }
-
+            
             $pointsRedeemed = (int) $claimed['points'];
             $rewardType = $claimed['name'];
-            $discount = (float) $claimed['value'];
+            $discount = (float) $claimed['value']; 
         } elseif ($request->has('redeem_points') && ($user->loyalty_points ?? 0) >= 50) {
             $discount = 50;
-            $pointsRedeemed = 50;
-            $rewardType = 'points';
-        }
-
-        return ['error' => null, 'discount' => $discount, 'pointsRedeemed' => $pointsRedeemed, 'rewardType' => $rewardType];
-    }
             $pointsRedeemed = 50;
             $rewardType = 'Standard Discount';
         }
 
         $subtotal = 0;
         $bulkSavings = 0;
+
+        // 🟢 HAPPY HOUR LOGIC: recalculate subtotal based on current time
         foreach ($cart as $details) {
-            $linePrice = $details['price'] * $details['quantity'];
+            $product = Product::find($details['product_id']);
+            $currentUnitPrice = $product ? $product->happy_hour_price : $details['price'];
+            
+            $linePrice = $currentUnitPrice * $details['quantity'];
             if ($details['quantity'] >= 6) {
                 $lineDiscount = $linePrice * 0.10;
                 $bulkSavings += $lineDiscount;
@@ -204,15 +176,21 @@ class OrderController extends Controller
 
             foreach ($cart as $key => $details) {
                 $realProductId = $details['product_id'] ?? intval($key);
+                $product = Product::find($realProductId);
+                
+                // 🟢 NEW: Capture live Happy Hour price at the moment of order commit
+                $appliedPrice = $product ? $product->happy_hour_price : $details['price'];
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $realProductId,
                     'product_name' => $details['name'] ?? null,
                     'quantity' => $details['quantity'],
-                    'price' => $details['price'],
+                    'price' => $appliedPrice,
                     'size' => $details['size'] ?? 'Regular',
                 ]);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -226,6 +204,10 @@ class OrderController extends Controller
                 $product = Product::find($realProductId);
                 $product->decrement('stock_quantity', $details['quantity']);
 >>>>>>> parent of 54976f8 (Dynamic Happy Hour & Revenue Engine)
+=======
+                $product->stock_quantity -= $details['quantity'];
+                $product->save();
+>>>>>>> parent of 080ec9b (Merge branch 'main' of https://github.com/Loucho09/miks_coffee)
 
                 if ($product->stock_quantity < 5) {
                     try {
