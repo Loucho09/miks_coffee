@@ -61,7 +61,7 @@
                 document.documentElement.classList.remove('dark');
             }
         </script>
-        <style>
+        <style> 
             .shadow-connected { box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5); }
             [x-cloak] { display: none !important; }
             .no-scrollbar::-webkit-scrollbar { display: none; }
