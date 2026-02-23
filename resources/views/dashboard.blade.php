@@ -47,7 +47,7 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 
-    <div x-data="{ reviewModal: false, selectedProduct: '', selectedItemId: '' }" class="py-4 sm:py-12 bg-stone-50 dark:bg-stone-950 min-h-screen transition-all duration-500">
+    <div x-data="{ reviewModal: false, giftModal: false, selectedProduct: '', selectedItemId: '' }" class="py-4 sm:py-12 bg-stone-50 dark:bg-stone-950 min-h-screen transition-all duration-500">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             @if(session('success'))
@@ -67,6 +67,18 @@
                         Good {{ date('H') < 12 ? 'Morning' : (date('H') < 17 ? 'Afternoon' : 'Evening') }}, <br class="hidden sm:block"> {{ $user->name }}
                     </h2>
                 </div>
+
+                {{-- Asset Transfer Shortcut --}}
+                <div @click="giftModal = true" class="cursor-pointer group flex items-center gap-6 bg-white dark:bg-stone-900 px-8 py-5 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-premium transition-all hover:border-amber-500/50 shrink-0 self-start">
+                    <div class="flex flex-col text-right">
+                        <span class="text-[8px] font-black text-amber-600 uppercase tracking-[0.3em] mb-1">Transfer Protocol</span>
+                        <span class="text-xs font-black text-stone-900 dark:text-white tracking-widest uppercase italic">Gift Points</span>
+                    </div>
+                    <div class="p-3 bg-stone-50 dark:bg-white/5 group-hover:bg-amber-600 rounded-2xl text-stone-900 dark:text-white group-hover:text-white transition-all shadow-inner">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                    </div>
+                </div>
+
                 <div class="flex items-center gap-3 sm:gap-5 bg-white dark:bg-stone-900 px-5 py-3 sm:px-8 sm:py-5 rounded-2xl sm:rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-premium shrink-0 self-start group transition-all">
                     <svg class="w-5 h-5 sm:w-8 sm:h-8 {{ $streakCount > 0 ? 'text-amber-500' : 'text-stone-300 dark:text-stone-700' }}" fill="currentColor" viewBox="0 0 20 20"><path d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-1.513-1.155-2.452a10.11 10.11 0 00-.4-1.045zM10 17a1 1 0 100-2 1 1 0 000 2z" /></svg>
                     <div class="flex flex-col">
@@ -356,9 +368,31 @@
             </div>
         </div>
 
+        {{-- 🟢 MODAL: Point Transfer Protocol --}}
+        <div x-show="giftModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-950/90 backdrop-blur-xl">
+            <div class="bg-white dark:bg-stone-900 rounded-[3rem] p-10 w-full max-w-md border border-stone-200 dark:border-stone-800" @click.away="giftModal = false">
+                <h3 class="text-2xl font-black text-stone-900 dark:text-white uppercase tracking-tighter italic mb-8 text-center">Transfer Protocol</h3>
+                <form action="{{ route('orders.transfer_points') }}" method="POST" class="space-y-6">
+                    @csrf
+                    <div>
+                        <label class="block text-[8px] font-black uppercase tracking-[0.4em] text-stone-500 mb-2 italic">Recipient Peer Email</label>
+                        <input type="email" name="recipient_email" required class="w-full px-6 py-4 rounded-2xl bg-stone-50 dark:bg-stone-950 border-stone-100 dark:border-stone-800 text-stone-900 dark:text-white font-black outline-none focus:border-amber-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-black uppercase tracking-[0.4em] text-stone-500 mb-2 italic">PTS Amount</label>
+                        <input type="number" name="amount" required min="5" max="{{ $dashPoints }}" class="w-full px-6 py-4 rounded-2xl bg-stone-50 dark:bg-stone-950 border-stone-100 dark:border-stone-800 text-stone-900 dark:text-white font-black outline-none focus:border-amber-500 transition-all">
+                    </div>
+                    <div class="flex gap-4 pt-6">
+                        <button type="button" @click="giftModal = false" class="flex-1 py-4 border border-stone-200 dark:border-stone-800 text-stone-500 rounded-2xl font-black uppercase text-[10px] tracking-widest transition hover:bg-stone-50 dark:hover:bg-stone-800">Abort</button>
+                        <button type="submit" class="flex-1 py-4 bg-amber-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-amber-600/30 active:scale-95 transition">Authorize</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         {{-- Review Modal --}}
         <div x-show="reviewModal" class="fixed inset-0 z-[100] overflow-y-auto flex items-center justify-center p-2 sm:p-4 bg-stone-950/95 backdrop-blur-2xl" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
-            <div class="bg-white dark:bg-stone-900 w-full max-w-xl rounded-[2.5rem] sm:rounded-[4.5rem] border border-stone-200 dark:border-stone-800 shadow-connected overflow-hidden relative transition-all duration-500" @click.away="reviewModal = false">
+            <div class="bg-white dark:bg-stone-900 w-full max-w-xl rounded-[2.5rem] sm:rounded-[4.5rem] border border-stone-200 dark:border-stone-800 shadow-premium overflow-hidden relative transition-all duration-500" @click.away="reviewModal = false">
                 <div class="absolute top-0 right-0 p-6 sm:p-10">
                     <button @click="reviewModal = false" class="p-2 sm:p-4 text-stone-400 hover:text-stone-900 dark:hover:text-white bg-stone-50 dark:bg-stone-950 rounded-xl sm:rounded-2xl border border-stone-100 dark:border-stone-800 transition-all active:scale-90 group">
                         <svg class="h-4 w-4 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>

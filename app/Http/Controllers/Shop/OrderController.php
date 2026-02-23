@@ -403,4 +403,48 @@ class OrderController extends Controller
 
         return view('emails.order_receipt', compact('order', 'tier'));
     }
+
+    /**
+     * Peer-to-Peer Point Transfer Protocol
+     * Relocated logic from WalletController to existing OrderController.
+     */
+    public function transferPoints(Request $request)
+    {
+        $request->validate([
+            'recipient_email' => 'required|email|exists:users,email',
+            'amount' => 'required|integer|min:5',
+        ]);
+
+        /** @var User $sender */
+        $sender = Auth::user();
+        $recipient = User::where('email', $request->recipient_email)->first();
+
+        if ($sender->id === $recipient->id) {
+            return back()->with('error', 'Operational Fault: Gifting to source account restricted.');
+        }
+
+        if ($sender->loyalty_points < $request->amount) {
+            return back()->with('error', 'Insufficient Loyalty Assets for transmission.');
+        }
+
+        DB::transaction(function () use ($sender, $recipient, $request) {
+            $amount = (int) $request->amount;
+
+            $sender->decrement('loyalty_points', $amount);
+            PointTransaction::create([
+                'user_id' => $sender->id,
+                'amount' => -$amount,
+                'description' => "Transferred points to {$recipient->name}"
+            ]);
+
+            $recipient->increment('loyalty_points', $amount);
+            PointTransaction::create([
+                'user_id' => $recipient->id,
+                'amount' => $amount,
+                'description' => "Received points from {$sender->name}"
+            ]);
+        });
+
+        return back()->with('success', 'Asset Protocol: Points successfully transmitted.');
+    }
 }
