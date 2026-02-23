@@ -40,25 +40,19 @@ class OrderController extends Controller
             $product = $item->product;
             if (!$product || !$product->is_active || $product->stock_quantity <= 0) continue;
 
-            // 🟢 REAL-TIME VALUATION: Ignore old order price and check current Happy Hour status
             $isHHActiveNow = $product->is_happy_hour_active;
             $currentBasePrice = 0;
 
             if ($product->sizes->count() > 0) {
-                // Determine the original size-specific price from current product configuration
                 $sizeObj = $product->sizes->where('size', $item->size)->first();
                 $originalBasePrice = $sizeObj ? (float)$sizeObj->price : (float)$product->price;
-                
-                // Recalculate based on current promo eligibility
                 $currentBasePrice = $isHHActiveNow 
                     ? ($originalBasePrice * (1 - ($product->happy_hour_discount / 100))) 
                     : $originalBasePrice;
             } else {
-                // Fallback for standard items without size variants
                 $currentBasePrice = $isHHActiveNow ? $product->happy_hour_price : $product->price;
             }
 
-            // Generate unique manifest key to preserve customization variants (Feature 3)
             $customizations = $item->customizations ?? [];
             $customizationHash = md5(json_encode($customizations));
             $cartKey = "itm_" . $item->product_id . "_" . str_replace([' ', "'"], ['_', ''], $item->size) . "_" . $customizationHash;
@@ -70,7 +64,7 @@ class OrderController extends Controller
                     "product_id" => (int) $item->product_id,
                     "name" => $product->name,
                     "quantity" => $item->quantity,
-                    "price" => (float) $currentBasePrice, // Set the fresh calculated price
+                    "price" => (float) $currentBasePrice, 
                     "size" => $item->size,
                     "image" => $product->image,
                     "is_happy_hour" => $isHHActiveNow,
@@ -81,6 +75,56 @@ class OrderController extends Controller
 
         session()->put('cart', $cart);
         return redirect()->route('cart.index')->with('success', 'Manifest restored with current market valuation.');
+    }
+
+    /**
+     * 🟢 FAVORITE REORDER PROTOCOL
+     * Restores a specific product configuration based on frequency.
+     */
+    public function reorderFavorite(Request $request)
+    {
+        $product = Product::with('sizes')->findOrFail($request->product_id);
+        $cart = session()->get('cart', []);
+
+        if (!$product->is_active || $product->stock_quantity <= 0) {
+            return redirect()->back()->with('error', 'Asset is currently depleted or inactive.');
+        }
+
+        $size = $request->size;
+        $isHHActiveNow = $product->is_happy_hour_active;
+        $currentBasePrice = 0;
+
+        if ($product->sizes->count() > 0) {
+            $sizeObj = $product->sizes->where('size', $size)->first();
+            $originalBasePrice = $sizeObj ? (float)$sizeObj->price : (float)$product->price;
+            $currentBasePrice = $isHHActiveNow 
+                ? ($originalBasePrice * (1 - ($product->happy_hour_discount / 100))) 
+                : $originalBasePrice;
+        } else {
+            $currentBasePrice = $isHHActiveNow ? $product->happy_hour_price : $product->price;
+        }
+
+        $customizations = json_decode($request->customizations, true) ?? [];
+        $customizationHash = md5(json_encode($customizations));
+        $cartKey = "itm_" . $product->id . "_" . str_replace([' ', "'"], ['_', ''], $size) . "_" . $customizationHash;
+
+        if (isset($cart[$cartKey])) {
+            $cart[$cartKey]['quantity']++;
+        } else {
+            $cart[$cartKey] = [
+                "product_id" => (int) $product->id,
+                "name" => $product->name,
+                "quantity" => 1,
+                "price" => (float) $currentBasePrice,
+                "size" => $size,
+                "image" => $product->image,
+                "is_happy_hour" => $isHHActiveNow,
+                "customizations" => $customizations
+            ];
+        }
+
+        session()->put('cart', $cart);
+        return redirect()->route('cart.index')->with('success', 'Favorite asset restored to active manifest.');
     }
 
     public function claimReward(Request $request)
@@ -155,7 +199,6 @@ class OrderController extends Controller
             $product = Product::find($details['product_id']);
             $currentUnitPrice = (float) $details['price'];
             
-            // Re-verify Happy Hour pricing server-side at moment of transaction
             if ($product && $product->is_happy_hour_active) {
                 $currentUnitPrice = (float) $product->happy_hour_price;
             }

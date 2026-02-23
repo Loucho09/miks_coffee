@@ -20,7 +20,7 @@ class MenuController extends Controller
                   ->orWhere('description', 'like', '%' . $request->search . '%');
             });
         }
-        $products = $query->paginate(10)->withQueryString();
+        $products = $query->paginate(25)->withQueryString();
         return view('admin.menu.index', compact('products'));
     }
 
@@ -140,5 +140,27 @@ class MenuController extends Controller
             $product->delete();
         }
         return redirect()->route('admin.menu.index', ['page' => $request->input('page', 1)])->with('success', count($ids) . ' items archived.');
+    }
+
+    /**
+     * 🟢 NEW FEATURE: Bulk Golden Hour Protocol
+     */
+    public function bulkGoldenHour(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:products,id',
+            'happy_hour_discount' => 'required|integer|min:0|max:100',
+            'happy_hour_start' => 'required',
+            'happy_hour_end' => 'required',
+        ]);
+
+        Product::whereIn('id', $request->ids)->update([
+            'happy_hour_discount' => $request->happy_hour_discount,
+            'happy_hour_start' => $request->happy_hour_start,
+            'happy_hour_end' => $request->happy_hour_end,
+        ]);
+
+        return redirect()->back()->with('success', 'Golden Hour Protocol applied to ' . count($request->ids) . ' manifest units.');
     }
 }

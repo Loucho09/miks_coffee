@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\PointTransaction;
 use App\Models\LoginHistory;
+use App\Models\OrderItem;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -121,6 +123,20 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($pts >= 500) return 'Gold';
         if ($pts >= 200) return 'Silver';
         return 'Bronze';
+    }
+
+    /**
+     * 🟢 FAVORITE PROTOCOL LOGIC
+     * Identifies the single most frequently ordered item configuration.
+     */
+    public function getFavoriteItemAttribute()
+    {
+        return OrderItem::whereIn('order_id', $this->orders()->pluck('id'))
+            ->select('product_id', 'size', 'customizations', DB::raw('COUNT(*) as frequency'))
+            ->groupBy('product_id', 'size', 'customizations')
+            ->orderByDesc('frequency')
+            ->with('product')
+            ->first();
     }
 
     public function loginHistory(): HasMany { return $this->hasMany(LoginHistory::class); }

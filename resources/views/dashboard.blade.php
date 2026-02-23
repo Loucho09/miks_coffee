@@ -30,8 +30,8 @@
         $nextMilestone = (floor($streakCount / 3) + 1) * 3;
         $streakProgress = (($streakCount % 3) / 3) * 100;
 
-        /* 🟢 NEW FEATURE LOGIC: Identify Last Order for Reorder Shortcut */
         $lastOrder = isset($recentOrders) ? $recentOrders->first() : null;
+        $favoriteItem = $user->favorite_item;
     @endphp
 
     <style>
@@ -76,9 +76,9 @@
                 </div>
             </div>
 
-            {{-- 🟢 NEW FEATURE: Reorder My Usual Shortcut --}}
+            {{-- 🟢 EFFICIENCY PROTOCOL: Reorder My Usual Shortcut --}}
             @if($lastOrder)
-                <div class="mb-8 sm:mb-12 p-6 sm:p-10 bg-white dark:bg-stone-900 rounded-[2.5rem] sm:rounded-[3.5rem] border border-amber-500/30 shadow-premium flex flex-col sm:flex-row justify-between items-center gap-6 group hover:border-amber-500 transition-all duration-500">
+                <div class="mb-4 sm:mb-6 p-6 sm:p-10 bg-white dark:bg-stone-900 rounded-[2.5rem] sm:rounded-[3.5rem] border border-amber-500/30 shadow-premium flex flex-col sm:flex-row justify-between items-center gap-6 group hover:border-amber-500 transition-all duration-500">
                     <div class="flex items-center gap-6">
                         <div class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[2rem] bg-amber-600/10 flex items-center justify-center text-amber-600 border border-amber-500/20 shadow-inner">
                             <svg class="w-8 h-8 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -93,6 +93,31 @@
                         @csrf
                         <button type="submit" class="w-full sm:w-auto px-10 py-5 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-2xl sm:rounded-[2rem] font-black uppercase text-[9px] sm:text-[11px] tracking-widest shadow-2xl active:scale-95 hover:bg-amber-600 dark:hover:bg-amber-500 transition-all">
                             Initialize Restore
+                        </button>
+                    </form>
+                </div>
+            @endif
+
+            {{-- 🟢 FAVORITE PROTOCOL: Identified Favorite Item configuration --}}
+            @if($favoriteItem)
+                <div class="mb-8 sm:mb-12 p-6 sm:p-10 bg-white dark:bg-stone-900 rounded-[2.5rem] sm:rounded-[3.5rem] border border-emerald-500/30 shadow-premium flex flex-col sm:flex-row justify-between items-center gap-6 group hover:border-emerald-500 transition-all duration-500">
+                    <div class="flex items-center gap-6">
+                        <div class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[2rem] bg-emerald-600/10 flex items-center justify-center text-emerald-600 border border-emerald-500/20 shadow-inner">
+                            <svg class="w-8 h-8 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                        </div>
+                        <div>
+                            <span class="text-emerald-600 font-black uppercase tracking-[0.4em] text-[8px] sm:text-[10px] mb-1 block leading-none italic">Favorite protocol</span>
+                            <h3 class="text-xl sm:text-3xl font-black text-stone-900 dark:text-white uppercase italic tracking-tighter leading-none">{{ $favoriteItem->product->name ?? 'Brew unit' }}</h3>
+                            <p class="text-[8px] sm:text-[10px] text-stone-400 font-bold uppercase tracking-widest mt-2">Restore favorite config ({{ $favoriteItem->frequency }} orders completed)</p>
+                        </div>
+                    </div>
+                    <form action="{{ route('orders.reorder_item') }}" method="POST" class="w-full sm:w-auto">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $favoriteItem->product_id }}">
+                        <input type="hidden" name="size" value="{{ $favoriteItem->size }}">
+                        <input type="hidden" name="customizations" value="{{ json_encode($favoriteItem->customizations) }}">
+                        <button type="submit" class="w-full sm:w-auto px-10 py-5 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-2xl sm:rounded-[2rem] font-black uppercase text-[9px] sm:text-[11px] tracking-widest shadow-2xl active:scale-95 hover:bg-emerald-600 dark:hover:bg-emerald-500 transition-all">
+                            Initialize Favorite
                         </button>
                     </form>
                 </div>
@@ -283,7 +308,6 @@
                         </div>
                     </div>
 
-                    {{-- Concierge Threads Section --}}
                     <div class="mt-16 sm:mt-28 space-y-8 sm:space-y-16 pb-12 sm:pb-24">
                         <div class="flex items-center justify-between px-1">
                             <h3 class="font-black text-stone-900 dark:text-white uppercase tracking-tighter italic leading-none transition-colors" style="font-size: var(--fluid-18-32)">Concierge threads</h3>
@@ -301,7 +325,6 @@
                                             <p class="text-xs sm:text-base text-stone-600 dark:text-stone-400 italic leading-relaxed font-medium">"{{ $ticket->message }}"</p>
                                         </div>
 
-                                        {{-- 🟢 FEATURE: Correct Admin Reply Rendering --}}
                                         @if($ticket->replies && $ticket->replies->count() > 0)
                                             <div class="space-y-6 sm:space-y-12 border-t border-stone-100 dark:border-stone-800 pt-6 sm:pt-14 transition-colors">
                                                 @foreach($ticket->replies as $reply)

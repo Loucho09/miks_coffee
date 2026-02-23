@@ -121,6 +121,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
             
             Route::post('/orders/{id}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
+            
+            // FAVORITE REORDER ROUTE
+            Route::post('/orders/reorder-item', [OrderController::class, 'reorderFavorite'])->name('orders.reorder_item');
         });
 
         /* --- COMMON AUTH ROUTES --- */
@@ -178,6 +181,9 @@ Route::middleware(['auth'])->group(function () {
                 Route::put('/{id}', 'update')->name('update');
                 Route::delete('/bulk-destroy', 'bulkDestroy')->name('bulk-destroy');
                 Route::delete('/{id}', 'destroy')->name('destroy');
+                
+                // 🟢 NEW: Bulk Golden Hour Protocol Route
+                Route::post('/bulk-golden-hour', 'bulkGoldenHour')->name('bulk-golden-hour');
             });
         });
     });
