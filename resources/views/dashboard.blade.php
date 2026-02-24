@@ -32,6 +32,15 @@
 
         $lastOrder = isset($recentOrders) ? $recentOrders->first() : null;
         $favoriteItem = $user->favorite_item;
+
+        $tierMultiplierLabel = $dashTier === 'Gold' ? '2x' : ($dashTier === 'Silver' ? '1.5x' : '1x');
+        $tierMultiplierColor = $dashTier === 'Gold' ? 'text-amber-400' : ($dashTier === 'Silver' ? 'text-stone-300' : 'text-amber-700');
+
+        $totalOrderCount = $user->orders()->count();
+        $punchCardProgress = $totalOrderCount % 10;
+        $punchCardNextMilestone = (floor($totalOrderCount / 10) + 1) * 10;
+        $punchCardPercent = ($punchCardProgress / 10) * 100;
+        $punchCardStamps = range(1, 10);
     @endphp
 
     <style>
@@ -45,6 +54,10 @@
         .glass-card { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* 🟢 ALTERNATIVE FIX: Define arbitrary shadows in CSS to avoid IDE errors */
+        .shadow-progress-glow { box-shadow: 0 0 10px rgba(217, 119, 6, 0.3); }
+        .shadow-stamp-glow { box-shadow: 0 0 8px rgba(217, 119, 6, 0.3); }
     </style>
 
     <div x-data="{ reviewModal: false, giftModal: false, selectedProduct: '', selectedItemId: '' }" class="py-4 sm:py-12 bg-stone-50 dark:bg-stone-950 min-h-screen transition-all duration-500">
@@ -68,7 +81,6 @@
                     </h2>
                 </div>
 
-                {{-- Asset Transfer Shortcut --}}
                 <div @click="giftModal = true" class="cursor-pointer group flex items-center gap-6 bg-white dark:bg-stone-900 px-8 py-5 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-premium transition-all hover:border-amber-500/50 shrink-0 self-start">
                     <div class="flex flex-col text-right">
                         <span class="text-[8px] font-black text-amber-600 uppercase tracking-[0.3em] mb-1">Transfer Protocol</span>
@@ -88,7 +100,6 @@
                 </div>
             </div>
 
-            {{-- 🟢 EFFICIENCY PROTOCOL: Reorder My Usual Shortcut --}}
             @if($lastOrder)
                 <div class="mb-4 sm:mb-6 p-6 sm:p-10 bg-white dark:bg-stone-900 rounded-[2.5rem] sm:rounded-[3.5rem] border border-amber-500/30 shadow-premium flex flex-col sm:flex-row justify-between items-center gap-6 group hover:border-amber-500 transition-all duration-500">
                     <div class="flex items-center gap-6">
@@ -110,7 +121,6 @@
                 </div>
             @endif
 
-            {{-- 🟢 FAVORITE PROTOCOL: Identified Favorite Item configuration --}}
             @if($favoriteItem)
                 <div class="mb-8 sm:mb-12 p-6 sm:p-10 bg-white dark:bg-stone-900 rounded-[2.5rem] sm:rounded-[3.5rem] border border-emerald-500/30 shadow-premium flex flex-col sm:flex-row justify-between items-center gap-6 group hover:border-emerald-500 transition-all duration-500">
                     <div class="flex items-center gap-6">
@@ -137,12 +147,11 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-start">
                 <div class="lg:col-span-4 space-y-4 sm:space-y-8">
-                    {{-- Loyalty Card --}}
                     <div class="relative overflow-hidden bg-stone-100 dark:bg-stone-900 rounded-3xl sm:rounded-[3rem] p-6 sm:p-10 text-white shadow-premium border border-stone-800 transition-all">
                         <div class="relative z-10">
                             <div class="flex justify-between items-start mb-6 sm:mb-12">
                                 <span class="px-3 py-1 bg-amber-600/10 border border-amber-500/20 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-amber-500 italic">{{ $dashTier }} tier</span>
-                                <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white/10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                                <span class="px-3 py-1 bg-stone-800/60 border border-stone-700/40 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest {{ $tierMultiplierColor }} italic">{{ $tierMultiplierLabel }} yield</span>
                             </div>
                             <p class="text-[8px] sm:text-[10px] uppercase tracking-[0.4em] text-stone-500 font-black mb-2 sm:mb-4 leading-none">Net loyalty assets</p>
                             <div class="flex items-baseline gap-2 sm:gap-3 mb-6 sm:mb-8">
@@ -150,8 +159,11 @@
                                 <span class="text-stone-900 dark:text-white font-black text-sm sm:text-xl tracking-widest uppercase italic">PTS</span>
                             </div>
                             <div class="w-full bg-stone-800 rounded-full h-2 sm:h-3 overflow-hidden shadow-inner border border-white/5">
-                                <div class="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(217,119,6,0.3)]" :style="'width: ' + {{ $perc }} + '%'"></div>
+                                {{-- 🟢 FIX: Moved arbitrary shadow to class and optimized width binding --}}
+                                <div class="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full transition-all duration-1000 shadow-progress-glow" 
+                                     :style="{ width: '{{ $perc }}%' }"></div>
                             </div>
+                            <p class="text-[7px] sm:text-[9px] font-black uppercase tracking-[0.3em] text-stone-600 mt-3 italic">1 PT / ₱10 spent · {{ $tierMultiplierLabel }} tier bonus</p>
                         </div>
                     </div>
 
@@ -161,10 +173,46 @@
                             <span class="text-amber-500 font-black text-[10px] tracking-tighter italic">{{ $streakCount }}/{{ $nextMilestone }}</span>
                         </div>
                         <div class="relative h-4 sm:h-6 w-full bg-stone-50 dark:bg-stone-950 rounded-xl sm:rounded-2xl overflow-hidden border border-stone-100 dark:border-stone-800 mb-4 shadow-inner p-1">
-                            <div class="absolute top-1 bottom-1 left-1 bg-gradient-to-r from-amber-600 to-amber-500 rounded-lg transition-all duration-1000" :style="'width: ' + {{ $streakProgress }} + '%'"></div>
+                            <div class="absolute top-1 bottom-1 left-1 bg-gradient-to-r from-amber-600 to-amber-500 rounded-lg transition-all duration-1000" :style="{ width: '{{ $streakProgress }}%' }"></div>
                         </div>
                         <p class="text-stone-500 dark:text-stone-400 text-[8px] sm:text-[10px] font-bold uppercase tracking-tight leading-relaxed italic text-center">
                             Authorize <span class="text-stone-900 dark:text-stone-200">{{ $nextMilestone - $streakCount }} units</span> for <span class="text-amber-600 font-black">+20 bonus</span>.
+                        </p>
+                    </div>
+
+                    <div class="bg-white dark:bg-stone-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 border border-stone-200 dark:border-stone-800 shadow-premium">
+                        <div class="flex justify-between items-center mb-4 sm:mb-8">
+                            <div>
+                                <h4 class="text-stone-900 dark:text-white font-black text-[8px] sm:text-[10px] uppercase tracking-[0.4em] italic leading-none">Frequency Log</h4>
+                                <p class="text-[7px] sm:text-[9px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest mt-1 italic">10th order = free item voucher</p>
+                            </div>
+                            <span class="text-amber-500 font-black text-[10px] tracking-tighter italic">{{ $punchCardProgress }}/10</span>
+                        </div>
+                        <div class="grid grid-cols-5 gap-2 sm:gap-3 mb-4 sm:mb-6">
+                            @foreach($punchCardStamps as $stamp)
+                                <div class="aspect-square rounded-xl sm:rounded-2xl border-2 flex items-center justify-center transition-all
+                                    {{ $stamp <= $punchCardProgress
+                                        ? 'bg-amber-600 border-amber-600 shadow-[0_0_8px_rgba(217,119,6,0.4)]'
+                                        : 'bg-stone-50 dark:bg-stone-950 border-stone-100 dark:border-stone-800' }}">
+                                    @if($stamp <= $punchCardProgress)
+                                        <svg class="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    @else
+                                        <svg class="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-stone-300 dark:text-stone-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="relative h-3 sm:h-4 w-full bg-stone-50 dark:bg-stone-950 rounded-full overflow-hidden border border-stone-100 dark:border-stone-800 shadow-inner p-0.5">
+                            {{-- 🟢 FIX: Moved dynamic width and shadow to more parser-friendly implementation --}}
+                            <div class="h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-full transition-all duration-1000 shadow-stamp-glow" 
+                                 :style="{ width: '{{ $punchCardPercent }}%' }"></div>
+                        </div>
+                        <p class="text-stone-500 dark:text-stone-400 text-[8px] sm:text-[10px] font-bold uppercase tracking-tight leading-relaxed italic text-center mt-3 sm:mt-4">
+                            @if($punchCardProgress === 0 && $totalOrderCount > 0 && $totalOrderCount % 10 === 0)
+                                <span class="text-emerald-600 font-black">Voucher authorized this cycle!</span>
+                            @else
+                                <span class="text-stone-900 dark:text-stone-200">{{ 10 - $punchCardProgress }} commits</span> until <span class="text-amber-600 font-black">free item voucher</span>.
+                            @endif
                         </p>
                     </div>
 
@@ -368,7 +416,6 @@
             </div>
         </div>
 
-        {{-- 🟢 MODAL: Point Transfer Protocol --}}
         <div x-show="giftModal" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-950/90 backdrop-blur-xl">
             <div class="bg-white dark:bg-stone-900 rounded-[3rem] p-10 w-full max-w-md border border-stone-200 dark:border-stone-800" @click.away="giftModal = false">
                 <h3 class="text-2xl font-black text-stone-900 dark:text-white uppercase tracking-tighter italic mb-8 text-center">Transfer Protocol</h3>
@@ -390,7 +437,6 @@
             </div>
         </div>
 
-        {{-- Review Modal --}}
         <div x-show="reviewModal" class="fixed inset-0 z-[100] overflow-y-auto flex items-center justify-center p-2 sm:p-4 bg-stone-950/95 backdrop-blur-2xl" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
             <div class="bg-white dark:bg-stone-900 w-full max-w-xl rounded-[2.5rem] sm:rounded-[4.5rem] border border-stone-200 dark:border-stone-800 shadow-premium overflow-hidden relative transition-all duration-500" @click.away="reviewModal = false">
                 <div class="absolute top-0 right-0 p-6 sm:p-10">
@@ -414,7 +460,7 @@
                                 @foreach(range(1, 5) as $rating)
                                     <label class="cursor-pointer group">
                                         <input type="radio" name="rating" value="{{ $rating }}" class="hidden peer" required>
-                                        <div class="w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-[1.75rem] border-2 border-stone-100 dark:border-stone-800 flex items-center justify-center peer-checked:bg-stone-900 dark:peer-checked:bg-amber-600 peer-checked:border-stone-900 dark:peer-checked:bg-amber-600 peer-checked:text-white dark:peer-checked:text-stone-950 text-stone-300 dark:text-stone-700 font-black transition-all group-hover:border-amber-500 shadow-sm text-sm sm:text-3xl italic">{{ $rating }}</div>
+                                        <div class="w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-[1.75rem] border-2 border-stone-100 dark:border-stone-800 flex items-center justify-center peer-checked:bg-stone-900 dark:peer-checked:bg-amber-600 peer-checked:border-stone-900 peer-checked:text-white dark:peer-checked:text-stone-950 text-stone-300 dark:text-stone-700 font-black transition-all group-hover:border-amber-500 shadow-sm text-sm sm:text-3xl italic">{{ $rating }}</div>
                                     </label>
                                 @endforeach
                             </div>

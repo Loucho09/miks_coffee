@@ -23,14 +23,14 @@ class OrderReceipt extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Confirmation - #' . $this->order->order_number,
+            subject: 'Official Order Manifest - #' . $this->order->order_number,
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'emails.receipt', 
+            view: 'emails.order_receipt',
         );
     }
 

@@ -54,7 +54,7 @@
                     <div class="flex items-center justify-between">
                         <label for="remember_me" class="inline-flex items-center cursor-pointer group">
                             <input id="remember_me" type="checkbox" name="remember" class="w-5 h-5 rounded-lg border-stone-300 dark:border-stone-700 text-amber-500 shadow-sm focus:ring-amber-500/20 bg-stone-50 dark:bg-stone-950 transition-all">
-                            <span class="ml-3 text-sm text-stone-600 dark:text-stone-400 font-bold group-hover:text-stone-900 dark:group-hover:text-white transition-colors">Remember me</span>
+                            <span class="ml-3 text-sm text-stone-600 dark:text-stone-400 font-bold group-hover:text-stone-900 dark:group-hover:text-white transition-colors">Save Login Details</span>
                         </label>
 
                         @if (Route::has('password.request'))

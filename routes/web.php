@@ -113,7 +113,8 @@ Route::middleware(['auth'])->group(function () {
                 Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
             });
 
-            Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+            // FIX: Point checkout directly to OrderController where the fixed store logic resides
+            Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
             
             // Post-Checkout Digital Receipt Route
             Route::get('/checkout/receipt/{id}', [CheckoutController::class, 'receipt'])->name('checkout.receipt');

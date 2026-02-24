@@ -19,6 +19,7 @@ class Order extends Model
         'points_earned',
         'points_redeemed',
         'reward_type',
+        'order_number',
         'notes',
     ];
 
