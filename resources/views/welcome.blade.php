@@ -450,10 +450,7 @@
 
                     <div class="md:col-span-4 flex flex-col items-center md:items-start text-center md:text-left">
                         <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-500 tracking-[0.4em] uppercase mb-8">Join the Culture</h3>
-                        <form class="flex w-full p-1.5 rounded-2xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 focus-within:border-amber-500/50 transition-all duration-500 mb-8">
-                            <input type="email" placeholder="Your email address" class="w-full px-4 bg-transparent border-none text-stone-900 dark:text-white text-sm focus:ring-0 placeholder-stone-500 font-light transition-colors">
-                            <button class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition shadow-lg shadow-amber-600/20">Join</button>
-                        </form>
+                      
 
                         <div class="flex gap-4">
                             <a href="https://www.facebook.com/share/17aDwarKPW/" class="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-blue-600 hover:border-blue-600/30 transition-all duration-300 group">
