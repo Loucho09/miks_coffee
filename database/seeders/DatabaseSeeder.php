@@ -11,6 +11,9 @@ use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Seed the application's database.
+     */
     public function run(): void
     {
         // 1. Setup Admin from .env
@@ -26,13 +29,16 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Optional: Keep your existing AdminUserSeeder if it handles other logic
-        // $this->call(AdminUserSeeder::class);
-
         // 2. Setup Test Customer
         User::updateOrCreate(
             ['email' => 'customer@example.com'],
-            ['name' => 'Test Customer', 'password' => Hash::make('password'), 'role' => 'customer', 'usertype' => 'customer', 'points' => 50]
+            [
+                'name' => 'Test Customer', 
+                'password' => Hash::make('password'), 
+                'role' => 'customer', 
+                'usertype' => 'customer', 
+                'points' => 50
+            ]
         );
 
         // 3. Menu Data (Organized by Categories)
@@ -76,7 +82,10 @@ class DatabaseSeeder extends Seeder
 
         // 4. Sync to DB
         foreach ($menu as $categoryName => $products) {
-            $category = Category::updateOrCreate(['name' => $categoryName], ['slug' => Str::slug($categoryName)]);
+            $category = Category::updateOrCreate(
+                ['name' => $categoryName], 
+                ['slug' => Str::slug($categoryName)]
+            );
 
             foreach ($products as $item) {
                 $product = Product::updateOrCreate(
