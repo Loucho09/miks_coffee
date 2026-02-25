@@ -76,8 +76,8 @@
             <div class="mb-6 sm:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-8">
                 <div class="min-w-0">
                     <span class="text-amber-600 font-black uppercase tracking-[0.4em] text-[8px] sm:text-[10px] mb-1 sm:mb-4 block">Session active</span>
-                    <h2 class="font-black text-stone-900 dark:text-white uppercase italic leading-[1.1] tracking-tighter transition-colors duration-500" style="font-size: var(--fluid-32-64)">
-                        Good {{ date('H') < 12 ? 'Morning' : (date('H') < 17 ? 'Afternoon' : 'Evening') }}, <br class="hidden sm:block"> {{ $user->name }}
+                    <h2 class="font-black text-stone-900 dark:text-white uppercase leading-[1.1] tracking-tighter transition-colors duration-500" style="font-size: var(--fluid-32-64)">
+                        Good {{ date('H') < 12 ? 'Morning' : (date('H') < 17 ? 'Afternoon' : 'Evening') }}, <br class="hidden sm:block "> {{ $user->name }}
                     </h2>
                 </div>
 
