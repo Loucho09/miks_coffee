@@ -6,7 +6,9 @@
     <div class="py-12 bg-stone-50 dark:bg-stone-950 min-h-screen transition-colors duration-500">
         <div class="max-w-4xl mx-auto px-6">
             <div class="bg-white dark:bg-stone-900 p-10 rounded-[3rem] border border-stone-200 dark:border-stone-800 shadow-sm text-stone-700 dark:text-stone-300 leading-relaxed">
-                <span class="text-[10px] font-black uppercase tracking-[0.4em] text-amber-600 mb-8 block">Last Updated: December 31, 2025</span>
+                <span class="text-[10px] font-black uppercase tracking-[0.4em] text-amber-600 mb-8 block">Last Updated: December 31, 
+                    
+                </span>
                 
                 <h3 class="text-xl font-bold text-stone-900 dark:text-white mb-4 italic uppercase tracking-tight">1. Community Features & Streaks</h3>
                 <p class="mb-4 font-medium italic">By participating in the Mik’s Coffee community, you acknowledge that:</p>

@@ -251,17 +251,17 @@
                             </div>
                             <div class="space-y-6">
                                 @forelse($topStreaks as $index => $leader)
-                                    <div class="flex items-center justify-between p-5 rounded-2xl bg-stone-950/50 border border-stone-800 transition-colors">
+                                    <div class="flex items-center justify-between p-5 rounded-2xl bg-coffee-100 dark:bg-stone-800 border border-stone-800 transition-colors">
                                         <div class="flex items-center gap-5">
-                                            <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black italic text-sm {{ $index == 0 ? 'bg-amber-600 text-stone-950' : 'bg-stone-800 text-stone-400' }} transition-all">{{ $index + 1 }}</div>
-                                            <div class="text-left text-white">
+                                            <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black italic text-sm {{ $index == 0 ? 'bg-amber-600 text-stone-950' : 'bg-amber-800 text-stone-400' }} transition-all">{{ $index + 1 }}</div>
+                                            <div class="text-left text-black dark:text-white ">
                                                 <p class="font-bold text-sm uppercase tracking-tight">{{ $leader->name }}</p>
-                                                <p class="text-[9px] font-black text-stone-400 uppercase tracking-widest">{{ $leader->loyalty_tier ?? 'Bronze' }} Member</p>
+                                                <p class="text-[9px] font-black text-stone-600  dark:text-stone-400 uppercase tracking-widest">{{ $leader->loyalty_tier ?? 'Bronze' }} Member</p>
                                             </div>
                                         </div>
                                         <div class="text-right text-white">
                                             <p class="text-2xl font-black italic text-amber-500 leading-none">{{ $leader->streak_count }}</p>
-                                            <p class="text-[8px] font-black text-stone-500 uppercase tracking-widest">Days</p>
+                                            <p class="text-[8px] font-black text-stone-600  dark:text-stone-400 uppercase tracking-widest">Day's</p>
                                         </div>
                                     </div>
                                 @empty
@@ -320,7 +320,7 @@
                             <h4 class="text-[10px] font-black uppercase tracking-widest {{ $isOpen ? 'text-emerald-600' : 'text-rose-600' }}">
                                 {{ $isOpen ? 'System Online' : 'System Offline' }}
                             </h4>
-                            <p class="text-[11px] font-bold text-stone-400 uppercase tracking-widest mt-1 transition-colors">
+                            <p class="text-[11px] font-bold text-amber-600 uppercase tracking-widest mt-1 transition-colors">
                                 {{ $isOpen ? 'Currently Serving' : 'Shop Closed until 09:00 AM' }}
                             </p>
                         </div>
@@ -341,7 +341,7 @@
                                     </div>
                                 </div>
 
-                                <p class="text-stone-50 dark:text-stone-400 text-sm font-medium mb-6 leading-relaxed transition-colors">{{ $branch['address'] }}</p>
+                                <p class="text-amber-500 dark:text-amber-500 text-sm font-medium mb-6 leading-relaxed transition-colors">{{ $branch['address'] }}</p>
 
                                 <div class="flex items-center gap-6">
                                     <button
@@ -352,7 +352,7 @@
                                             copied = true;
                                             setTimeout(function() { copied = false; }, 2000);
                                         "
-                                        :class="copied ? 'text-emerald-500' : 'text-stone-400 hover:text-amber-500'"
+                                        :class="copied ? 'text-emerald-500' : 'text-emerald-400 hover:text-amber-500'"
                                         class="text-[9px] font-black uppercase tracking-[0.2em] transition-colors flex items-center gap-2">
                                         <svg x-show="!copied" class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
@@ -362,7 +362,7 @@
                                         </svg>
                                         <span x-text="copied ? 'Copied!' : 'Copy Address'"></span>
                                     </button>
-                                    <a href="{{ $branch['map_link'] }}" target="_blank" class="text-[9px] font-black uppercase tracking-[0.2em] text-stone-400 hover:text-amber-500 transition-colors flex items-center gap-2">
+                                    <a href="{{ $branch['map_link'] }}" target="_blank" class="text-[9px] font-black uppercase tracking-[0.2em] text-black dark:text-white hover:text-amber-500 transition-colors flex items-center gap-2">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                         External GPS
                                     </a>

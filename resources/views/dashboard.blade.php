@@ -75,11 +75,13 @@
 
             <div class="mb-6 sm:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-8">
                 <div class="min-w-0">
-                    <span class="text-amber-600 font-black uppercase tracking-[0.4em] text-[8px] sm:text-[10px] mb-1 sm:mb-4 block">Session active</span>
-                    <h2 class="font-black text-stone-900 dark:text-white uppercase italic leading-[1.1] tracking-tighter transition-colors duration-500" style="font-size: var(--fluid-32-64)">
-                        Good {{ date('H') < 12 ? 'Morning' : (date('H') < 17 ? 'Afternoon' : 'Evening') }}, <br class="hidden sm:block "> {{ $user->name }}
-                    </h2>
-                </div>
+    <span class="text-amber-600 font-black tracking-[0.4em] text-[8px] sm:text-[10px] mb-1 sm:mb-4 block">Session active</span>
+    <h2 class="font-black text-stone-900 dark:text-white italic leading-[1.1] tracking-tighter transition-colors duration-500" style="font-size: var(--fluid-32-64)">
+        Good {{ date('H') < 12 ? 'Morning' : (date('H') < 17 ? 'Afternoon' : 'Evening') }}, 
+        <br class="hidden sm:block"> 
+        <span class="text-[#4b3832] dark:text-[#c1b3a3]">{{ $user->name }}</span>
+    </h2>
+</div>
 
                 <div @click="giftModal = true" class="cursor-pointer group flex items-center gap-6 bg-white dark:bg-stone-900 px-8 py-5 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-premium transition-all hover:border-amber-500/50 shrink-0 self-start">
                     <div class="flex flex-col text-right">

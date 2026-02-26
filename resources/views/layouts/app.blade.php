@@ -135,7 +135,8 @@
                         <span class="w-2 h-2 rounded-full {{ $isActuallyOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-400' }}"></span>
                         <span>Management System {{ $isActuallyOnline ? 'Online' : 'Offline' }}</span>
                         <span class="mx-2 text-stone-200 dark:text-stone-800">|</span>
-                        <span>© 2025</span>
+                        <span>© 
+                        </span>
                     </div>
                 </div>
             </footer>
@@ -170,7 +171,8 @@
                         </div>
                     </div>
                     <div class="border-t border-stone-100 dark:border-stone-800 pt-8 text-xs text-stone-400 font-bold uppercase tracking-widest">
-                        © 2025 Mik's Coffee Shop. Unit 2B, Brgy. Osorio.
+                        © 
+                         Mik's Coffee Shop. Unit 2B, Brgy. Osorio.
                     </div>
                 </div>
             </footer>
