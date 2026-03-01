@@ -152,21 +152,26 @@
                     <div class="relative overflow-hidden bg-stone-100 dark:bg-stone-900 rounded-3xl sm:rounded-[3rem] p-6 sm:p-10 text-white shadow-premium border border-stone-800 transition-all">
                         <div class="relative z-10">
                             <div class="flex justify-between items-start mb-6 sm:mb-12">
-                                <span class="px-3 py-1 bg-amber-600/10 border border-amber-500/20 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-amber-500 italic">{{ $dashTier }} tier</span>
-                                <span class="px-3 py-1 bg-stone-800/60 border border-stone-700/40 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest {{ $tierMultiplierColor }} italic">{{ $tierMultiplierLabel }} yield</span>
+                                <span class="px-3 py-1 bg-amber-600/10 border border-amber-500/20 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-amber-900 dark:text-amber-400 italic">{{ $dashTier }} tier</span>
+                               <span class="px-3 py-1 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest italic border shadow-sm transition-colors duration-200 bg-stone-800 text-stone-50 border-stone-600 dark:bg-amber-500 dark:text-stone-950 dark:border-amber-400 {{ $tierMultiplierColor }}">
+    {{ $tierMultiplierLabel }} yield
+</span>
                             </div>
-                            <p class="text-[8px] sm:text-[10px] uppercase tracking-[0.4em] text-stone-500 font-black mb-2 sm:mb-4 leading-none">Net loyalty assets</p>
-                            <div class="flex items-baseline gap-2 sm:gap-3 mb-6 sm:mb-8">
-                                <span class="text-5xl sm:text-7xl font-black dark:text-stone-400 tracking-tighter leading-none">{{ $dashPoints }}</span>
-                                <span class="text-stone-900 dark:text-white font-black text-sm sm:text-xl tracking-widest uppercase italic">PTS</span>
-                            </div>
-                            <div class="w-full bg-stone-800 rounded-full h-2 sm:h-3 overflow-hidden shadow-inner border border-white/5">
-                                {{-- 🟢 FIX: Moved arbitrary shadow to class and optimized width binding --}}
-                                <div class="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full transition-all duration-1000 shadow-progress-glow" 
-                                     :style="{ width: '{{ $perc }}%' }"></div>
-                            </div>
-                            <p class="text-[7px] sm:text-[9px] font-black uppercase tracking-[0.3em] text-stone-600 mt-3 italic">1 PT / ₱10 spent · {{ $tierMultiplierLabel }} tier bonus</p>
-                        </div>
+    <p class="text-[8px] sm:text-[10px] uppercase tracking-[0.4em] font-black mb-2 sm:mb-4 leading-none text-stone-500 dark:text-stone-400">Net loyalty assets</p>
+    
+    <div class="flex items-baseline gap-2 sm:gap-3 mb-6 sm:mb-8">
+        <span class="text-5xl sm:text-7xl font-black tracking-tighter leading-none text-stone-900 dark:text-white">{{ $dashPoints }}</span>
+        <span class="font-black text-sm sm:text-xl tracking-widest uppercase italic text-stone-700 dark:text-stone-300">PTS</span>
+    </div>
+    
+    <div class="w-full rounded-full h-2 sm:h-3 overflow-hidden shadow-inner border bg-stone-200 border-stone-300 dark:bg-stone-800 dark:border-white/5">
+        {{-- 🟢 FIX: Moved arbitrary shadow to class and optimized width binding --}}
+        <div class="bg-gradient-to-r h-full rounded-full transition-all duration-1000 shadow-progress-glow from-amber-500 to-amber-400 dark:from-amber-600 dark:to-amber-500" 
+             :style="`width: {{ $perc }}%;`"></div>
+    </div>
+    
+    <p class="text-[7px] sm:text-[9px] font-black uppercase tracking-[0.3em] mt-3 italic text-stone-500 dark:text-stone-400">1 PT / ₱10 spent · {{ $tierMultiplierLabel }} tier bonus</p>
+</div>
                     </div>
 
                     <div class="bg-white dark:bg-stone-900 rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 border border-stone-200 dark:border-stone-800 shadow-premium">
@@ -245,21 +250,26 @@
                         </div>
                     </div>
 
-                    <div class="bg-stone-400 dark:bg-stone-900 rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-stone-800 shadow-premium transition-all">
-                        <span class="text-[8px] sm:text-[10px] font-black text-amber-600 uppercase tracking-[0.4em] block mb-4 italic">System core</span>
-                        <h4 class="text-lg sm:text-2xl font-black text-white uppercase italic tracking-tighter mb-6 leading-tight">Data Management</h4>
-                        <div class="flex flex-col gap-3">
-                            <a href="{{ route('profile.data_report') }}" class="w-full py-4 bg-stone-50 text-stone-950 rounded-xl sm:rounded-2xl font-black uppercase tracking-widest text-[8px] sm:text-[10px] transition-all flex items-center justify-center gap-3">
-                                Generate Audit
-                            </a>
-                            <form action="{{ route('profile.export') }}" method="POST" class="w-full">
-                                @csrf
-                                <button type="submit" class="w-full py-3 text-stone-500 rounded-xl font-black uppercase tracking-widest text-[7px] border border-stone-800 transition-all flex items-center justify-center">
-                                    Export JSON
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+                    <div class="bg-stone-100 dark:bg-stone-900 rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-stone-200 dark:border-stone-800 shadow-premium transition-all">
+    <span class="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.4em] block mb-4 italic text-amber-600 dark:text-amber-500">System core</span>
+    
+    <h4 class="text-lg sm:text-2xl font-black uppercase italic tracking-tighter mb-6 leading-tight text-stone-900 dark:text-white">Data Management</h4>
+    
+    <div class="flex flex-col gap-3">
+        {{-- Primary Action --}}
+        <a href="{{ route('profile.data_report') }}" class="w-full py-4 rounded-xl sm:rounded-2xl font-black uppercase tracking-widest text-[8px] sm:text-[10px] transition-all flex items-center justify-center gap-3 bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-50 dark:text-stone-950 dark:hover:bg-stone-200 shadow-sm">
+            Generate Audit
+        </a>
+        
+        {{-- Secondary Action --}}
+        <form action="{{ route('profile.export') }}" method="POST" class="w-full">
+            @csrf
+            <button type="submit" class="w-full py-3 rounded-xl font-black uppercase tracking-widest text-[7px] border transition-all flex items-center justify-center text-stone-500 border-stone-300 hover:bg-stone-200 dark:text-stone-400 dark:border-stone-800 dark:hover:bg-stone-800/50">
+                Export JSON
+            </button>
+        </form>
+    </div>
+</div>
                 </div>
 
                 <div class="lg:col-span-8 space-y-6 sm:space-y-12">
@@ -375,43 +385,73 @@
                             <h3 class="font-black text-stone-900 dark:text-white uppercase tracking-tighter italic leading-none transition-colors" style="font-size: var(--fluid-18-32)">Concierge threads</h3>
                         </div>
                         @if(isset($supportTickets))
-                            <div class="space-y-6 sm:space-y-10">
-                                @forelse($supportTickets as $ticket)
-                                    <div class="bg-white dark:bg-stone-900 rounded-[2rem] sm:rounded-[3.5rem] p-6 sm:p-14 border border-stone-200 dark:border-stone-800 shadow-premium transition-all">
-                                        <div class="flex flex-wrap items-center gap-3 sm:gap-5 mb-6 sm:mb-10">
-                                            <span class="px-3 py-1.5 bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg text-[7px] sm:text-[10px] font-black uppercase text-stone-500 tracking-widest transition-colors shadow-inner">ID #{{ $ticket->id }}</span>
-                                            <div class="px-3 py-1.5 rounded-lg text-[7px] sm:text-[10px] font-black uppercase tracking-[0.2em] italic {{ $ticket->status == 'pending' ? 'bg-amber-500/10 text-amber-600 animate-pulse' : ($ticket->status == 'replied' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-stone-100 dark:bg-stone-950 text-stone-500') }} shadow-sm">{{ strtoupper($ticket->status) }}</div>
-                                        </div>
-                                        <h4 class="text-lg sm:text-3xl font-black text-stone-900 dark:text-white uppercase italic mb-4 transition-colors leading-tight tracking-tighter">{{ $ticket->subject }}</h4>
-                                        <div class="p-6 sm:p-10 bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-[1.5rem] sm:rounded-[3rem] relative mb-6 sm:mb-12 transition-colors shadow-inner">
-                                            <p class="text-xs sm:text-base text-stone-600 dark:text-stone-400 italic leading-relaxed font-medium">"{{ $ticket->message }}"</p>
-                                        </div>
+                           <div class="space-y-6 sm:space-y-10">
+    @forelse($supportTickets as $ticket)
+        <div class="bg-white dark:bg-stone-900 rounded-[2rem] sm:rounded-[3.5rem] p-6 sm:p-14 border border-stone-200 dark:border-stone-800 shadow-premium transition-all">
+            
+            {{-- Ticket Header Elements --}}
+            <div class="flex flex-wrap items-center gap-3 sm:gap-5 mb-6 sm:mb-10">
+                <span class="px-3 py-1.5 bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg text-[7px] sm:text-[10px] font-black uppercase text-stone-600 dark:text-stone-400 tracking-widest transition-colors shadow-inner">
+                    ID #{{ $ticket->id }}
+                </span>
+                
+                {{-- 🟢 FIX: Added dark mode text colors to dynamic statuses --}}
+                <div class="px-3 py-1.5 rounded-lg text-[7px] sm:text-[10px] font-black uppercase tracking-[0.2em] italic shadow-sm transition-colors
+                    {{ $ticket->status == 'pending' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 animate-pulse' : 
+                      ($ticket->status == 'replied' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 
+                      'bg-stone-100 dark:bg-stone-950 text-stone-600 dark:text-stone-400') }}">
+                    {{ strtoupper($ticket->status) }}
+                </div>
+            </div>
 
-                                        @if($ticket->replies && $ticket->replies->count() > 0)
-                                            <div class="space-y-6 sm:space-y-12 border-t border-stone-100 dark:border-stone-800 pt-6 sm:pt-14 transition-colors">
-                                                @foreach($ticket->replies as $reply)
-                                                    <div class="flex gap-4 sm:gap-8 items-start group">
-                                                        <div class="shrink-0 w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-[1.25rem] bg-stone-900 dark:bg-stone-100 flex items-center justify-center text-white dark:text-stone-900 shadow-xl transition-all">
-                                                            <svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
-                                                        </div>
-                                                        <div class="flex-1">
-                                                            <div class="flex items-center justify-between mb-2 sm:mb-4">
-                                                                <span class="text-[8px] sm:text-[11px] font-black uppercase text-amber-600 tracking-[0.3em] italic leading-none transition-colors">Response active</span>
-                                                                <span class="text-[7px] sm:text-[9px] text-stone-400 dark:text-stone-500 font-black uppercase transition-colors tracking-widest">{{ $reply->created_at->diffForHumans() }}</span>
-                                                            </div>
-                                                            <div class="bg-stone-100 dark:bg-stone-950/60 p-5 sm:p-10 rounded-2xl sm:rounded-[3rem] border border-stone-200 dark:border-stone-800 transition-all shadow-premium group-hover:shadow-lg">
-                                                                <p class="text-xs sm:text-base text-stone-700 dark:text-stone-300 italic leading-relaxed font-medium transition-colors">{{ $reply->message }}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    </div>
-                                @empty
-                                    <div class="py-16 text-center opacity-30 italic font-black uppercase text-stone-500 tracking-[0.4em] text-[8px] sm:text-[11px]">System log void</div>
-                                @endforelse
+            <h4 class="text-lg sm:text-3xl font-black text-stone-900 dark:text-white uppercase italic mb-4 transition-colors leading-tight tracking-tighter">
+                {{ $ticket->subject }}
+            </h4>
+            
+            {{-- Original Message --}}
+            <div class="p-6 sm:p-10 bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-800 rounded-[1.5rem] sm:rounded-[3rem] relative mb-6 sm:mb-12 transition-colors shadow-inner">
+                <p class="text-xs sm:text-base text-stone-600 dark:text-stone-400 italic leading-relaxed font-medium">
+                    "{{ $ticket->message }}"
+                </p>
+            </div>
+
+            {{-- Replies Section --}}
+            @if($ticket->replies && $ticket->replies->count() > 0)
+                {{-- 🟢 FIX: Darkened the light-mode border (stone-200) so the divider is actually visible --}}
+                <div class="space-y-6 sm:space-y-12 border-t border-stone-200 dark:border-stone-800 pt-6 sm:pt-14 transition-colors">
+                    @foreach($ticket->replies as $reply)
+                        <div class="flex gap-4 sm:gap-8 items-start group">
+                            
+                            {{-- Reply Icon --}}
+                            <div class="shrink-0 w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-[1.25rem] bg-stone-900 dark:bg-stone-100 flex items-center justify-center text-white dark:text-stone-900 shadow-xl transition-all">
+                                <svg class="w-5 h-5 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
                             </div>
+                            
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-2 sm:mb-4">
+                                    {{-- 🟢 FIX: Added dark mode amber and fixed date contrast --}}
+                                    <span class="text-[8px] sm:text-[11px] font-black uppercase text-amber-600 dark:text-amber-500 tracking-[0.3em] italic leading-none transition-colors">Response active</span>
+                                    <span class="text-[7px] sm:text-[9px] text-stone-500 dark:text-stone-400 font-black uppercase transition-colors tracking-widest">{{ $reply->created_at->diffForHumans() }}</span>
+                                </div>
+                                
+                                <div class="bg-stone-100 dark:bg-stone-950/60 p-5 sm:p-10 rounded-2xl sm:rounded-[3rem] border border-stone-200 dark:border-stone-800 transition-all shadow-premium group-hover:shadow-lg">
+                                    <p class="text-xs sm:text-base text-stone-700 dark:text-stone-300 italic leading-relaxed font-medium transition-colors">
+                                        {{ $reply->message }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    @empty
+        {{-- 🟢 FIX: Ensured the empty state text scales well --}}
+        <div class="py-16 text-center opacity-50 italic font-black uppercase text-stone-500 dark:text-stone-600 tracking-[0.4em] text-[8px] sm:text-[11px]">
+            System log void
+        </div>
+    @endforelse
+</div>
                         @endif
                     </div>
                 </div>
