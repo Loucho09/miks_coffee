@@ -33,6 +33,12 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\EnsureSingleAdminSession::class,
         ]);
+
+        // FIX: Trusts proxies to resolve real user IP addresses (fixes 127.0.0.1 issue)
+        $middleware->trustProxies(at: [
+            '127.0.0.1',
+            '*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

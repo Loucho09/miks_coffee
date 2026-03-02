@@ -22,6 +22,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\CheckIpController;
 
 // Models
 use App\Models\Product;
@@ -56,6 +57,9 @@ Route::post('/support/send', [SupportController::class, 'send'])->name('support.
 
 Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/terms', 'legal.terms')->name('terms');
+
+// DEBUG: Real IP verification route
+Route::get('/debug-ip', CheckIpController::class);
 
 /* |--------------------------------------------------------------------------
    | 2. AUTHENTICATED ROUTES
