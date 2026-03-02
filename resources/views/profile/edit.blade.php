@@ -59,7 +59,7 @@
                                 $deviceModel = 'iPhone' . (isset($matches[1]) ? ' (iOS ' . str_replace('_', '.', $matches[1]) . ')' : '');
                             } elseif (str_contains($lowerAgent, 'android')) {
                                 preg_match('/Android \d+; ([^;)]+)/', $agent, $matches);
-                                $deviceModel = isset($matches[1]) ? $matches[1] : 'Android Device';
+                                $deviceModel = isset($matches[1]) ? trim($matches[1]) : 'Android Device';
                             } elseif (str_contains($lowerAgent, 'ipad')) {
                                 $deviceModel = 'iPad';
                             } elseif (str_contains($lowerAgent, 'windows')) {
