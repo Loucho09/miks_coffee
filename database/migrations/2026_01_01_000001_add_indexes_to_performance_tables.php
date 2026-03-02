@@ -13,40 +13,42 @@ return new class extends Migration
     public function up(): void
     {
         // Speed up Login Activity lookups in the profile and security monitoring
-        Schema::table('login_histories', function (Blueprint $table) {
-            if (Schema::hasTable('login_histories')) {
+        if (Schema::hasTable('login_histories')) {
+            Schema::table('login_histories', function (Blueprint $table) {
                 $table->index('user_id');
-            }
-        });
+            });
+        }
 
         // Speed up Single Session middleware checks for Admin accounts
-        Schema::table('users', function (Blueprint $table) {
-            if (Schema::hasColumn('users', 'last_session_id')) {
-                $table->index('last_session_id');
-            }
-        });
+        if (Schema::hasTable('users')) {
+            Schema::table('users', function (Blueprint $table) {
+                if (Schema::hasColumn('users', 'last_session_id')) {
+                    $table->index('last_session_id');
+                }
+            });
+        }
 
         // NEW FEATURE: High-speed Composite Indexes for Shop Operations
         // Speed up order item lookups for receipts and history
-        Schema::table('order_items', function (Blueprint $table) {
-            if (Schema::hasTable('order_items')) {
+        if (Schema::hasTable('order_items')) {
+            Schema::table('order_items', function (Blueprint $table) {
                 $table->index(['order_id', 'product_id']);
-            }
-        });
+            });
+        }
 
         // Speed up dashboard rendering and customer order tracking
-        Schema::table('orders', function (Blueprint $table) {
-            if (Schema::hasTable('orders')) {
+        if (Schema::hasTable('orders')) {
+            Schema::table('orders', function (Blueprint $table) {
                 $table->index(['user_id', 'status', 'created_at']);
-            }
-        });
+            });
+        }
 
         // Speed up menu filtering and active product loading
-        Schema::table('products', function (Blueprint $table) {
-            if (Schema::hasTable('products')) {
+        if (Schema::hasTable('products')) {
+            Schema::table('products', function (Blueprint $table) {
                 $table->index(['is_active', 'category_id']);
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -54,24 +56,34 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('login_histories', function (Blueprint $table) {
-            $table->dropIndex(['user_id']);
-        });
+        if (Schema::hasTable('login_histories')) {
+            Schema::table('login_histories', function (Blueprint $table) {
+                $table->dropIndex(['user_id']);
+            });
+        }
 
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropIndex(['last_session_id']);
-        });
+        if (Schema::hasTable('users')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropIndex(['last_session_id']);
+            });
+        }
 
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->dropIndex(['order_id', 'product_id']);
-        });
+        if (Schema::hasTable('order_items')) {
+            Schema::table('order_items', function (Blueprint $table) {
+                $table->dropIndex(['order_id', 'product_id']);
+            });
+        }
 
-        Schema::table('orders', function (Blueprint $table) {
-            $table->dropIndex(['user_id', 'status', 'created_at']);
-        });
+        if (Schema::hasTable('orders')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->dropIndex(['user_id', 'status', 'created_at']);
+            });
+        }
 
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropIndex(['is_active', 'category_id']);
-        });
+        if (Schema::hasTable('products')) {
+            Schema::table('products', function (Blueprint $table) {
+                $table->dropIndex(['is_active', 'category_id']);
+            });
+        }
     }
 };

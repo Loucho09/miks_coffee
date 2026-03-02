@@ -27,10 +27,21 @@
 
                 <div class="space-y-4 md:space-y-5">
                     @forelse($loginHistory as $entry)
+                        @php
+                            $agent = strtolower($entry->user_agent);
+                            $isMobile = str_contains($agent, 'mobile') || str_contains($agent, 'android') || str_contains($agent, 'iphone') || str_contains($agent, 'ipad');
+                            
+                            $device = 'Desktop';
+                            if (str_contains($agent, 'iphone')) $device = 'iPhone';
+                            elseif (str_contains($agent, 'android')) $device = 'Android';
+                            elseif (str_contains($agent, 'ipad')) $device = 'iPad';
+                            elseif (str_contains($agent, 'windows')) $device = 'Windows PC';
+                            elseif (str_contains($agent, 'macintosh')) $device = 'Mac';
+                        @endphp
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 md:p-8 bg-stone-50 dark:bg-stone-950/50 rounded-2xl md:rounded-[2rem] border border-stone-100 dark:border-stone-800 group hover:border-amber-500/30 transition-all gap-4 sm:gap-0">
                             <div class="flex items-center gap-5 w-full sm:w-auto">
                                 <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 flex items-center justify-center text-stone-400 group-hover:text-amber-500 group-hover:border-amber-500/20 transition-all shrink-0 shadow-sm">
-                                    @if(str_contains(strtolower($entry->user_agent), 'mobile'))
+                                    @if($isMobile)
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                     @else
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 21h6l-.75-4M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -38,7 +49,11 @@
                                 </div>
                                 <div class="min-w-0">
                                     <p class="text-base font-black text-stone-900 dark:text-white uppercase tracking-tight leading-tight">{{ $entry->ip_address }}</p>
-                                    <p class="text-[9px] text-stone-400 font-bold uppercase truncate max-w-[200px] md:max-w-xs tracking-wider mt-1">{{ $entry->user_agent }}</p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="text-[9px] font-black text-amber-600 uppercase tracking-widest">{{ $device }}</span>
+                                        <span class="text-stone-300 dark:text-stone-700 text-[9px]">|</span>
+                                        <p class="text-[9px] text-stone-400 font-bold uppercase truncate max-w-[150px] md:max-w-xs tracking-wider">{{ $entry->user_agent }}</p>
+                                    </div>
                                 </div>
                             </div>
                             <div class="text-left sm:text-right flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center w-full sm:w-auto border-t sm:border-t-0 border-stone-200 dark:border-stone-800 pt-4 sm:pt-0">
@@ -59,7 +74,6 @@
 
             {{-- Privacy Controls / Account Data --}}
             <div class="bg-stone-900 rounded-[2rem] md:rounded-[3rem] p-8 md:p-14 border border-stone-800 shadow-2xl relative overflow-hidden group">
-                {{-- Decorative Background Shield --}}
                 <div class="absolute -top-10 -right-10 opacity-10 group-hover:scale-110 transition-transform duration-700 text-white select-none pointer-events-none">
                     <svg class="w-48 h-48 md:w-64 md:h-64" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.47 4.34-2.98 8.19-7 9.41V12H5V6.3l7-3.11v8.8z"/>
