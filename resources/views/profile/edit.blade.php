@@ -48,16 +48,27 @@
                 <div class="space-y-4 md:space-y-5">
                     @forelse($loginHistory as $entry)
                         @php
-                            $agent = strtolower($entry->user_agent);
-                            $isMobile = str_contains($agent, 'mobile') || str_contains($agent, 'android') || str_contains($agent, 'iphone') || str_contains($agent, 'ipad');
+                            $agent = $entry->user_agent;
+                            $lowerAgent = strtolower($agent);
                             
-                            // Human-readable device parser
-                            $device = 'Desktop';
-                            if (str_contains($agent, 'iphone')) $device = 'iPhone';
-                            elseif (str_contains($agent, 'android')) $device = 'Android';
-                            elseif (str_contains($agent, 'ipad')) $device = 'iPad';
-                            elseif (str_contains($agent, 'windows')) $device = 'Windows PC';
-                            elseif (str_contains($agent, 'macintosh')) $device = 'Mac';
+                            // Advanced Device Model Detection
+                            $deviceModel = 'Desktop';
+                            
+                            if (str_contains($lowerAgent, 'iphone')) {
+                                preg_match('/iPhone OS (\d+_\d+)/', $agent, $matches);
+                                $deviceModel = 'iPhone' . (isset($matches[1]) ? ' (iOS ' . str_replace('_', '.', $matches[1]) . ')' : '');
+                            } elseif (str_contains($lowerAgent, 'android')) {
+                                preg_match('/Android \d+; ([^;)]+)/', $agent, $matches);
+                                $deviceModel = isset($matches[1]) ? $matches[1] : 'Android Device';
+                            } elseif (str_contains($lowerAgent, 'ipad')) {
+                                $deviceModel = 'iPad';
+                            } elseif (str_contains($lowerAgent, 'windows')) {
+                                $deviceModel = 'Windows PC';
+                            } elseif (str_contains($lowerAgent, 'macintosh')) {
+                                $deviceModel = 'Mac';
+                            }
+
+                            $isMobile = str_contains($lowerAgent, 'mobile') || str_contains($lowerAgent, 'android') || str_contains($lowerAgent, 'iphone') || str_contains($lowerAgent, 'ipad');
                         @endphp
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 md:p-8 bg-stone-50 dark:bg-stone-950/50 rounded-2xl md:rounded-[2rem] border border-stone-100 dark:border-stone-800 group hover:border-amber-500/30 transition-all gap-4 sm:gap-0">
                             <div class="flex items-center gap-5 w-full sm:w-auto">
@@ -71,7 +82,7 @@
                                 <div class="min-w-0">
                                     <p class="text-base font-black text-stone-900 dark:text-white uppercase tracking-tight">{{ $entry->ip_address }}</p>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-[9px] font-black text-amber-600 uppercase tracking-widest">{{ $device }}</span>
+                                        <span class="text-[9px] font-black text-amber-600 uppercase tracking-widest">{{ $deviceModel }}</span>
                                         <span class="text-stone-300 dark:text-stone-700">|</span>
                                         <p class="text-[9px] text-stone-400 font-bold uppercase truncate max-w-[150px] md:max-w-xs tracking-wider">{{ $entry->user_agent }}</p>
                                     </div>
@@ -97,7 +108,7 @@
             </div>
 
             {{-- Privacy Controls Section --}}
-            <div class="bg-stone-100 dark:bg-stone-900 rounded-[2rem] md:rounded-[3rem] p-8 md:p-14 border border-stone-800 shadow-2xl relative overflow-hidden group">
+            <div class="bg-stone-100 dark:bg-stone-950 rounded-[2rem] md:rounded-[3rem] p-8 md:p-14 border border-stone-200 dark:border-stone-800 shadow-2xl relative overflow-hidden group">
                 <div class="absolute -top-10 -right-10 opacity-10 group-hover:scale-110 transition-transform duration-700 text-dandelion-500">
                     <svg class="w-48 h-48 md:w-64 md:h-64" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.47 4.34-2.98 8.19-7 9.41V12H5V6.3l7-3.11v8.8z"/></svg>
                 </div>
@@ -105,7 +116,7 @@
                 <div class="relative z-10">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-2 h-6 bg-amber-500 rounded-full"></div>
-                        <h3 class="text-2xl md:text-3xl font-black dark:text-white uppercase italic tracking-tighter">Privacy & Data</h3>
+                        <h3 class="text-2xl md:text-3xl font-black text-stone-900 dark:text-white uppercase italic tracking-tighter">Privacy & Data</h3>
                     </div>
                     <p class="text-xs md:text-sm text-stone-600 dark:text-stone-300 font-medium italic leading-relaxed mb-10 uppercase tracking-tight max-w-full md:max-w-lg">
                         Manage your digital footprint. Download your activity records or view the human-readable compliance report. We ensure all data is encrypted and handled under strict roasting protocols.
@@ -114,7 +125,7 @@
                         <a href="{{ route('profile.data_report') }}" class="py-5 bg-white text-stone-900 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] text-center hover:bg-amber-500 hover:text-white transition-all transform hover:-translate-y-1 shadow-lg shadow-white/5">View Data Report</a>
                         <form action="{{ route('profile.export') }}" method="POST">
                             @csrf
-                            <button type="submit" class="w-full py-5 border border-stone-700 text-stone-600 dark:text-stone-200 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:border-amber-500 hover:bg-amber-500/5 transition-all transform hover:-translate-y-1">Export JSON Archive</button>
+                            <button type="submit" class="w-full py-5 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-200 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:border-amber-500 hover:bg-amber-500/5 transition-all transform hover:-translate-y-1">Export JSON Archive</button>
                         </form>
                     </div>
                 </div>

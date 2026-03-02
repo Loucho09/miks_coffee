@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Carbon\Carbon;
 
 class LoginHistory extends Model
 {
@@ -17,6 +18,14 @@ class LoginHistory extends Model
     protected $casts = [
         'login_at' => 'datetime',
     ];
+
+    /**
+     * Accessor to ensure every timestamp is converted to Manila time for the UI.
+     */
+    public function getLoginAtAttribute($value)
+    {
+        return Carbon::parse($value)->timezone('Asia/Manila');
+    }
 
     public function user(): BelongsTo
     {
