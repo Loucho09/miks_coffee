@@ -21,10 +21,9 @@ class LogSuccessfulLogin
     {
         /** @var \App\Models\User $user */
         $user = $event->user;
+        $sessionId = Session::getId();
 
         if ($user->isAdmin()) {
-            $sessionId = Session::getId();
-            
             // Use updateQuietly to prevent triggering unnecessary observers/events
             $user->last_session_id = $sessionId;
             $user->saveQuietly();
@@ -33,11 +32,15 @@ class LogSuccessfulLogin
             Cache::put("admin_session_{$user->id}", $sessionId, 600);
         }
 
-        LoginHistory::create([
-            'user_id' => $user->id,
-            'ip_address' => $this->request->ip(),
-            'user_agent' => $this->request->userAgent(),
-            'login_at' => now(),
-        ]);
+        // Use updateOrCreate to prevent "Unique Constraint Failed" errors if the event triggers twice
+        LoginHistory::updateOrCreate(
+            ['session_id' => $sessionId],
+            [
+                'user_id' => $user->id,
+                'ip_address' => $this->request->ip(),
+                'user_agent' => $this->request->userAgent(),
+                'login_at' => now(),
+            ]
+        );
     }
 }

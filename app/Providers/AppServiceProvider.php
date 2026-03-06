@@ -8,8 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Auth\Events\Login;
 use App\Models\SupportTicket;
 use App\Models\LoginHistory;
 
@@ -45,23 +43,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         /**
-         * SECURITY: Automatic Login Tracking
-         * Captures IP and Browser data upon successful login.
-         */
-        Event::listen(Login::class, function ($event) {
-            LoginHistory::create([
-                'user_id' => $event->user->id,
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-                'login_at' => now(),
-            ]);
-        });
-
-        /**
          * ULTRA-SNAP SINGLETON:
-         * We bind the unread count calculation to the view share once.
+         * Targeted to avoid infinite loops and provide sidebar data.
+         * We bind the unread count calculation and login history to the view share once.
          */
-        View::composer(['layouts.*', 'dashboard', 'cafe.*', 'public_menu'], function ($view) {
+        View::composer(['layouts.app', 'dashboard', 'cafe.index', 'public_menu'], function ($view) {
             if (Auth::check()) {
                 $userId = Auth::id();
                 
@@ -71,9 +57,21 @@ class AppServiceProvider extends ServiceProvider
                         ->count();
                 });
 
-                $view->with('unreadSupportCount', $unreadCount);
+                // Fetch recent login history for the authenticated user
+                $loginHistory = LoginHistory::where('user_id', $userId)
+                    ->latest('login_at')
+                    ->take(5)
+                    ->get();
+
+                $view->with([
+                    'unreadSupportCount' => $unreadCount,
+                    'loginHistory' => $loginHistory
+                ]);
             } else {
-                $view->with('unreadSupportCount', 0);
+                $view->with([
+                    'unreadSupportCount' => 0,
+                    'loginHistory' => collect()
+                ]);
             }
         });
     }
