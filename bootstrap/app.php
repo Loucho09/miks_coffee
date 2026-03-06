@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\UpdateAdminStatus::class,
             \App\Http\Middleware\HandleReferral::class,
+            \App\Http\Middleware\TrackSessionHistory::class, // ADDED: Cloud-proof background session tracking
         ]);
 
         $middleware->alias([

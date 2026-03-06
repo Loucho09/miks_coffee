@@ -73,11 +73,15 @@
     <main class="flex-grow relative" x-data="{ showLoyaltyCard: false }">
         @auth
             @php
-                /* GLOBAL INITIALIZATION: This prevents 'Undefined variable' errors on pages like /home */
+                /* FIX: GLOBAL INITIALIZATION
+                   Variables must be defined at the top of the @auth block so they are accessible 
+                   to the modal on every page (Home, Rewards, etc.). This prevents the 
+                   "Undefined variable $activeToken" 500 error.
+                */
                 $routeOrderId = request()->route('id');
                 $activeOrder = $routeOrderId ? \App\Models\Order::find($routeOrderId) : null;
-                $activeToken = $activeOrder ? $activeOrder->qr_claim_token : null;
-                $isClaimed = $activeOrder ? (bool)$activeOrder->points_awarded : false;
+                $activeToken = $activeOrder->qr_claim_token ?? session('active_claim_token');
+                $isClaimed = $activeOrder->points_awarded ?? false;
             @endphp
 
             @if(Auth::user()->usertype !== 'admin')
@@ -107,7 +111,7 @@
                         <div class="p-8">
                             <div class="flex items-center justify-between mb-8">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white">
+                                    <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                     </div>
                                     <div>
@@ -115,7 +119,7 @@
                                         <p class="text-[10px] text-amber-600 font-bold uppercase tracking-widest">Digital Loyalty Card</p>
                                     </div>
                                 </div>
-                                <button @click="showLoyaltyCard = false" class="text-stone-400 hover:text-stone-600">
+                                <button @click="showLoyaltyCard = false" class="text-stone-400 hover:text-stone-600 transition-colors">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                             </div>
@@ -132,11 +136,11 @@
                                     </div>
                                 @elseif($isClaimed)
                                     <div class="text-center py-10">
-                                        <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                        <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500 shadow-inner">
+                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                         </div>
                                         <p class="text-[10px] text-green-600 font-black uppercase tracking-widest leading-none">Stars Claimed</p>
-                                        <p class="text-[8px] text-stone-400 mt-2 uppercase tracking-tighter">Manifest Finalized</p>
+                                        <p class="text-[8px] text-stone-400 mt-2 uppercase tracking-tighter italic">Manifest Finalized</p>
                                     </div>
                                 @else
                                     <div class="text-center py-10 px-4">
