@@ -47,6 +47,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->loyalty_points ?? 0;
     }
 
+    /**
+     * FIXED: Points to the secure single-use route instead of a static ID.
+     * Prevents 500 error by matching the route defined in web.php.
+     */
+    public function getStarIdUrlAttribute(): string
+    {
+        return route('admin.claim_points', ['token' => 'active-manifest']);
+    }
+
     protected static function booted()
     {
         static::creating(function ($user) {
@@ -125,10 +134,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return 'Bronze';
     }
 
-    /**
-     * 🟢 FAVORITE PROTOCOL LOGIC
-     * Identifies the single most frequently ordered item configuration.
-     */
     public function getFavoriteItemAttribute()
     {
         return OrderItem::whereIn('order_id', $this->orders()->pluck('id'))

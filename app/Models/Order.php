@@ -21,6 +21,8 @@ class Order extends Model
         'reward_type',
         'order_number',
         'notes',
+        'qr_claim_token', // SECURE: Added for single-use QR logic
+        'points_awarded',  // SECURE: Added to prevent multiple point claims
     ];
 
     public function items()

@@ -20,8 +20,6 @@ use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Auth\EmailVerificationController;
-use App\Http\Controllers\Auth\EmailVerificationPromptController;
-use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\CheckIpController;
 
 // Models
@@ -38,7 +36,6 @@ Route::get('/', [HomeController::class, 'index'])->name('welcome');
 
 Route::get('/menu', function (Request $request) {
     $searchTerm = substr($request->search, 0, 100);
-
     $query = Product::with(['category', 'sizes'])->where('is_active', true);
     if ($request->filled('search')) {
         $query->where(function($q) use ($searchTerm) {
@@ -58,7 +55,6 @@ Route::post('/support/send', [SupportController::class, 'send'])->name('support.
 Route::view('/privacy', 'legal.privacy')->name('privacy');
 Route::view('/terms', 'legal.terms')->name('terms');
 
-// DEBUG: Real IP verification route
 Route::get('/debug-ip', CheckIpController::class);
 
 /* |--------------------------------------------------------------------------
@@ -66,11 +62,9 @@ Route::get('/debug-ip', CheckIpController::class);
    | -------------------------------------------------------------------------- */
 Route::middleware(['auth'])->group(function () {
 
-    /* --- EMAIL CODE VERIFICATION ROUTES --- */
     Route::get('/verify-code', [EmailVerificationController::class, 'show'])->name('verification.code.view');
     Route::post('/verify-code', [EmailVerificationController::class, 'verify'])->name('verification.code.verify');
 
-    /* --- PROTECTED BY VERIFICATION --- */
     Route::middleware(['verified'])->group(function () {
 
         /* --- CUSTOMER ONLY FEATURES --- */
@@ -80,13 +74,7 @@ Route::middleware(['auth'])->group(function () {
                 $user = Auth::user();
                 $user->updateStreak(); 
                 $recentOrders = Order::where('user_id', $user->id)->with(['items.product', 'items.review', 'items.order'])->latest()->take(5)->get();
-                
-                $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)
-                    ->with(['replies.user'])
-                    ->latest()
-                    ->take(5)
-                    ->get();
-                    
+                $supportTickets = \App\Models\SupportTicket::where('user_id', $user->id)->with(['replies.user'])->latest()->take(5)->get();
                 return view('dashboard', compact('recentOrders', 'supportTickets'));
             })->name('dashboard');
 
@@ -117,20 +105,11 @@ Route::middleware(['auth'])->group(function () {
                 Route::delete('/remove-from-cart', 'remove')->name('cart.remove');
             });
 
-            // FIX: Point checkout directly to OrderController where the fixed store logic resides
-            Route::post('/checkout', [OrderController::class, 'store'])->name('checkout.store');
-            
-            // Post-Checkout Digital Receipt Route
+            Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
             Route::get('/checkout/receipt/{id}', [CheckoutController::class, 'receipt'])->name('checkout.receipt');
-            
             Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-            
             Route::post('/orders/{id}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
-            
-            // FAVORITE REORDER ROUTE
             Route::post('/orders/reorder-item', [OrderController::class, 'reorderFavorite'])->name('orders.reorder_item');
-
-            // POINT TRANSFER PROTOCOL ROUTE
             Route::post('/orders/transfer-points', [OrderController::class, 'transferPoints'])->name('orders.transfer_points');
         });
 
@@ -139,8 +118,7 @@ Route::middleware(['auth'])->group(function () {
             $order = Order::with(['items.product', 'user'])->findOrFail($id);
             /** @var User $user */
             $user = Auth::user();
-            if ($order->user_id !== Auth::id() && !$user->isAdmin()) abort(403); 
-            
+            if ($order->user_id !== Auth::id() && ($user->usertype ?? '') !== 'admin') abort(403); 
             $pts = $order->user->loyalty_points ?? 0;
             $tier = $pts >= 500 ? 'Gold' : ($pts >= 200 ? 'Silver' : 'Bronze');
             return view('emails.order_receipt', compact('order', 'tier'));
@@ -168,6 +146,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/orders/export', ExportController::class)->name('orders.export');
             Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
             
+            // SECURITY: Points claim route for secure single-use tokens
+            Route::get('/claim-order-points/{token}', [CheckoutController::class, 'claimOrderPoints'])->name('claim_points');
+
             Route::controller(CustomerController::class)->prefix('customers')->name('customers.')->group(function () {
                 Route::get('/', 'index')->name('index');           
                 Route::get('/{id}', 'show')->name('show');         
@@ -189,15 +170,13 @@ Route::middleware(['auth'])->group(function () {
                 Route::put('/{id}', 'update')->name('update');
                 Route::delete('/bulk-destroy', 'bulkDestroy')->name('bulk-destroy');
                 Route::delete('/{id}', 'destroy')->name('destroy');
-                
-                // NEW: Bulk Golden Hour Protocol Route
                 Route::post('/bulk-golden-hour', 'bulkGoldenHour')->name('bulk-golden-hour');
             });
         });
     });
 });
 
-/* --- OPTIMIZATION WORKAROUND FOR SHARED HOSTING --- */
+/* --- OPTIMIZATION WORKAROUND --- */
 Route::get('/workaround-optimize', function() {
     Artisan::call('optimize:clear');
     Artisan::call('optimize');

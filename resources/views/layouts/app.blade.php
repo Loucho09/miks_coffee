@@ -17,7 +17,6 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- config.js -->
     <script>
     tailwind.config = {
         darkMode: 'class',
@@ -25,64 +24,23 @@
             extend: {
                 fontFamily: { sans: ['Outfit', 'sans-serif'] },
              colors: {
-                // 🟢 SOPHISTICATED BEIGE & ESPRESSO THEME (60-30-10 Rule)
                 stone: {
-                    // LIGHT MODE: The 60% and 30% Beige connection
-                    50: '#F5F2EA',  // 60% - Main Beige Background (Soft & Warm)
-                    100: '#EBE6D9', // 30% - Secondary/Card Background
-                    200: '#DED7C5', // 10% - Subtle Beige Borders
-                    
-                    // NEUTRAL STEPS: Typography and Accents
-                    300: '#D1C8B1',
-                    400: '#B8AD91',
-                    500: '#8F8366',
-                    600: '#736852',
-                    700: '#574F3E',
-                    800: '#3B352A',
-                    
-                    // DARK MODE: The "Connected" Charcoal-Beige
-                    900: '#1A1816', // 30% - Secondary Dark BG (Warm Charcoal)
-                    950: '#0C0B0A', // 60% - Primary Dark BG (Deep Espresso)
-                    1000: '#FF0000', // Custom Red Preserved
+                    50: '#F5F2EA', 100: '#EBE6D9', 200: '#DED7C5', 300: '#D1C8B1', 400: '#B8AD91', 500: '#8F8366', 600: '#736852', 700: '#574F3E', 800: '#3B352A', 900: '#1A1816', 950: '#0C0B0A', 1000: '#FF0000',
                 },
-                
-                // 🟢 ACCENT COLORS: 10% Branding
                 amber: {
-                    400: '#FBBF24',
-                    500: '#F59E0B', // Primary 10% Accent (Brand Orange)
-                    600: '#D97706',
-                    700: '#B45309',
-                    1000: '#F59E0B',
+                    400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 1000: '#F59E0B',
                 },
-
-                // 🟢 COFFEE SPECIFIC PALETTE
                 'coffee': {
-                    100: '#F5E6E0',
-                    600: '#8D5F46',
-                    800: '#4B2C20',
-                    900: '#2C1810',
+                    100: '#F5E6E0', 600: '#8D5F46', 800: '#4B2C20', 900: '#2C1810',
                 },
-
-                // 🟢 LEGACY BRANDING: Compatibility
-                'brand': {
-                    orange: '#F59E0B',
-                },
-
-                'dashboard': {
-                    1000: '#FF0000',
-                },
+                'brand': { orange: '#F59E0B', },
+                'dashboard': { 1000: '#FF0000', },
             },
             boxShadow: {
-                // 🟢 NEW FEATURE: Custom Depth Effects
-                // Soft shadow tuned for light beige backgrounds
                 'beige': '0 20px 40px -15px rgba(143, 131, 102, 0.2)',
-                // Heavy, atmospheric shadow for dark theme depth
                 'connected': '0 25px 60px -15px rgba(0, 0, 0, 0.7)',
             },
-            letterSpacing: {
-                // For that premium high-end look on headers
-                'widest': '0.4em',
-            },
+            letterSpacing: { 'widest': '0.4em', },
         }
         }
     }
@@ -98,7 +56,7 @@
         }
     </script>
 </head>
-<body class="font-sans antialiased bg-stone-100  dark:bg-stone-950 text-stone-800 dark:text-stone-200 transition-colors duration-300 flex flex-col min-h-screen">
+<body class="font-sans antialiased bg-stone-100 dark:bg-stone-950 text-stone-800 dark:text-stone-200 transition-colors duration-300 flex flex-col min-h-screen">
     
     @include('layouts.navigation')
 
@@ -112,7 +70,96 @@
         </header>
     @endif
 
-    <main class="flex-grow relative">
+    <main class="flex-grow relative" x-data="{ showLoyaltyCard: false }">
+        @auth
+            @php
+                /* GLOBAL INITIALIZATION: This prevents 'Undefined variable' errors on pages like /home */
+                $routeOrderId = request()->route('id');
+                $activeOrder = $routeOrderId ? \App\Models\Order::find($routeOrderId) : null;
+                $activeToken = $activeOrder ? $activeOrder->qr_claim_token : null;
+                $isClaimed = $activeOrder ? (bool)$activeOrder->points_awarded : false;
+            @endphp
+
+            @if(Auth::user()->usertype !== 'admin')
+                @if(request()->routeIs('checkout.receipt'))
+                    <button @click="showLoyaltyCard = true" class="fixed bottom-24 right-6 z-40 p-4 rounded-full bg-amber-500 text-white shadow-2xl hover:scale-110 active:scale-95 transition-all outline-none border-4 border-white dark:border-stone-900 animate-bounce">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                        <span class="absolute -top-1 -right-1 flex h-4 w-4">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-4 w-4 bg-amber-600 border border-white items-center justify-center text-[7px] font-black uppercase">!</span>
+                        </span>
+                    </button>
+                @endif
+
+                <div x-show="showLoyaltyCard" 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-full"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 translate-y-full"
+                     class="fixed inset-0 z-50 flex items-end justify-center px-4 pb-10 sm:items-center sm:p-0" 
+                     style="display: none;">
+                    
+                    <div class="fixed inset-0 bg-stone-950/60 backdrop-blur-sm" @click="showLoyaltyCard = false"></div>
+
+                    <div class="relative w-full max-w-sm bg-white dark:bg-stone-900 rounded-[2.5rem] shadow-connected overflow-hidden border border-amber-500/20">
+                        <div class="p-8">
+                            <div class="flex items-center justify-between mb-8">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-sm font-black uppercase tracking-widest text-stone-900 dark:text-stone-100">Star ID</h3>
+                                        <p class="text-[10px] text-amber-600 font-bold uppercase tracking-widest">Digital Loyalty Card</p>
+                                    </div>
+                                </div>
+                                <button @click="showLoyaltyCard = false" class="text-stone-400 hover:text-stone-600">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+
+                            <div class="flex flex-col items-center justify-center p-6 bg-stone-50 dark:bg-stone-950 rounded-[2rem] border-2 border-stone-100 dark:border-stone-800 shadow-inner">
+                                @if($activeToken && !$isClaimed)
+                                    {!! QrCode::size(180)->backgroundColor(255, 255, 255)->color(120, 113, 108)->margin(1)->generate(route('admin.claim_points', ['token' => $activeToken])) !!}
+                                    
+                                    <div class="mt-4 p-3 bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 w-full text-center">
+                                        <p class="text-[8px] text-stone-400 font-black uppercase mb-1">PC Verification Link:</p>
+                                        <a href="{{ route('admin.claim_points', ['token' => $activeToken]) }}" class="text-[10px] text-amber-600 font-mono break-all hover:underline select-all">
+                                            {{ route('admin.claim_points', ['token' => $activeToken]) }}
+                                        </a>
+                                    </div>
+                                @elseif($isClaimed)
+                                    <div class="text-center py-10">
+                                        <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                        </div>
+                                        <p class="text-[10px] text-green-600 font-black uppercase tracking-widest leading-none">Stars Claimed</p>
+                                        <p class="text-[8px] text-stone-400 mt-2 uppercase tracking-tighter">Manifest Finalized</p>
+                                    </div>
+                                @else
+                                    <div class="text-center py-10 px-4">
+                                        <div class="w-12 h-12 bg-stone-200 dark:bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-4 text-stone-400">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                        </div>
+                                        <p class="text-[10px] text-stone-400 font-black uppercase tracking-widest leading-relaxed">Manifest unavailable in this sequence</p>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="mt-8 text-center space-y-4">
+                                <div class="inline-block px-4 py-2 bg-amber-500/10 rounded-full border border-amber-500/20">
+                                    <span class="text-xs font-black text-amber-600 italic uppercase tracking-widest">#{{ str_pad(auth()->id(), 5, '0', STR_PAD_LEFT) }}</span>
+                                </div>
+                                <p class="text-[10px] text-stone-400 font-black uppercase tracking-[0.3em] leading-relaxed px-6">Show this code to the barista to earn star points for your order.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        @endauth
+
         {{ $slot }}
     </main>
 
@@ -128,15 +175,13 @@
                     </div>
                     <div class="flex items-center gap-3 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
                         @php
-                            // 🔧 FIX: Check actual database status for admin
                             $adminUser = Auth::user();
                             $isActuallyOnline = $adminUser->is_online && $adminUser->last_seen_at && $adminUser->last_seen_at->diffInMinutes(now()) < 5;
                         @endphp
                         <span class="w-2 h-2 rounded-full {{ $isActuallyOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-400' }}"></span>
                         <span>Management System {{ $isActuallyOnline ? 'Online' : 'Offline' }}</span>
                         <span class="mx-2 text-stone-200 dark:text-stone-800">|</span>
-                        <span>© 
-                        </span>
+                        <span>© </span>
                     </div>
                 </div>
             </footer>
@@ -165,14 +210,13 @@
                         <div>
                             <h3 class="text-xs font-black uppercase mb-6 tracking-widest">Stay Updated</h3>
                             <div class="flex gap-2">
-                                <input type="email" placeholder="Email" class="w-full px-4 py-2 border border-stone-200 dark:border-stone-700 rounded-xl bg-stone-100  dark:bg-stone-800 text-sm outline-none">
+                                <input type="email" placeholder="Email" class="w-full px-4 py-2 border border-stone-200 dark:border-stone-700 rounded-xl bg-stone-100 dark:bg-stone-800 text-sm outline-none">
                                 <button class="bg-stone-900 dark:bg-white text-white dark:text-stone-900 px-4 py-2 rounded-xl font-bold">Go</button>
                             </div>
                         </div>
                     </div>
                     <div class="border-t border-stone-100 dark:border-stone-800 pt-8 text-xs text-stone-400 font-bold uppercase tracking-widest">
-                        © 
-                         Mik's Coffee Shop. Unit 2B, Brgy. Osorio.
+                        © Mik's Coffee Shop. Unit 2B, Brgy. Osorio.
                     </div>
                 </div>
             </footer>

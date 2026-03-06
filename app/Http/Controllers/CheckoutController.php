@@ -12,6 +12,7 @@ use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderReceipt;
+use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
@@ -51,11 +52,15 @@ class CheckoutController extends Controller
                 ]);
             }
 
+            // ALTERNATIVE FIX: Generate token here to be used for physical scan
+            // Removed automatic +10 point increment to force physical receipt interaction.
             $order = Order::create([
                 'user_id' => $user->id,
                 'total_price' => max(0, $subtotal - $discount),
                 'status' => 'pending',
                 'order_number' => 'ORD-' . strtoupper(uniqid()),
+                'qr_claim_token' => Str::random(32), // Secure single-use token
+                'points_awarded' => false,
             ]);
 
             foreach ($cart as $id => $details) {
@@ -78,32 +83,58 @@ class CheckoutController extends Controller
                 }
             }
 
-            $user->increment('loyalty_points', 10);
-            PointTransaction::create([
-                'user_id' => $user->id,
-                'amount' => 10,
-                'description' => "Earned from Order #{$order->id}",
-            ]);
-
-            // 🟢 DISPATCH DIGITAL RECEIPT
+            // Dispatch digital receipt email with scannable claim link
             try {
                 Mail::to($user->email)->send(new OrderReceipt($order));
             } catch (\Exception $e) {
-                // Silently log email failure to prevent checkout crash
                 \Log::error('Receipt Email Failed: ' . $e->getMessage());
             }
 
             $user->updateStreak();
             session()->forget('cart');
 
-            // Redirect to receipt manifest
             return redirect()->route('checkout.receipt', $order->id)->with('success', 'Order Sequence Finalized.');
         });
     }
 
     public function receipt($id)
     {
-        $order = Order::with('items.product')->where('user_id', Auth::id())->findOrFail($id);
+        $order = Order::with(['items.product', 'user'])->where('user_id', Auth::id())->findOrFail($id);
         return view('cafe.receipt', compact('order'));
+    }
+
+    /**
+     * Admin claim handler. Points are only awarded once per token.
+     * Prevents multi-scanning exploits.
+     */
+    public function claimOrderPoints($token)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user || !$user->isAdmin()) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $order = Order::where('qr_claim_token', $token)->firstOrFail();
+
+        if ($order->points_awarded) {
+            return redirect()->route('admin.dashboard')->with('error', 'Operational Warning: Stars already claimed for this manifest.');
+        }
+
+        DB::transaction(function () use ($order) {
+            $customer = $order->user;
+            $customer->increment('loyalty_points', 10);
+
+            PointTransaction::create([
+                'user_id' => $customer->id,
+                'amount' => 10,
+                'description' => "Order Manifest Claim: #{$order->order_number}",
+            ]);
+
+            $order->update(['points_awarded' => true]);
+        });
+
+        return redirect()->route('admin.dashboard')->with('status', "Success! Added 10 Stars to {$order->user->name}. Manifest finalized.");
     }
 }
