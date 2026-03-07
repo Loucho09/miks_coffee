@@ -60,8 +60,9 @@ class AppServiceProvider extends ServiceProvider
                 // Fetch recent login history for the authenticated user
                 $loginHistory = LoginHistory::where('user_id', $userId)
                     ->latest('login_at')
-                    ->take(5)
-                    ->get();
+                    ->get()
+                    ->unique('session_id')
+                    ->take(5);
 
                 $view->with([
                     'unreadSupportCount' => $unreadCount,

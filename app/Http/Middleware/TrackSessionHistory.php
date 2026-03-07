@@ -27,10 +27,14 @@ class TrackSessionHistory
      */
     public function terminate(Request $request, Response $response): void
     {
-        if (Auth::check()) {
+        // 1. Skip tracking for the security heartbeat route to prevent DB overload
+        // 2. Only track if the user is authenticated
+        if (Auth::check() && !$request->routeIs('auth.check')) {
             try {
                 $sessionId = $request->session()->getId();
+                
                 if ($sessionId) {
+                    // updateOrCreate satisfies the NOT NULL constraint reliably
                     LoginHistory::updateOrCreate(
                         ['session_id' => $sessionId],
                         [
