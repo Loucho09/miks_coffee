@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\LoginHistory;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class TrackSessionHistory
 {
@@ -33,18 +34,21 @@ class TrackSessionHistory
             try {
                 $sessionId = $request->session()->getId();
                 
-                if ($sessionId) {
-                    // updateOrCreate satisfies the NOT NULL constraint reliably
-                    LoginHistory::updateOrCreate(
-                        ['session_id' => $sessionId],
-                        [
-                            'user_id'    => Auth::id(),
-                            'ip_address' => $request->ip(),
-                            'user_agent' => $request->userAgent(),
-                            'login_at'   => now(),
-                        ]
-                    );
+                // CLOUD FALLBACK: If session ID is missing or empty, generate a temporary 
+                // tracking key to satisfy the database NOT NULL constraint and prevent 500 errors.
+                if (empty($sessionId)) {
+                    $sessionId = 'cloud_sync_' . Str::random(40);
                 }
+
+                LoginHistory::updateOrCreate(
+                    ['session_id' => $sessionId],
+                    [
+                        'user_id'    => Auth::id(),
+                        'ip_address' => $request->ip() ?? '0.0.0.0',
+                        'user_agent' => $request->userAgent() ?? 'Unknown',
+                        'login_at'   => now(),
+                    ]
+                );
             } catch (\Exception $e) {
                 // Silently log glitches so the user experience is never interrupted on Laravel Cloud
                 Log::error("Cloud Tracking Glitch: " . $e->getMessage());

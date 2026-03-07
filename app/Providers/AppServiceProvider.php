@@ -57,7 +57,7 @@ class AppServiceProvider extends ServiceProvider
                         ->count();
                 });
 
-                // Fetch recent login history for the authenticated user
+                // Fetch recent login history for the authenticated user safely
                 $loginHistory = LoginHistory::where('user_id', $userId)
                     ->latest('login_at')
                     ->get()
