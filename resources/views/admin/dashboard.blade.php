@@ -8,7 +8,7 @@
                 </h2>
             </div>
             <div class="flex items-center gap-4">
-                {{-- 🟢 NEW FEATURE: Camera QR Scanner Button --}}
+                {{-- 🟢 Camera QR Scanner Button --}}
                 <button onclick="openScanner()" class="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-stone-900 dark:hover:bg-amber-400 transition-all shadow-lg active:scale-95 shadow-amber-500/20 group">
                     <svg class="w-4 h-4 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     Scan Star ID
@@ -23,8 +23,17 @@
     </x-slot>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    {{-- 🟢 NEW: Light-weight QR Library --}}
     <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        /* Optimized Scanner UI */
+        #qr-reader { border: none !important; border-radius: 2rem !important; overflow: hidden; }
+        #qr-reader__scan_region { background: #0c0b0a !important; }
+        #qr-reader__scan_region video { object-fit: cover !important; width: 100% !important; height: 100% !important; border-radius: 2rem !important; }
+        .scanner-target { position: absolute; inset: 0; z-index: 10; border: 2px solid rgba(245, 158, 11, 0.3); pointer-events: none; border-radius: 2rem; }
+        .scanner-line { position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #f59e0b, transparent); box-shadow: 0 0 15px #f59e0b; animation: scanning 2s linear infinite; z-index: 11; }
+        @keyframes scanning { 0% { top: 10%; } 50% { top: 90%; } 100% { top: 10%; } }
+    </style>
 
     <div class="py-6 sm:py-12 bg-stone-50 dark:bg-stone-950 min-h-screen transition-colors duration-500">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -41,8 +50,10 @@
                             <button onclick="closeScanner()" class="text-stone-400 hover:text-stone-600 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
                         </div>
 
-                        <div class="relative rounded-[2rem] overflow-hidden bg-stone-100 dark:bg-stone-950 border-2 border-stone-100 dark:border-stone-800 shadow-inner aspect-square">
+                        <div id="scannerContainer" class="relative rounded-[2rem] overflow-hidden bg-stone-100 dark:bg-stone-950 border-2 border-stone-100 dark:border-stone-800 shadow-inner aspect-square">
                             <div id="qr-reader" class="w-full h-full"></div>
+                            <div class="scanner-target"></div>
+                            <div class="scanner-line"></div>
                         </div>
 
                         <div id="scanStatus" class="mt-6 text-center text-[10px] font-black uppercase tracking-widest text-stone-400">Position the QR code within the frame</div>
@@ -52,7 +63,6 @@
             
             {{-- Admin Daily Snapshot --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
-                {{-- Today's Sales Card --}}
                 <div class="bg-stone-400 dark:bg-amber-600 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group transition-all duration-500 hover:shadow-amber-600/20">
                     <div class="relative z-10">
                         <p class="text-[10px] font-black uppercase tracking-[0.3em] text-stone-900 dark:text-stone-900 dark:text-amber-900/60 mb-2">Today's Revenue</p>
@@ -66,21 +76,18 @@
                     </div>
                 </div>
    
-                {{-- Loyalty Issued Card --}}
                 <div class="bg-white dark:bg-stone-900 p-6 sm:p-8 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-sm transition-all duration-500 flex flex-col justify-center">
                     <p class="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-2">Points Issued Today</p>
                     <h4 class="text-3xl font-black text-amber-600 dark:text-amber-500 italic">+{{ number_format($pointsIssued) }}</h4>
                     <p class="text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase mt-1">New Loyalty Debt</p>
                 </div>
 
-                {{-- Redemptions Card --}}
                 <div class="bg-white dark:bg-stone-900 p-6 sm:p-8 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 shadow-sm transition-all duration-500 flex flex-col justify-center">
                     <p class="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-2">Rewards Redeemed</p>
                     <h4 class="text-3xl font-black text-rose-600 dark:text-rose-500 italic">-{{ number_format($pointsRedeemed) }}</h4>
                     <p class="text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase mt-1">Inventory Outflow</p>
                 </div>
 
-                {{-- Top Customer Card --}}
                 <div class="bg-amber-100 dark:bg-stone-800 p-6 sm:p-8 rounded-[2.5rem] shadow-sm relative overflow-hidden group flex flex-col justify-center transition-all duration-500 border border-amber-200 dark:border-stone-700">
                     <div class="relative z-10">
                         <p class="text-[10px] font-black text-amber-800 dark:text-amber-500/80 uppercase tracking-[0.3em] mb-2">Today's Top Regular</p>
@@ -201,35 +208,62 @@
     <script>
         // SCANNER CONTROLS
         let html5QrCode;
+        const defaultContainerHTML = `
+            <div id="qr-reader" class="w-full h-full"></div>
+            <div class="scanner-target"></div>
+            <div class="scanner-line"></div>
+        `;
 
         function openScanner() {
+            // Restore container state
+            document.getElementById('scannerContainer').innerHTML = defaultContainerHTML;
             document.getElementById('scannerModal').classList.remove('hidden');
             document.getElementById('scannerModal').classList.add('flex');
             
             html5QrCode = new Html5Qrcode("qr-reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            
+            const config = { 
+                fps: 30,
+                qrbox: (viewfinderWidth, viewfinderHeight) => {
+                    const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                    const qrboxSize = Math.floor(minEdgeSize * 0.8); 
+                    return { width: qrboxSize, height: qrboxSize };
+                },
+                aspectRatio: 1.0,
+                experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+            };
 
-            html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
-                // Handle scanned URL or plain Token
-                let token = decodedText;
-                if (decodedText.includes('claim-order-points/')) {
-                    token = decodedText.split('claim-order-points/').pop();
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                config, 
+                (decodedText) => {
+                    let token = decodedText;
+                    if (decodedText.includes('claim-order-points/')) {
+                        token = decodedText.split('claim-order-points/').pop();
+                    }
+                    
+                    processPoints(token);
+                    html5QrCode.stop();
                 }
-                
-                processPoints(token);
-                html5QrCode.stop();
+            ).catch(err => {
+                document.getElementById('scanStatus').innerHTML = '<span class="text-rose-500">Camera Access Denied</span>';
             });
         }
 
         function closeScanner() {
-            if (html5QrCode) html5QrCode.stop();
-            document.getElementById('scannerModal').classList.add('hidden');
-            document.getElementById('scannerModal').classList.remove('flex');
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('scannerModal').classList.add('hidden');
+                });
+            } else {
+                document.getElementById('scannerModal').classList.add('hidden');
+            }
         }
 
         async function processPoints(token) {
             const statusDiv = document.getElementById('scanStatus');
-            statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse">Processing Manifest...</span>';
+            const containerDiv = document.getElementById('scannerContainer');
+            statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse uppercase tracking-widest">Validating Manifest...</span>';
 
             try {
                 const response = await fetch("{{ route('admin.scan_star_id') }}", {
@@ -244,14 +278,28 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    statusDiv.innerHTML = `<span class="text-emerald-500">✔ ${data.message}</span>`;
+                    // 🟢 SUCCESS STATE
+                    containerDiv.innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full bg-emerald-500 text-white animate-pulse">
+                            <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                            <p class="font-black text-2xl uppercase tracking-tighter">COMPLETE</p>
+                        </div>
+                    `;
+                    statusDiv.innerHTML = `<span class="text-emerald-500 font-black uppercase tracking-widest underline decoration-2 offset-4 underline-offset-4 decoration-emerald-500/30">✔ +10 Stars added to ${data.customer}</span>`;
                     setTimeout(() => { location.reload(); }, 2000);
                 } else {
-                    statusDiv.innerHTML = `<span class="text-rose-500">❌ ${data.message}</span>`;
+                    // ❌ ERROR STATE
+                    containerDiv.innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full bg-rose-600 text-white">
+                            <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
+                            <p class="font-black text-2xl uppercase tracking-tighter">ERROR</p>
+                        </div>
+                    `;
+                    statusDiv.innerHTML = `<span class="text-rose-500 font-black uppercase tracking-widest">❌ ${data.message}</span>`;
                     setTimeout(() => { openScanner(); }, 3000);
                 }
             } catch (error) {
-                statusDiv.innerHTML = '<span class="text-rose-500">❌ Network error. Check connection.</span>';
+                statusDiv.innerHTML = '<span class="text-rose-500 uppercase tracking-widest">Network Error</span>';
             }
         }
 
