@@ -14,7 +14,7 @@ class AdminController extends Controller
 {
     /**
      * AJAX Endpoint for QR Scanner
-     * Optimized logic to ensure points are saved correctly to the database.
+     * Optimized for high-speed verification and guaranteed database persistence.
      */
     public function processScan(Request $request)
     {
@@ -36,16 +36,16 @@ class AdminController extends Controller
                 /** @var User $user */
                 $user = User::findOrFail($order->user_id);
                 
-                // FIXED: Manual increment and save to ensure persistence
+                // FIXED: Manual increment and save to ensure persistence on Cloud DB
                 $currentPoints = (int)($user->loyalty_points ?? 0);
                 $user->loyalty_points = $currentPoints + 10;
                 $user->save(); 
                 
-                // Mark manifest as awarded
+                // Lock the manifest to prevent double-claiming
                 $order->points_awarded = true;
                 $order->save();
 
-                // Log the transaction
+                // Log the transaction for the admin activity feed
                 PointTransaction::create([
                     'user_id' => $user->id,
                     'order_id' => $order->id,
@@ -57,7 +57,7 @@ class AdminController extends Controller
 
             return response()->json([
                 'success' => true, 
-                'message' => "COMPLETE", //
+                'message' => "COMPLETE", // Triggers the green UI state
                 'customer' => $order->user->name ?? 'Customer',
                 'new_total' => User::find($order->user_id)->loyalty_points
             ]);

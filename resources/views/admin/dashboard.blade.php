@@ -27,7 +27,7 @@
 
     <style>
         /* Optimized Scanner UI */
-        #qr-reader { border: none !important; border-radius: 2rem !important; overflow: hidden; }
+        #qr-reader { border: none !important; border-radius: 2rem !important; overflow: hidden; height: 100% !important; }
         #qr-reader__scan_region { background: #0c0b0a !important; }
         #qr-reader__scan_region video { object-fit: cover !important; width: 100% !important; height: 100% !important; border-radius: 2rem !important; }
         .scanner-target { position: absolute; inset: 0; z-index: 10; border: 2px solid rgba(245, 158, 11, 0.3); pointer-events: none; border-radius: 2rem; }
@@ -222,15 +222,19 @@
             
             html5QrCode = new Html5Qrcode("qr-reader");
             
+            // 🟢 BOOSTED ACCURACY & FIELD OF SCAN
             const config = { 
-                fps: 30,
+                fps: 30, // High FPS for instant reading
                 qrbox: (viewfinderWidth, viewfinderHeight) => {
+                    // Larger field of scan: 95% of viewfinder area
                     const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                    const qrboxSize = Math.floor(minEdgeSize * 0.8); 
+                    const qrboxSize = Math.floor(minEdgeSize * 0.95); 
                     return { width: qrboxSize, height: qrboxSize };
                 },
                 aspectRatio: 1.0,
-                experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true // Native hardware acceleration
+                }
             };
 
             html5QrCode.start(
@@ -238,6 +242,7 @@
                 config, 
                 (decodedText) => {
                     let token = decodedText;
+                    // Support both full URL and raw tokens
                     if (decodedText.includes('claim-order-points/')) {
                         token = decodedText.split('claim-order-points/').pop();
                     }
@@ -254,22 +259,25 @@
             if (html5QrCode && html5QrCode.isScanning) {
                 html5QrCode.stop().then(() => {
                     document.getElementById('scannerModal').classList.add('hidden');
+                    document.getElementById('scannerModal').classList.remove('flex');
                 });
             } else {
                 document.getElementById('scannerModal').classList.add('hidden');
+                document.getElementById('scannerModal').classList.remove('flex');
             }
         }
 
         async function processPoints(token) {
             const statusDiv = document.getElementById('scanStatus');
             const containerDiv = document.getElementById('scannerContainer');
-            statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse uppercase tracking-widest">Validating Manifest...</span>';
+            statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse uppercase tracking-widest">CONNECTING TO DATABASE...</span>';
 
             try {
                 const response = await fetch("{{ route('admin.scan_star_id') }}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     },
                     body: JSON.stringify({ token: token })
@@ -278,28 +286,29 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // 🟢 SUCCESS STATE
+                    // 🟢 SUCCESS STATE: "COMPLETE"
                     containerDiv.innerHTML = `
                         <div class="flex flex-col items-center justify-center h-full bg-emerald-500 text-white animate-pulse">
                             <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-                            <p class="font-black text-2xl uppercase tracking-tighter">COMPLETE</p>
+                            <p class="font-black text-3xl uppercase tracking-tighter">COMPLETE</p>
                         </div>
                     `;
-                    statusDiv.innerHTML = `<span class="text-emerald-500 font-black uppercase tracking-widest underline decoration-2 offset-4 underline-offset-4 decoration-emerald-500/30">✔ +10 Stars added to ${data.customer}</span>`;
+                    statusDiv.innerHTML = `<span class="text-emerald-500 font-black uppercase tracking-widest">✔ +10 Stars added to ${data.customer}</span>`;
                     setTimeout(() => { location.reload(); }, 2000);
                 } else {
                     // ❌ ERROR STATE
                     containerDiv.innerHTML = `
                         <div class="flex flex-col items-center justify-center h-full bg-rose-600 text-white">
                             <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
-                            <p class="font-black text-2xl uppercase tracking-tighter">ERROR</p>
+                            <p class="font-black text-3xl uppercase tracking-tighter">ERROR</p>
                         </div>
                     `;
                     statusDiv.innerHTML = `<span class="text-rose-500 font-black uppercase tracking-widest">❌ ${data.message}</span>`;
                     setTimeout(() => { openScanner(); }, 3000);
                 }
             } catch (error) {
-                statusDiv.innerHTML = '<span class="text-rose-500 uppercase tracking-widest">Network Error</span>';
+                statusDiv.innerHTML = '<span class="text-rose-500 uppercase tracking-widest">Network Timeout - Check Cloud Connection</span>';
+                setTimeout(() => { openScanner(); }, 3000);
             }
         }
 
