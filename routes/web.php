@@ -21,6 +21,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\CheckIpController;
+use App\Http\Controllers\Admin\AdminController; // ADDED
 
 // Models
 use App\Models\Product;
@@ -148,6 +149,9 @@ Route::middleware(['auth'])->group(function () {
             
             // SECURITY: Points claim route for secure single-use tokens
             Route::get('/claim-order-points/{token}', [CheckoutController::class, 'claimOrderPoints'])->name('claim_points');
+            
+            // 🟢 NEW: QR Scanner AJAX endpoint
+            Route::post('/scan-star-id', [AdminController::class, 'processScan'])->name('scan_star_id');
 
             Route::controller(CustomerController::class)->prefix('customers')->name('customers.')->group(function () {
                 Route::get('/', 'index')->name('index');           

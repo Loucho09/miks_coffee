@@ -7,19 +7,50 @@
                     {{ __('Analytics Dashboard') }}
                 </h2>
             </div>
-            <div class="flex items-center gap-3">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                <span class="text-[10px] font-black uppercase tracking-widest text-stone-400 dark:text-stone-500">Real-Time Sales Feed</span>
+            <div class="flex items-center gap-4">
+                {{-- 🟢 NEW FEATURE: Camera QR Scanner Button --}}
+                <button onclick="openScanner()" class="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-stone-900 dark:hover:bg-amber-400 transition-all shadow-lg active:scale-95 shadow-amber-500/20 group">
+                    <svg class="w-4 h-4 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Scan Star ID
+                </button>
+
+                <div class="hidden sm:flex items-center gap-3">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-stone-400 dark:text-stone-500">Real-Time Sales Feed</span>
+                </div>
             </div>
         </div>
     </x-slot>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {{-- 🟢 NEW: Light-weight QR Library --}}
+    <script src="https://unpkg.com/html5-qrcode"></script>
 
     <div class="py-6 sm:py-12 bg-stone-50 dark:bg-stone-950 min-h-screen transition-colors duration-500">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- 🟢 NEW FEATURE: Admin Daily Snapshot --}}
+            {{-- QR SCANNER MODAL OVERLAY --}}
+            <div id="scannerModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-stone-950/80 backdrop-blur-md">
+                <div class="relative w-full max-w-lg bg-white dark:bg-stone-900 rounded-[2.5rem] shadow-connected overflow-hidden border border-amber-500/20">
+                    <div class="p-8">
+                        <div class="flex items-center justify-between mb-8">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+                                <div><h3 class="text-sm font-black uppercase tracking-widest text-stone-900 dark:text-stone-100">Live Scanner</h3><p class="text-[10px] text-amber-600 font-bold uppercase tracking-widest">Verify Star ID</p></div>
+                            </div>
+                            <button onclick="closeScanner()" class="text-stone-400 hover:text-stone-600 transition-colors"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                        </div>
+
+                        <div class="relative rounded-[2rem] overflow-hidden bg-stone-100 dark:bg-stone-950 border-2 border-stone-100 dark:border-stone-800 shadow-inner aspect-square">
+                            <div id="qr-reader" class="w-full h-full"></div>
+                        </div>
+
+                        <div id="scanStatus" class="mt-6 text-center text-[10px] font-black uppercase tracking-widest text-stone-400">Position the QR code within the frame</div>
+                    </div>
+                </div>
+            </div>
+            
+            {{-- Admin Daily Snapshot --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
                 {{-- Today's Sales Card --}}
                 <div class="bg-stone-400 dark:bg-amber-600 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group transition-all duration-500 hover:shadow-amber-600/20">
@@ -168,6 +199,62 @@
     </div>
 
     <script>
+        // SCANNER CONTROLS
+        let html5QrCode;
+
+        function openScanner() {
+            document.getElementById('scannerModal').classList.remove('hidden');
+            document.getElementById('scannerModal').classList.add('flex');
+            
+            html5QrCode = new Html5Qrcode("qr-reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+            html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+                // Handle scanned URL or plain Token
+                let token = decodedText;
+                if (decodedText.includes('claim-order-points/')) {
+                    token = decodedText.split('claim-order-points/').pop();
+                }
+                
+                processPoints(token);
+                html5QrCode.stop();
+            });
+        }
+
+        function closeScanner() {
+            if (html5QrCode) html5QrCode.stop();
+            document.getElementById('scannerModal').classList.add('hidden');
+            document.getElementById('scannerModal').classList.remove('flex');
+        }
+
+        async function processPoints(token) {
+            const statusDiv = document.getElementById('scanStatus');
+            statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse">Processing Manifest...</span>';
+
+            try {
+                const response = await fetch("{{ route('admin.scan_star_id') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ token: token })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusDiv.innerHTML = `<span class="text-emerald-500">✔ ${data.message}</span>`;
+                    setTimeout(() => { location.reload(); }, 2000);
+                } else {
+                    statusDiv.innerHTML = `<span class="text-rose-500">❌ ${data.message}</span>`;
+                    setTimeout(() => { openScanner(); }, 3000);
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<span class="text-rose-500">❌ Network error. Check connection.</span>';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const isDark = document.documentElement.classList.contains('dark');
             const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
@@ -186,7 +273,6 @@
                         datasets: [{
                             label: 'Revenue',
                             data: JSON.parse(revenueCanvas.dataset.values),
-                            backgroundColor: isDark ? '#fbbf24' : '#stone-900',
                             backgroundColor: ['#d97706', '#f59e0b', '#fbbf24', '#fcd34d', '#fde68a'],
                             borderRadius: 12
                         }]
