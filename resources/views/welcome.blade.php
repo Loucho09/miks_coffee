@@ -275,7 +275,6 @@
         </section>
 
         @php
-            // Fix: explicitly set Philippines timezone so open/closed status is accurate
             date_default_timezone_set('Asia/Manila');
             $currentHour = (int) date('H');
             $isOpen = ($currentHour >= 9 && $currentHour < 22);
@@ -284,8 +283,8 @@
                 [
                     'name'      => 'Trece Branch',
                     'address'   => '399 Tanza - Trece Martires Rd, Trece Martires City, 4109 Cavite',
-                    'map_src'   => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4933.761939870053!2d120.86568747605753!3d14.284781586164984!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd81001f3e2407%3A0x7548c28cd57121cc!2sMik%E2%80%99s%20coffee%20shop!5e1!3m2!1sen!2sph!4v1771865729911!5m2!1sen!2sph',
-                    'map_link'  => 'https://maps.app.goo.gl/8JG1eN2X7NtXzi3d9',
+                    'map_src'   => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3864.123!2d120.865!3d14.284!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTTCsDE3JzA1LjIiTiAxMjDCsDUxJzU2LjUiRQ!5e0!3m2!1sen!2sph!4v1700000000000!5m2!1sen!2sph',
+                    'map_link'  => 'https://maps.google.com/?q=14.284781586164984,120.86568747605753',
                     'dest_lat'  => '14.284781586164984',
                     'dest_lng'  => '120.86568747605753',
                     'iframe_id' => 'map-iframe-trece',
@@ -293,8 +292,8 @@
                 [
                     'name'      => 'Osorio Branch',
                     'address'   => 'Brgy. Osorio, Trece Martires City, Cavite',
-                    'map_src'   => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4933.6069502492455!2d120.87790997605755!3d14.291848986158746!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd810036190f85%3A0xfadff5bded680d09!2sMik\'s%20Coffee%20Shop!5e1!3m2!1sen!2sph!4v1771865763904!5m2!1sen!2sph',
-                    'map_link'  => 'https://maps.app.goo.gl/2q4k4eh5QMkQqVL78',
+                    'map_src'   => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3864.123!2d120.877!3d14.291!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTTCsDE3JzMwLjYiTiAxMjDCsDUyJzQwLjUiRQ!5e0!3m2!1sen!2sph!4v1700000000001!5m2!1sen!2sph',
+                    'map_link'  => 'https://maps.google.com/?q=14.291848986158746,120.87790997605755',
                     'dest_lat'  => '14.291848986158746',
                     'dest_lng'  => '120.87790997605755',
                     'iframe_id' => 'map-iframe-osorio',
@@ -372,9 +371,6 @@
                             <div class="h-80 relative overflow-hidden bg-stone-200 dark:bg-stone-900 group/map transition-colors">
                                 <iframe
                                     id="{{ $branch['iframe_id'] }}"
-                                    data-default-src="{{ $branch['map_src'] }}"
-                                    data-dest-lat="{{ $branch['dest_lat'] }}"
-                                    data-dest-lng="{{ $branch['dest_lng'] }}"
                                     class="w-full h-full grayscale-[30%] contrast-[1.1] transition-all duration-700 group-hover/map:scale-105 dark:invert dark:hue-rotate-180 dark:brightness-90"
                                     src="{{ $branch['map_src'] }}"
                                     style="border:0;"
@@ -382,9 +378,7 @@
                                     loading="lazy"
                                     referrerpolicy="no-referrer-when-downgrade">
                                 </iframe>
-
                                 <div class="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-stone-950/80 to-transparent pointer-events-none z-10"></div>
-
                                 <a href="{{ $branch['map_link'] }}"
                                    target="_blank"
                                    rel="noopener noreferrer"
@@ -450,8 +444,6 @@
 
                     <div class="md:col-span-4 flex flex-col items-center md:items-start text-center md:text-left">
                         <h3 class="text-[10px] font-black text-amber-600 dark:text-amber-500 tracking-[0.4em] uppercase mb-8">Join the Culture</h3>
-                      
-
                         <div class="flex gap-4">
                             <a href="https://www.facebook.com/share/17aDwarKPW/" class="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-blue-600 hover:border-blue-600/30 transition-all duration-300 group">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -500,50 +492,6 @@
                 }
                 syncIcons();
             });
-        </script>
-
-        {{-- Geolocation: update map iframes to show directions from user's current location --}}
-        <script>
-            (function () {
-                // Map iframe IDs paired with their destination coordinates
-                var mapIframes = [
-                    { id: 'map-iframe-trece',  destLat: '14.284781586164984', destLng: '120.86568747605753' },
-                    { id: 'map-iframe-osorio', destLat: '14.291848986158746', destLng: '120.87790997605755' }
-                ];
-
-                function buildDirectionsSrc(originLat, originLng, destLat, destLng) {
-                    // Uses the classic maps embed directions URL which does NOT require an API key
-                    return 'https://maps.google.com/maps?saddr=' +
-                        encodeURIComponent(originLat + ',' + originLng) +
-                        '&daddr=' +
-                        encodeURIComponent(destLat + ',' + destLng) +
-                        '&output=embed';
-                }
-
-                function applyDirectionsToIframes(lat, lng) {
-                    mapIframes.forEach(function (item) {
-                        var iframe = document.getElementById(item.id);
-                        if (iframe) {
-                            iframe.src = buildDirectionsSrc(lat, lng, item.destLat, item.destLng);
-                        }
-                    });
-                }
-
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        function (position) {
-                            applyDirectionsToIframes(
-                                position.coords.latitude,
-                                position.coords.longitude
-                            );
-                        },
-                        function () {
-                            // Permission denied or unavailable — keep default static embed src (already set in HTML)
-                        },
-                        { timeout: 8000, maximumAge: 60000 }
-                    );
-                }
-            })();
         </script>
     </body>
 </html>

@@ -10,7 +10,14 @@ class HomeController extends Controller
 {
     public function index()
     {
+        /**
+         * UPDATED: Public Standings query to exclude Admin accounts.
+         * This ensures only regular customers appear on the landing page leaderboard.
+         */
         $topStreaks = User::where('streak_count', '>', 0)
+            ->where('usertype', '!=', 'admin')
+            ->where('role', '!=', 'admin')
+            ->where('email', '!=', 'jmloucho09@gmail.com')
             ->orderBy('streak_count', 'desc')
             ->take(5)
             ->get();
