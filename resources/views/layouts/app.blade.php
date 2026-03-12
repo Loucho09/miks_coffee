@@ -185,7 +185,7 @@
                         <span class="w-2 h-2 rounded-full {{ $isActuallyOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-400' }}"></span>
                         <span>Management System {{ $isActuallyOnline ? 'Online' : 'Offline' }}</span>
                         <span class="mx-2 text-stone-200 dark:text-stone-800">|</span>
-                        <span>© </span>
+                        <span>© 2026 </span>
                     </div>
                 </div>
             </footer>

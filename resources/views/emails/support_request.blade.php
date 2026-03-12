@@ -23,7 +23,7 @@
             <p><span class="label">Message:</span><br> {{ $customerMessage }}</p>
         </div>
         <div class="footer">
-            © 
+            © 2026
              Mik's Coffee Shop - Trece Martires
         </div>
     </div>
