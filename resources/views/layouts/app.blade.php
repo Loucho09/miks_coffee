@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- PWA Meta Tags --}}
+    {{-- 🟢 PWA Meta Tags - Mobile Compatibility Fix --}}
     <meta name="theme-color" content="#F59E0B">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Miks Coffee">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
 
     <title>{{ config('app.name', "Mik's Coffee Shop - Best Coffee in Trece Martires") }}</title>
@@ -77,6 +80,9 @@
     <main class="flex-grow relative" x-data="{ showLoyaltyCard: false }">
         @auth
             @php
+                /* FIX: GLOBAL INITIALIZATION
+                   Variables defined at the top of the @auth block for modal accessibility.
+                */
                 $routeOrderId = request()->route('id');
                 $activeOrder = $routeOrderId ? \App\Models\Order::find($routeOrderId) : null;
                 $activeToken = $activeOrder->qr_claim_token ?? session('active_claim_token');
@@ -251,11 +257,15 @@
         });
     </script>
     
-    {{-- Service Worker Registration --}}
+    {{-- 🟢 Service Worker Registration - Fixed for Mobile --}}
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js');
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('Miks Coffee PWA Active');
+                }).catch(err => {
+                    console.error('PWA Registration Fail:', err);
+                });
             });
         }
     </script>

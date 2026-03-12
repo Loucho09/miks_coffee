@@ -13,6 +13,7 @@ class HomeController extends Controller
         /**
          * UPDATED: Public Standings query to exclude Admin accounts.
          * This ensures only regular customers appear on the landing page leaderboard.
+         * Filtered based on usertype, role, and specific admin email.
          */
         $topStreaks = User::where('streak_count', '>', 0)
             ->where('usertype', '!=', 'admin')
