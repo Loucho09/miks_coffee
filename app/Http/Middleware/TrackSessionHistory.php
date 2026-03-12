@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\LoginHistory;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class TrackSessionHistory
@@ -32,23 +33,30 @@ class TrackSessionHistory
         // 2. Only track if the user is authenticated
         if (Auth::check() && !$request->routeIs(['auth.check', 'admin.scan_star_id'])) {
             try {
-                $sessionId = $request->session()->getId();
-                
-                // CLOUD FALLBACK: If session ID is missing or empty, generate a temporary 
-                // tracking key to satisfy the database NOT NULL constraint and prevent 500 errors.
-                if (empty($sessionId)) {
-                    $sessionId = 'cloud_sync_' . Str::random(40);
-                }
+                /**
+                 * CRITICAL STABILITY CHECK:
+                 * Verifies the existence of the session_id column before execution.
+                 * This prevents 500 errors if the Laravel Cloud database is out of sync.
+                 */
+                if (Schema::hasColumn('login_histories', 'session_id')) {
+                    $sessionId = $request->session()->getId();
+                    
+                    // CLOUD FALLBACK: If session ID is missing or empty, generate a temporary 
+                    // tracking key to satisfy the database NOT NULL constraint and prevent 500 errors.
+                    if (empty($sessionId)) {
+                        $sessionId = 'cloud_sync_' . Str::random(40);
+                    }
 
-                LoginHistory::updateOrCreate(
-                    ['session_id' => $sessionId],
-                    [
-                        'user_id'    => Auth::id(),
-                        'ip_address' => $request->ip() ?? '0.0.0.0',
-                        'user_agent' => $request->userAgent() ?? 'Unknown',
-                        'login_at'   => now(),
-                    ]
-                );
+                    LoginHistory::updateOrCreate(
+                        ['session_id' => $sessionId],
+                        [
+                            'user_id'    => Auth::id(),
+                            'ip_address' => $request->ip() ?? '0.0.0.0',
+                            'user_agent' => $request->userAgent() ?? 'Unknown',
+                            'login_at'   => now(),
+                        ]
+                    );
+                }
             } catch (\Exception $e) {
                 // Silently log glitches so the user experience is never interrupted on Laravel Cloud
                 Log::error("Cloud Tracking Glitch: " . $e->getMessage());
