@@ -23,6 +23,7 @@
     </x-slot>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {{-- 🟢 NEW: Light-weight QR Library --}}
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
@@ -206,7 +207,6 @@
     </div>
 
     <script>
-        // SCANNER CONTROLS
         let html5QrCode;
         const defaultContainerHTML = `
             <div id="qr-reader" class="w-full h-full"></div>
@@ -215,10 +215,8 @@
         `;
 
         function openScanner() {
-            // Restore container state
             document.getElementById('scannerContainer').innerHTML = defaultContainerHTML;
-            document.getElementById('scannerModal').classList.remove('hidden');
-            document.getElementById('scannerModal').classList.add('flex');
+            document.getElementById('scannerModal').classList.replace('hidden', 'flex');
             
             html5QrCode = new Html5Qrcode("qr-reader");
             
@@ -226,14 +224,13 @@
             const config = { 
                 fps: 30, // High FPS for instant reading
                 qrbox: (viewfinderWidth, viewfinderHeight) => {
-                    // Larger field of scan: 95% of viewfinder area
                     const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                    const qrboxSize = Math.floor(minEdgeSize * 0.95); 
+                    const qrboxSize = Math.floor(minEdgeSize * 0.95); // 95% scan field
                     return { width: qrboxSize, height: qrboxSize };
                 },
                 aspectRatio: 1.0,
                 experimentalFeatures: {
-                    useBarCodeDetectorIfSupported: true // Native hardware acceleration
+                    useBarCodeDetectorIfSupported: true 
                 }
             };
 
@@ -242,11 +239,9 @@
                 config, 
                 (decodedText) => {
                     let token = decodedText;
-                    // Support both full URL and raw tokens
                     if (decodedText.includes('claim-order-points/')) {
                         token = decodedText.split('claim-order-points/').pop();
                     }
-                    
                     processPoints(token);
                     html5QrCode.stop();
                 }
@@ -258,19 +253,17 @@
         function closeScanner() {
             if (html5QrCode && html5QrCode.isScanning) {
                 html5QrCode.stop().then(() => {
-                    document.getElementById('scannerModal').classList.add('hidden');
-                    document.getElementById('scannerModal').classList.remove('flex');
+                    document.getElementById('scannerModal').classList.replace('flex', 'hidden');
                 });
             } else {
-                document.getElementById('scannerModal').classList.add('hidden');
-                document.getElementById('scannerModal').classList.remove('flex');
+                document.getElementById('scannerModal').classList.replace('flex', 'hidden');
             }
         }
 
         async function processPoints(token) {
             const statusDiv = document.getElementById('scanStatus');
             const containerDiv = document.getElementById('scannerContainer');
-            statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse uppercase tracking-widest">CONNECTING TO DATABASE...</span>';
+            statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse uppercase tracking-widest">Validating with Cloud...</span>';
 
             try {
                 const response = await fetch("{{ route('admin.scan_star_id') }}", {
@@ -278,6 +271,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest', // Mandatory for AJAX on Cloud
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     },
                     body: JSON.stringify({ token: token })
@@ -286,7 +280,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // 🟢 SUCCESS STATE: "COMPLETE"
+                    // SUCCESS STATE: COMPLETE
                     containerDiv.innerHTML = `
                         <div class="flex flex-col items-center justify-center h-full bg-emerald-500 text-white animate-pulse">
                             <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
@@ -296,7 +290,7 @@
                     statusDiv.innerHTML = `<span class="text-emerald-500 font-black uppercase tracking-widest">✔ +10 Stars added to ${data.customer}</span>`;
                     setTimeout(() => { location.reload(); }, 2000);
                 } else {
-                    // ❌ ERROR STATE
+                    // ERROR STATE
                     containerDiv.innerHTML = `
                         <div class="flex flex-col items-center justify-center h-full bg-rose-600 text-white">
                             <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -307,7 +301,7 @@
                     setTimeout(() => { openScanner(); }, 3000);
                 }
             } catch (error) {
-                statusDiv.innerHTML = '<span class="text-rose-500 uppercase tracking-widest">Network Timeout - Check Cloud Connection</span>';
+                statusDiv.innerHTML = '<span class="text-rose-500 uppercase tracking-widest">Cloud Timeout - Check Connection</span>';
                 setTimeout(() => { openScanner(); }, 3000);
             }
         }
@@ -317,8 +311,6 @@
             const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
             const tickColor = isDark ? '#78716c' : '#a8a29e';
 
-            setTimeout(() => { window.location.reload(); }, 60000);
-            
             const revenueCanvas = document.getElementById('revenueChart');
             const categoryCanvas = document.getElementById('categoryChart');
             
@@ -338,16 +330,8 @@
                         responsive: true, maintainAspectRatio: false, 
                         plugins: { legend: { display: false } },
                         scales: {
-                            y: { 
-                                grid: { color: gridColor }, 
-                                border: { display: false },
-                                ticks: { color: tickColor, font: { weight: '700', size: 10 } } 
-                            },
-                            x: { 
-                                grid: { display: false }, 
-                                border: { display: false },
-                                ticks: { color: tickColor, font: { weight: '700', size: 10 } } 
-                            }
+                            y: { grid: { color: gridColor }, border: { display: false }, ticks: { color: tickColor, font: { weight: '700', size: 10 } } },
+                            x: { grid: { display: false }, border: { display: false }, ticks: { color: tickColor, font: { weight: '700', size: 10 } } }
                         }
                     }
                 });
@@ -365,23 +349,14 @@
                         }]
                     },
                     options: { 
-                        responsive: true, 
-                        maintainAspectRatio: false, 
-                        cutout: '75%', 
+                        responsive: true, maintainAspectRatio: false, cutout: '75%', 
                         plugins: { 
-                            legend: { 
-                                position: 'bottom', 
-                                labels: { 
-                                    color: tickColor,
-                                    font: { size: 10, weight: '700' }, 
-                                    padding: 20,
-                                    usePointStyle: true
-                                } 
-                            } 
+                            legend: { position: 'bottom', labels: { color: tickColor, font: { size: 10, weight: '700' }, padding: 20, usePointStyle: true } } 
                         } 
                     }
                 });
             }
+            setTimeout(() => { window.location.reload(); }, 60000);
         });
     </script>
 </x-app-layout>

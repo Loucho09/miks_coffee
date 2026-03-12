@@ -35,7 +35,7 @@ class HomeController extends Controller
             ->take(3)
             ->get();
 
-        // 🟢 NEW FEATURE: Check if any active Happy Hour exists
+        // Check if any active Happy Hour exists
         $isHappyHour = Product::where('is_active', 1)
             ->get()
             ->some(fn($p) => $p->is_happy_hour_active);
