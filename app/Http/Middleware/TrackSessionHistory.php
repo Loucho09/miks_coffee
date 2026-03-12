@@ -15,7 +15,6 @@ class TrackSessionHistory
 {
     /**
      * Standard handle method - just passes the request through.
-     * This ensures the user receives their response (redirect/dashboard) immediately.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -23,26 +22,17 @@ class TrackSessionHistory
     }
 
     /**
-     * CLOUD-PROOF LOGIC: This runs AFTER the browser receives the page.
-     * Moving the database write here prevents 500 errors and 419 CSRF timeouts 
-     * caused by database lag during the login sequence.
+     * CLOUD-PROOF LOGIC: Runs AFTER response to prevent interfering with performance-critical routes.
      */
     public function terminate(Request $request, Response $response): void
     {
-        // 1. Skip tracking for security heartbeat and the QR scanner route to ensure no scan timeouts
-        // 2. Only track if the user is authenticated
+        // 1. EXCLUDE scan route and security heartbeat to prevent scan timeouts
         if (Auth::check() && !$request->routeIs(['auth.check', 'admin.scan_star_id'])) {
             try {
-                /**
-                 * CRITICAL STABILITY CHECK:
-                 * Verifies the existence of the session_id column before execution.
-                 * This prevents 500 errors if the Laravel Cloud database is out of sync.
-                 */
+                // 2. Safely verify column existence before execution
                 if (Schema::hasColumn('login_histories', 'session_id')) {
                     $sessionId = $request->session()->getId();
                     
-                    // CLOUD FALLBACK: If session ID is missing or empty, generate a temporary 
-                    // tracking key to satisfy the database NOT NULL constraint and prevent 500 errors.
                     if (empty($sessionId)) {
                         $sessionId = 'cloud_sync_' . Str::random(40);
                     }
@@ -58,7 +48,6 @@ class TrackSessionHistory
                     );
                 }
             } catch (\Exception $e) {
-                // Silently log glitches so the user experience is never interrupted on Laravel Cloud
                 Log::error("Cloud Tracking Glitch: " . $e->getMessage());
             }
         }

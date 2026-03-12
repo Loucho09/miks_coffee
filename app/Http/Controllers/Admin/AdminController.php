@@ -35,21 +35,17 @@ class AdminController extends Controller
 
         try {
             // Force a higher time limit for cloud stability during DB transaction
-            set_time_limit(10);
+            set_time_limit(20);
 
-            // 3. Define user before transaction to ensure scope availability for the response
-            $user = User::findOrFail($order->user_id);
-
-            // 4. Atomic Database Update
-            // We use a retry count of 2 to handle potential deadlock/concurrency issues on cloud DBs
-            DB::transaction(function () use ($order, $user) {
-                // Explicit save to bypass attribute caching glitches on cloud environments
-                $currentPoints = (int)($user->loyalty_points ?? 0);
-                $user->loyalty_points = $currentPoints + 10;
-                $user->save(); 
+            // 3. Atomic Database Update
+            // We use a retry count of 3 to handle potential deadlock/concurrency issues on cloud DBs
+            DB::transaction(function () use ($order) {
+                $user = User::findOrFail($order->user_id);
                 
-                $order->points_awarded = true;
-                $order->save();
+                // Atomic increment to prevent race conditions on shared cloud environments
+                $user->increment('loyalty_points', 10);
+                
+                $order->update(['points_awarded' => true]);
 
                 PointTransaction::create([
                     'user_id' => $user->id,
@@ -58,21 +54,22 @@ class AdminController extends Controller
                     'type' => 'earned',
                     'description' => "Manifest #{$order->id} scanned at counter."
                 ]);
-            }, 2);
+            }, 3);
+
+            $finalUser = User::find($order->user_id);
 
             return response()->json([
                 'success' => true, 
                 'message' => "COMPLETE",
-                'customer' => $user->name ?? 'Customer'
+                'customer' => $finalUser->name ?? 'Customer'
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Cloud Scan Error: ' . $e->getMessage());
+            Log::error('Cloud Scan Fatal Failure: ' . $e->getMessage());
             
-            // Specifically catching common cloud timeout/busy errors to provide better UX
             return response()->json([
                 'success' => false, 
-                'message' => 'Operational Failure - Database Busy'
+                'message' => 'Cloud Database Busy - Please Retry Scan'
             ], 500);
         }
     }

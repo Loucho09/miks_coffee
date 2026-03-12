@@ -61,7 +61,6 @@
                 </div>
             </div>
             
-            {{-- Admin Daily Snapshot (Standard Features Kept) --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
                 <div class="bg-stone-400 dark:bg-amber-600 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group transition-all duration-500 hover:shadow-amber-600/20">
                     <div class="relative z-10">
@@ -262,9 +261,9 @@
             statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse uppercase tracking-widest font-bold">Connecting to Cloud Database...</span>';
 
             try {
-                // FIXED FETCH: Explicit headers to prevent Laravel Cloud firewalls and timeouts
+                // FIXED FETCH: Specific production headers to handle Laravel Cloud WAF and timeouts
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s Frontend Timeout
+                const timeoutId = setTimeout(() => controller.abort(), 20000); // Extended 20s Cloud Timeout
 
                 const response = await fetch("{{ route('admin.scan_star_id') }}", {
                     method: 'POST',
@@ -272,7 +271,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest', // Mandatory for Cloud Security
+                        'X-Requested-With': 'XMLHttpRequest', // Fixes Cloud Firewall drops
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({ token: token })
@@ -280,7 +279,17 @@
 
                 clearTimeout(timeoutId);
 
-                if (response.status === 419) throw new Error("Security Session Expired. Please refresh page.");
+                // EXPLICIT DIAGNOSTIC: Detect if the cloud rejected the security session
+                if (response.status === 419) {
+                    throw new Error("Security Session Expired. Please refresh page.");
+                }
+
+                // EXPLICIT DIAGNOSTIC: Capture 500 errors to prevent generic "Timeout" message
+                if (!response.ok) {
+                    const errorDetails = await response.text();
+                    console.error("Cloud DB Fault:", errorDetails);
+                    throw new Error(`Cloud Error ${response.status}`);
+                }
 
                 const data = await response.json();
 
@@ -295,19 +304,14 @@
                     statusDiv.innerHTML = `<span class="text-emerald-500 font-black uppercase tracking-widest italic underline decoration-2 decoration-emerald-500/30">✔ +10 Stars added to ${data.customer}</span>`;
                     setTimeout(() => { location.reload(); }, 2000);
                 } else {
-                    // ERROR STATE
-                    containerDiv.innerHTML = `
-                        <div class="flex flex-col items-center justify-center h-full bg-rose-600 text-white">
-                            <svg class="w-24 h-24 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
-                            <p class="font-black text-3xl uppercase tracking-tighter">ERROR</p>
-                        </div>
-                    `;
-                    statusDiv.innerHTML = `<span class="text-rose-500 font-black uppercase tracking-widest">❌ ${data.message}</span>`;
-                    setTimeout(() => { openScanner(); }, 3000);
+                    // REJECTION STATE: Logical error (invalid token, already claimed, etc.)
+                    throw new Error(data.message);
                 }
             } catch (error) {
-                statusDiv.innerHTML = `<span class="text-rose-500 font-black uppercase tracking-widest">Cloud Timeout - Check Connection</span>`;
-                setTimeout(() => { openScanner(); }, 3000);
+                // FINAL FALLBACK: Show actual error message if possible to help troubleshooting
+                statusDiv.innerHTML = `<span class="text-rose-500 font-black uppercase tracking-widest">ERROR: ${error.message}</span>`;
+                console.error("Scan Process Failed:", error);
+                setTimeout(() => { openScanner(); }, 4000);
             }
         }
 
