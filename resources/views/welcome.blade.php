@@ -3,9 +3,14 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        {{-- PWA Meta Tags --}}
+        <meta name="theme-color" content="#F59E0B">
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
+
         <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}?v={{ time() }}">
         <link rel="shortcut icon" type="image/png" href="{{ asset('favicon.png') }}?v={{ time() }}">
-        <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}?v={{ time() }}">
+        <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
         <title>Miks Coffee Shop - Trece Martires</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -492,6 +497,15 @@
                 }
                 syncIcons();
             });
+        </script>
+
+        {{-- Service Worker Registration --}}
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js');
+                });
+            }
         </script>
     </body>
 </html>

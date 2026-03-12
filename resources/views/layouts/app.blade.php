@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    {{-- PWA Meta Tags --}}
+    <meta name="theme-color" content="#F59E0B">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+
     <title>{{ config('app.name', "Mik's Coffee Shop - Best Coffee in Trece Martires") }}</title>
     
     <meta name="description" content="Visit Mik's Coffee Shop in Brgy. Osorio, Trece Martires. Premium coffee and savory meals.">
@@ -73,11 +77,6 @@
     <main class="flex-grow relative" x-data="{ showLoyaltyCard: false }">
         @auth
             @php
-                /* FIX: GLOBAL INITIALIZATION
-                   Variables must be defined at the top of the @auth block so they are accessible 
-                   to the modal on every page (Home, Rewards, etc.). This prevents the 
-                   "Undefined variable $activeToken" 500 error.
-                */
                 $routeOrderId = request()->route('id');
                 $activeOrder = $routeOrderId ? \App\Models\Order::find($routeOrderId) : null;
                 $activeToken = $activeOrder->qr_claim_token ?? session('active_claim_token');
@@ -250,6 +249,15 @@
                 localStorage.setItem('color-theme', 'dark');
             }
         });
+    </script>
+    
+    {{-- Service Worker Registration --}}
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
     </script>
     
     @livewireScripts
