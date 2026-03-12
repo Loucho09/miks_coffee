@@ -21,7 +21,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\CheckIpController;
-use App\Http\Controllers\Admin\AdminController; // ADDED
+use App\Http\Controllers\Admin\AdminController; 
 
 // Models
 use App\Models\Product;
@@ -34,6 +34,12 @@ use App\Models\User;
    | -------------------------------------------------------------------------- */
 
 Route::get('/', [HomeController::class, 'index'])->name('welcome');
+
+/**
+ * PWA Offline Route
+ * Displays the offline view when no network is detected.
+ */
+Route::view('/offline', 'offline')->name('offline');
 
 Route::get('/menu', function (Request $request) {
     $searchTerm = substr($request->search, 0, 100);
@@ -147,15 +153,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/orders/export', ExportController::class)->name('orders.export');
             Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
             
-            // SECURITY: Points claim route for secure single-use tokens
             Route::get('/claim-order-points/{token}', [CheckoutController::class, 'claimOrderPoints'])->name('claim_points');
-            
-            // 🟢 NEW: QR Scanner AJAX endpoint
             Route::post('/scan-star-id', [AdminController::class, 'processScan'])->name('scan_star_id');
 
             Route::controller(CustomerController::class)->prefix('customers')->name('customers.')->group(function () {
                 Route::get('/', 'index')->name('index');           
-                Route::get('/{id}', 'show')->name('show');         
+                Route::get('/{id}', 'show')->name('show');          
                 Route::put('/{id}/password', 'resetPassword')->name('reset_password');
             });
 
