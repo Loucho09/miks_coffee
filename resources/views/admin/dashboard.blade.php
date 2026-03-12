@@ -23,7 +23,6 @@
     </x-slot>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    {{-- 🟢 NEW: Light-weight QR Library --}}
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
@@ -207,6 +206,7 @@
     </div>
 
     <script>
+        // SCANNER CONTROLS
         let html5QrCode;
         const defaultContainerHTML = `
             <div id="qr-reader" class="w-full h-full"></div>
@@ -263,19 +263,22 @@
         async function processPoints(token) {
             const statusDiv = document.getElementById('scanStatus');
             const containerDiv = document.getElementById('scannerContainer');
-            statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse uppercase tracking-widest">Validating with Cloud...</span>';
+            statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse uppercase tracking-widest font-bold">Connecting to Cloud Database...</span>';
 
             try {
+                // FIXED FETCH: Explicit headers to prevent Laravel Cloud security blocks
                 const response = await fetch("{{ route('admin.scan_star_id') }}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest', // Mandatory for AJAX on Cloud
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        'X-Requested-With': 'XMLHttpRequest', // Mandatory for Laravel Cloud firewalls
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({ token: token })
                 });
+
+                if (response.status === 419) throw new Error("Security Session Expired. Please refresh page.");
 
                 const data = await response.json();
 
@@ -287,7 +290,7 @@
                             <p class="font-black text-3xl uppercase tracking-tighter">COMPLETE</p>
                         </div>
                     `;
-                    statusDiv.innerHTML = `<span class="text-emerald-500 font-black uppercase tracking-widest">✔ +10 Stars added to ${data.customer}</span>`;
+                    statusDiv.innerHTML = `<span class="text-emerald-500 font-black uppercase tracking-widest italic underline decoration-2 decoration-emerald-500/30">✔ +10 Stars added to ${data.customer}</span>`;
                     setTimeout(() => { location.reload(); }, 2000);
                 } else {
                     // ERROR STATE
@@ -301,7 +304,7 @@
                     setTimeout(() => { openScanner(); }, 3000);
                 }
             } catch (error) {
-                statusDiv.innerHTML = '<span class="text-rose-500 uppercase tracking-widest">Cloud Timeout - Check Connection</span>';
+                statusDiv.innerHTML = `<span class="text-rose-500 font-black uppercase tracking-widest">Network Timeout - ${error.message || 'Check Connection'}</span>`;
                 setTimeout(() => { openScanner(); }, 3000);
             }
         }
