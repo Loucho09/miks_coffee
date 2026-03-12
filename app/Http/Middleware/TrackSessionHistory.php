@@ -28,9 +28,9 @@ class TrackSessionHistory
      */
     public function terminate(Request $request, Response $response): void
     {
-        // 1. Skip tracking for the security heartbeat route to prevent DB overload
+        // 1. Skip tracking for security heartbeat and the QR scanner route to ensure no scan timeouts
         // 2. Only track if the user is authenticated
-        if (Auth::check() && !$request->routeIs('auth.check')) {
+        if (Auth::check() && !$request->routeIs(['auth.check', 'admin.scan_star_id'])) {
             try {
                 $sessionId = $request->session()->getId();
                 

@@ -262,17 +262,23 @@
             statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse uppercase tracking-widest font-bold">Connecting to Cloud Database...</span>';
 
             try {
-                // FIXED FETCH: Explicit headers to prevent Laravel Cloud firewalls
+                // FIXED FETCH: Explicit headers to prevent Laravel Cloud firewalls and timeouts
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s Frontend Timeout
+
                 const response = await fetch("{{ route('admin.scan_star_id') }}", {
                     method: 'POST',
+                    signal: controller.signal,
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json', // Fixes Cloud JSON response issues
-                        'X-Requested-With': 'XMLHttpRequest', // Mandatory for Laravel Cloud Security
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest', // Mandatory for Cloud Security
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({ token: token })
                 });
+
+                clearTimeout(timeoutId);
 
                 if (response.status === 419) throw new Error("Security Session Expired. Please refresh page.");
 
