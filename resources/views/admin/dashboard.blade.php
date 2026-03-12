@@ -61,7 +61,7 @@
                 </div>
             </div>
             
-            {{-- Admin Daily Snapshot --}}
+            {{-- Admin Daily Snapshot (Standard Features Kept) --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
                 <div class="bg-stone-400 dark:bg-amber-600 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group transition-all duration-500 hover:shadow-amber-600/20">
                     <div class="relative z-10">
@@ -206,7 +206,6 @@
     </div>
 
     <script>
-        // SCANNER CONTROLS
         let html5QrCode;
         const defaultContainerHTML = `
             <div id="qr-reader" class="w-full h-full"></div>
@@ -220,18 +219,15 @@
             
             html5QrCode = new Html5Qrcode("qr-reader");
             
-            // 🟢 BOOSTED ACCURACY & FIELD OF SCAN
             const config = { 
-                fps: 30, // High FPS for instant reading
+                fps: 30,
                 qrbox: (viewfinderWidth, viewfinderHeight) => {
                     const minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
-                    const qrboxSize = Math.floor(minEdgeSize * 0.95); // 95% scan field
+                    const qrboxSize = Math.floor(minEdgeSize * 0.95);
                     return { width: qrboxSize, height: qrboxSize };
                 },
                 aspectRatio: 1.0,
-                experimentalFeatures: {
-                    useBarCodeDetectorIfSupported: true 
-                }
+                experimentalFeatures: { useBarCodeDetectorIfSupported: true }
             };
 
             html5QrCode.start(
@@ -266,13 +262,13 @@
             statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse uppercase tracking-widest font-bold">Connecting to Cloud Database...</span>';
 
             try {
-                // FIXED FETCH: Explicit headers to prevent Laravel Cloud security blocks
+                // FIXED FETCH: Explicit headers to prevent Laravel Cloud firewalls
                 const response = await fetch("{{ route('admin.scan_star_id') }}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest', // Mandatory for Laravel Cloud firewalls
+                        'Accept': 'application/json', // Fixes Cloud JSON response issues
+                        'X-Requested-With': 'XMLHttpRequest', // Mandatory for Laravel Cloud Security
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({ token: token })
@@ -304,7 +300,7 @@
                     setTimeout(() => { openScanner(); }, 3000);
                 }
             } catch (error) {
-                statusDiv.innerHTML = `<span class="text-rose-500 font-black uppercase tracking-widest">Network Timeout - ${error.message || 'Check Connection'}</span>`;
+                statusDiv.innerHTML = `<span class="text-rose-500 font-black uppercase tracking-widest">Cloud Timeout - Check Connection</span>`;
                 setTimeout(() => { openScanner(); }, 3000);
             }
         }

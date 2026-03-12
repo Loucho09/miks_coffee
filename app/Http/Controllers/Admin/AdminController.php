@@ -14,57 +14,57 @@ class AdminController extends Controller
 {
     /**
      * AJAX Endpoint for QR Scanner
-     * Optimized for high-speed verification and guaranteed database persistence.
+     * Optimized for Laravel Cloud persistence and instant feedback.
      */
     public function processScan(Request $request)
     {
+        // 1. Validate Input
         $request->validate(['token' => 'required|string']);
-        
-        // Find the manifest linked to the secure token
-        $order = Order::where('qr_claim_token', $request->token)->first();
+        $token = $request->token;
+
+        // 2. Locate Manifest
+        $order = Order::where('qr_claim_token', $token)->first();
 
         if (!$order) {
-            return response()->json(['success' => false, 'message' => 'Invalid Manifest: Token not recognized.']);
+            return response()->json(['success' => false, 'message' => 'Invalid Token - Order Not Found']);
         }
 
         if ($order->points_awarded) {
-            return response()->json(['success' => false, 'message' => 'Security Error: Stars already claimed for this order.']);
+            return response()->json(['success' => false, 'message' => 'Stars already claimed for this order']);
         }
 
         try {
-            DB::transaction(function () use ($order) {
-                /** @var User $user */
-                $user = User::findOrFail($order->user_id);
-                
-                // FIXED: Manual increment and save to ensure persistence on Cloud DB
+            // 3. Define user before transaction to ensure scope availability for the response
+            $user = User::findOrFail($order->user_id);
+
+            // 4. Atomic Database Update
+            DB::transaction(function () use ($order, $user) {
+                // Explicit save to bypass attribute caching glitches on cloud environments
                 $currentPoints = (int)($user->loyalty_points ?? 0);
                 $user->loyalty_points = $currentPoints + 10;
                 $user->save(); 
                 
-                // Lock the manifest to prevent double-claiming
                 $order->points_awarded = true;
                 $order->save();
 
-                // Log the transaction for the admin activity feed
                 PointTransaction::create([
                     'user_id' => $user->id,
                     'order_id' => $order->id,
                     'amount' => 10,
                     'type' => 'earned',
-                    'description' => "Manifest #{$order->id} scanned via Camera."
+                    'description' => "Manifest #{$order->id} scanned at counter."
                 ]);
             });
 
             return response()->json([
                 'success' => true, 
-                'message' => "COMPLETE", // Triggers the green UI state
-                'customer' => User::find($order->user_id)->name ?? 'Customer',
-                'new_total' => User::find($order->user_id)->loyalty_points
+                'message' => "COMPLETE",
+                'customer' => $user->name ?? 'Customer'
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Scan Processing Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Operational Failure: Points not added.']);
+            Log::error('Cloud Scan Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Operational Failure - Database Busy']);
         }
     }
 }
