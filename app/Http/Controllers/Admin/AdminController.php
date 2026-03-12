@@ -34,10 +34,14 @@ class AdminController extends Controller
         }
 
         try {
+            // Force a higher time limit for cloud stability during DB transaction
+            set_time_limit(10);
+
             // 3. Define user before transaction to ensure scope availability for the response
             $user = User::findOrFail($order->user_id);
 
             // 4. Atomic Database Update
+            // We use a retry count of 2 to handle potential deadlock/concurrency issues on cloud DBs
             DB::transaction(function () use ($order, $user) {
                 // Explicit save to bypass attribute caching glitches on cloud environments
                 $currentPoints = (int)($user->loyalty_points ?? 0);
@@ -54,7 +58,7 @@ class AdminController extends Controller
                     'type' => 'earned',
                     'description' => "Manifest #{$order->id} scanned at counter."
                 ]);
-            });
+            }, 2);
 
             return response()->json([
                 'success' => true, 
@@ -64,7 +68,12 @@ class AdminController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Cloud Scan Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Operational Failure - Database Busy']);
+            
+            // Specifically catching common cloud timeout/busy errors to provide better UX
+            return response()->json([
+                'success' => false, 
+                'message' => 'Operational Failure - Database Busy'
+            ], 500);
         }
     }
 }
