@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- 🟢 PWA Meta Tags - Mobile Compatibility Fix --}}
-    <meta name="theme-color" content="#F59E0B">
+    {{-- 🟢 PWA Meta Tags --}}
+    <meta name="theme-color" content="#0C0B0A">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Miks Coffee">
@@ -63,7 +63,19 @@
         }
     </script>
 </head>
-<body class="font-sans antialiased bg-stone-100 dark:bg-stone-950 text-stone-800 dark:text-stone-200 transition-colors duration-300 flex flex-col min-h-screen">
+<body class="font-sans antialiased bg-stone-100 dark:bg-stone-950 text-stone-800 dark:text-stone-200 transition-colors duration-300 flex flex-col min-h-screen"
+      {{-- 🟢 ROOT DATA: userClosedBar added here to control visibility globally --}}
+      x-data="{ 
+        installPrompt: null, 
+        showInstallBar: false,
+        userClosedBar: false,
+        isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream 
+      }"
+      @beforeinstallprompt.window="
+        event.preventDefault(); 
+        installPrompt = event; 
+        showInstallBar = true;
+      ">
     
     @include('layouts.navigation')
 
@@ -80,9 +92,6 @@
     <main class="flex-grow relative" x-data="{ showLoyaltyCard: false }">
         @auth
             @php
-                /* FIX: GLOBAL INITIALIZATION
-                   Variables defined at the top of the @auth block for modal accessibility.
-                */
                 $routeOrderId = request()->route('id');
                 $activeOrder = $routeOrderId ? \App\Models\Order::find($routeOrderId) : null;
                 $activeToken = $activeOrder->qr_claim_token ?? session('active_claim_token');
@@ -172,6 +181,51 @@
         {{ $slot }}
     </main>
 
+    {{-- 🟢 FIXED DOWNLOAD BAR: Moved outside <main> to avoid scope conflicts --}}
+    <div x-show="(showInstallBar || (isIOS && !window.navigator.standalone)) && !userClosedBar" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="translate-y-full"
+         x-transition:enter-end="translate-y-0"
+         class="fixed bottom-0 left-0 right-0 z-[999] p-4 lg:hidden" x-cloak>
+        
+        <div class="bg-white dark:bg-stone-900 border border-amber-500/20 rounded-[2.5rem] p-5 shadow-connected flex items-center justify-between gap-2 transition-colors relative">
+            
+            {{-- Close Button (X) --}}
+            <button type="button"
+                    @click="userClosedBar = true" 
+                    class="absolute -top-3 -right-3 w-10 h-10 bg-stone-800 text-white rounded-full flex items-center justify-center shadow-2xl border-2 border-stone-700 active:scale-90 transition-all z-[1000] cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="w-12 h-12 flex-shrink-0 rounded-2xl bg-amber-500 flex items-center justify-center text-white shadow-lg">
+                    <img src="{{ asset('favicon.png') }}" class="w-8 h-8 object-contain">
+                </div>
+                <div class="text-left truncate">
+                    <h4 class="text-xs font-black uppercase tracking-widest text-stone-900 dark:text-stone-100 leading-none">Miks App</h4>
+                    <p class="text-[9px] text-stone-500 dark:text-stone-400 mt-1 uppercase font-bold tracking-tighter truncate">Faster ordering</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1">
+                <template x-if="installPrompt">
+                    <button @click="installPrompt.prompt(); installPrompt.userChoice.then(() => { userClosedBar = true; installPrompt = null; })" 
+                            class="bg-amber-600 text-white px-5 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-amber-700 active:scale-95 shadow-lg">
+                        Download
+                    </button>
+                </template>
+
+                <template x-if="isIOS && !installPrompt">
+                    <div class="bg-stone-100 dark:bg-stone-800 px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-center min-w-[100px]">
+                        <p class="text-[8px] font-black text-amber-600 uppercase leading-tight italic text-nowrap">Install App</p>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
     @auth
         @if(Auth::user()->usertype === 'admin')
             <footer class="bg-stone-100 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 py-6 mt-auto">
@@ -257,15 +311,10 @@
         });
     </script>
     
-    {{-- 🟢 Service Worker Registration - Fixed for Mobile --}}
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(registration => {
-                    console.log('Miks Coffee PWA Active');
-                }).catch(err => {
-                    console.error('PWA Registration Fail:', err);
-                });
+                navigator.serviceWorker.register('/sw.js');
             });
         }
     </script>

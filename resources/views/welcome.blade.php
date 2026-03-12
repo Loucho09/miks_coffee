@@ -4,8 +4,11 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        {{-- PWA Meta Tags --}}
-        <meta name="theme-color" content="#F59E0B">
+        {{-- 🟢 PWA Meta Tags --}}
+        <meta name="theme-color" content="#0C0B0A">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="Miks Coffee">
         <link rel="manifest" href="{{ asset('manifest.json') }}">
 
         <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}?v={{ time() }}">
@@ -44,35 +47,15 @@
                         fontFamily: { sans: ['Outfit', 'sans-serif'] },
                         colors: {
                             stone: {
-                                50: '#F5F2EA',
-                                100: '#EBE6D9',
-                                200: '#DED7C5',
-                                950: '#0C0B0A',
-                                900: '#1A1816',
-                                300: '#D1C8B1',
-                                400: '#B8AD91',
-                                500: '#8F8366',
-                                600: '#736852',
-                                700: '#574F3E',
-                                800: '#3B352A',
-                                1000: '#FF0000',
+                                50: '#F5F2EA', 100: '#EBE6D9', 200: '#DED7C5', 950: '#0C0B0A', 900: '#1A1816', 300: '#D1C8B1', 400: '#B8AD91', 500: '#8F8366', 600: '#736852', 700: '#574F3E', 800: '#3B352A', 1000: '#FF0000',
                             },
                             amber: {
-                                400: '#FBBF24',
-                                500: '#F59E0B',
-                                600: '#D97706',
-                                700: '#B45309',
-                                1000: '#F59E0B',
+                                400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 1000: '#F59E0B',
                             },
                             'coffee': {
-                                100: '#F5E6E0',
-                                600: '#8D5F46',
-                                800: '#4B2C20',
-                                900: '#2C1810',
+                                100: '#F5E6E0', 600: '#8D5F46', 800: '#4B2C20', 900: '#2C1810',
                             },
-                            'brand': {
-                                orange: '#F59E0B',
-                            },
+                            'brand': { orange: '#F59E0B', },
                         },
                     }
                 }
@@ -94,7 +77,19 @@
             .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         </style>
     </head>
-    <body class="antialiased bg-stone-50 dark:bg-stone-950 text-stone-800 dark:text-stone-200 transition-colors duration-300 font-sans flex flex-col min-h-screen">
+    <body class="antialiased bg-stone-50 dark:bg-stone-950 text-stone-800 dark:text-stone-200 transition-colors duration-300 font-sans flex flex-col min-h-screen"
+          x-data="{ 
+            installPrompt: null, 
+            showInstallBar: false,
+            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream 
+          }"
+          @beforeinstallprompt.window="
+            event.preventDefault(); 
+            installPrompt = event; 
+            showInstallBar = true;
+          "
+          {{-- 🟢 Listen for global close event --}}
+          @close-bar.window="showInstallBar = false">
 
         <button id="theme-toggle" type="button" class="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-white/80 dark:bg-stone-800/80 backdrop-blur-md text-stone-500 dark:text-stone-400 shadow-2xl hover:scale-110 transition-transform focus:outline-none ring-1 ring-stone-200 dark:ring-stone-700">
             <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -453,7 +448,7 @@
                             <a href="https://www.facebook.com/share/17aDwarKPW/" class="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-blue-600 hover:border-blue-600/30 transition-all duration-300 group">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                             </a>
-                            <a href="https://www.instagram.com/mikscoffee?igsh=c3kwb2IxOG80MHg4" class="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:text-pink-600 hover:border-pink-600/30 transition-all duration-300 group">
+                            <a href="https://www.instagram.com/mikscoffee?igsh=c3kwb2IxOG80MHg4" class="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center text-stone-600 dark:text-stone-400 hover:pink-600 hover:border-pink-600/30 transition-all duration-300 group">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
                             </a>
                         </div>
@@ -467,6 +462,52 @@
                 </div>
             </div>
         </footer>
+
+        {{-- 🟢 FIXED MOBILE DOWNLOAD BAR --}}
+        <div x-show="showInstallBar || (isIOS && !window.navigator.standalone)" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="translate-y-full"
+             x-transition:enter-end="translate-y-0"
+             class="fixed bottom-0 left-0 right-0 z-[200] p-4 lg:hidden" x-cloak>
+            
+            <div class="bg-white dark:bg-stone-900 border border-amber-500/20 rounded-[2.5rem] p-5 shadow-connected flex items-center justify-between gap-2 transition-colors relative">
+                
+                {{-- 🔴 FIXED CLOSE BUTTON: Dispatches custom event for 100% reliability --}}
+                <button type="button"
+                        @click.prevent.stop="$dispatch('close-bar')" 
+                        class="absolute -top-3 -right-3 w-10 h-10 bg-stone-800 text-white rounded-full flex items-center justify-center shadow-2xl border-2 border-stone-700 active:scale-90 transition-all z-[210] pointer-events-auto cursor-pointer"
+                        aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div class="w-12 h-12 flex-shrink-0 rounded-2xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20 transition-all">
+                        <img src="{{ asset('favicon.png') }}" class="w-8 h-8 object-contain">
+                    </div>
+                    <div class="text-left truncate">
+                        <h4 class="text-xs font-black uppercase tracking-widest text-stone-900 dark:text-stone-100 leading-none">Miks App</h4>
+                        <p class="text-[9px] text-stone-500 dark:text-stone-400 mt-1 uppercase font-bold tracking-tighter truncate">Faster ordering</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1">
+                    <template x-if="installPrompt">
+                        <button @click="installPrompt.prompt(); installPrompt.userChoice.then(() => { $dispatch('close-bar'); installPrompt = null; })" 
+                                class="bg-amber-600 text-white px-5 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-amber-700 active:scale-95 transition-all shadow-lg shadow-amber-600/20">
+                            Download
+                        </button>
+                    </template>
+
+                    <template x-if="isIOS && !installPrompt">
+                        <div class="bg-stone-100 dark:bg-stone-800 px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-700 text-center min-w-[100px]">
+                            <p class="text-[8px] font-black text-amber-600 uppercase leading-tight italic">Install on iOS</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
 
         <script>
             var btn = document.getElementById('theme-toggle');
