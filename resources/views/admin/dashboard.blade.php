@@ -258,20 +258,23 @@
         async function processPoints(token) {
             const statusDiv = document.getElementById('scanStatus');
             const containerDiv = document.getElementById('scannerContainer');
-            statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse uppercase tracking-widest font-bold">Connecting to Cloud Database...</span>';
+            statusDiv.innerHTML = '<span class="text-amber-500 animate-pulse uppercase tracking-widest font-bold">Establishing Secure Cloud Link...</span>';
 
             try {
-                // FIXED FETCH: Specific production headers to handle Laravel Cloud WAF and timeouts
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 20000); // Extended 20s Cloud Timeout
+                // FIXED ENDPOINT: Force HTTPS and use relative construction to prevent Mixed Content "Failed to Fetch"
+                const rawEndpoint = "{{ route('admin.scan_star_id') }}";
+                const endpoint = rawEndpoint.startsWith('http://') ? rawEndpoint.replace('http://', 'https://') : rawEndpoint;
 
-                const response = await fetch("{{ route('admin.scan_star_id') }}", {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s Cloud Timeout
+
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     signal: controller.signal,
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest', // Fixes Cloud Firewall drops
+                        'X-Requested-With': 'XMLHttpRequest', // Mandatory for Laravel Cloud WAF bypass
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({ token: token })
@@ -309,8 +312,8 @@
                 }
             } catch (error) {
                 // FINAL FALLBACK: Show actual error message if possible to help troubleshooting
-                statusDiv.innerHTML = `<span class="text-rose-500 font-black uppercase tracking-widest">ERROR: ${error.message}</span>`;
                 console.error("Scan Process Failed:", error);
+                statusDiv.innerHTML = `<span class="text-rose-500 font-black uppercase tracking-widest">ERROR: ${error.message}</span>`;
                 setTimeout(() => { openScanner(); }, 4000);
             }
         }

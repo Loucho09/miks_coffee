@@ -29,7 +29,7 @@ class TrackSessionHistory
         // 1. EXCLUDE scan route and security heartbeat to prevent scan timeouts
         if (Auth::check() && !$request->routeIs(['auth.check', 'admin.scan_star_id'])) {
             try {
-                // 2. Safely verify column existence before execution
+                // 2. Safely verify column existence before execution to prevent SQL 500 errors
                 if (Schema::hasColumn('login_histories', 'session_id')) {
                     $sessionId = $request->session()->getId();
                     
