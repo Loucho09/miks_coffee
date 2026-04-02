@@ -38,7 +38,7 @@ class HomeController extends Controller
         // 🟢 FEATURE: Check if any active Happy Hour exists
         $isHappyHour = Product::where('is_active', 1)
             ->get()
-            ->some(fn($p) => $p->is_happy_hour_active);
+             ->some(fn($p) => $p->is_happy_hour_active);
 
         return view('welcome', compact('topStreaks', 'featuredProducts', 'trendingProducts', 'isHappyHour'));
     }
