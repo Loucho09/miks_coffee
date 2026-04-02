@@ -33,7 +33,7 @@ class HomeController extends Controller
             }])
             ->orderBy('order_items_count', 'desc')
               ->take(3)
-            ->get();
+                 ->get();
 
         // 🟢 FEATURE: Check if any active Happy Hour exists
         $isHappyHour = Product::where('is_active', 1)
