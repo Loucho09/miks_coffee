@@ -155,7 +155,7 @@
                         {{-- Content Area --}}
                     <div class="p-6 flex-1 flex flex-col">
                         <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-xl font-bold text-stone-900 dark:text-white tracking-tight">
+                             <h3 class="text-xl font-bold text-stone-900 dark:text-white tracking-tight">
                                 {{ $product->name }}
                             </h3>
                             <a href="{{ route('login') }}" class="text-[10px] font-black uppercase tracking-widest text-stone-400 group-hover:text-amber-600 transition-colors">
