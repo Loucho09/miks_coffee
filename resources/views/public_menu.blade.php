@@ -150,7 +150,7 @@
                                 </span>
                             </div>
                         @endif
-                     </div> 
+                      </div> 
                                          
                      {{-- Content Area --}}
                     <div class="p-6 flex-1 flex flex-col">
