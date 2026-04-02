@@ -39,7 +39,7 @@ class HomeController extends Controller
         $isHappyHour = Product::where('is_active', 1)
             ->get()
              ->some(fn($p) => $p->is_happy_hour_active);
-
+ 
         return view('welcome', compact('topStreaks', 'featuredProducts', 'trendingProducts', 'isHappyHour'));
     }
 }  
