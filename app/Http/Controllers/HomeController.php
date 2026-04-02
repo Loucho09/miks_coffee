@@ -32,7 +32,7 @@ class HomeController extends Controller
                 $query->where('created_at', '>=', now()->subDay());
             }])
             ->orderBy('order_items_count', 'desc')
-            ->take(3)
+              ->take(3)
             ->get();
 
         // 🟢 FEATURE: Check if any active Happy Hour exists
