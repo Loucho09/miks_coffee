@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    public function index()  
+    public function index()   
     {
         /** 
          * UPDATED: Public Standings query to exclude Admin accounts.
