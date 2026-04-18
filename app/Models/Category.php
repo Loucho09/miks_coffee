@@ -8,7 +8,7 @@ use Illuminate\Support\Str; // 🟢 Required for slugging
 
 class Category extends Model
 {
-    use HasFactory;            
+    use HasFactory;             
 
     protected $fillable = [
         'name',
