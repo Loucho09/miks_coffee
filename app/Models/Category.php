@@ -16,7 +16,7 @@ class Category extends Model
         'image', // 🟢 Added for Category Banners
         'is_active',
     ];
-                       
+                        
     /**
      * 🟢 NEW FEATURE: Automate slug generation on save
      * This ensures the slug is generated from the name before saving to the database.
