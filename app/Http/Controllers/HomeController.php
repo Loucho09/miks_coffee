@@ -26,7 +26,7 @@ class HomeController extends Controller
             ->inRandomOrder()
             ->take(3)
             ->get();
-  
+   
         $trendingProducts = Product::where('is_active', 1)
             ->withCount(['orderItems' => function($query) {
                 $query->where('created_at', '>=', now()->subDay());
